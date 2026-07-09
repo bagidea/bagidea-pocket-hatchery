@@ -36,7 +36,7 @@ import type { Session } from '@wharfkit/session'
 import { login, restore, logout } from './wallet'
 import { getContract } from './contract'
 import { isPlayable } from './network'
-import { waxwingStatus, ensureNetwork, waxwingAccount, waxwingBuildAction, waxwingWaitForIntent, waxwingCancel, waxwingPushAction, openWaxwingPanel, type WaxwingIntent } from './waxwing'
+import { waxwingStatus, ensureNetwork, waxwingAccount, waxwingBuildAction, waxwingWaitForIntent, waxwingCancel, openWaxwingPanel, type WaxwingIntent } from './waxwing'
 import {
   fetchGameState,
   getTokenBalance,
@@ -121,6 +121,7 @@ const ACTION_LABEL: Record<string, string> = {
   feed: 'Feed',
   evolve: 'Evolve',
   breed: 'Breed',
+  accelerate: 'Accelerate Growth',
   harvest: 'Harvest EGG',
   claimreward: 'Claim HATCH Reward',
 }
@@ -132,6 +133,7 @@ export interface GameActions {
   feed: (assetId: string) => Promise<void>
   evolve: (assetId: string) => Promise<void>
   breed: (parentA: string, parentB: string) => Promise<void>
+  accelerate: (assetId: string, amount: string) => Promise<void>
   harvest: () => Promise<void>
   claimReward: () => Promise<void>
   refresh: () => Promise<void>
@@ -581,18 +583,42 @@ export function useGameActions(): GameActions {
         })
         return Promise.resolve()
       }
-      // Breed has complex inline actions (token transfer + AtomicAssets
-      // mint + setassetdata × 2) that the buildaction→confirm flow can't
-      // sign correctly (bug: tx gets only contract's eosio.code, no player
-      // signature). Use pushAction which signs + broadcasts in one step.
+      // Breed emits player-funded inline HATCH transfers (40% burn + 60% → pool)
+      // plus contract-authorized AtomicAssets mint/setassetdata. Route it through
+      // the unified signer's SIGN-INTENT path (s.push) — same confirm-before-
+      // broadcast gate as every other action — NOT an immediate pushAction.
+      //
+      // Why the intent path is correct here (the inline-authorization fix):
+      // the single top-level `breed` action carries authorization
+      // [{ owner, active }]. Antelope PROPAGATES that authorization to the
+      // contract's inline `hatchtokens1::transfer{owner→contract}`, so the burn
+      // + pool transfers are covered by the player's own signature — no separate
+      // transfer action, and no `phgamecreatr@eosio.code` on the player is needed.
+      // Verified on-chain: `waxwingsuper` burned 4.0000 HATCH + funded the pool
+      // while its `active` permission holds ZERO accounts (no eosio.code). The old
+      // "buildaction can't sign" note was stale — confirm() signs with the player's
+      // own key. (Needs one live Sign-test after unlock to reconfirm end-to-end.)
       return run('Breed', (s) =>
-        waxwingPushAction('breed', {
+        s.push('breed', {
           owner: s.actor,
           parent_a: parentA,
           parent_b: parentB,
-        }, s.actor).then((r) => ({ txid: r.txid })),
+        }),
       )
     },
+    [run],
+  )
+
+  // Accelerate — burn HATCH to convert directly into growth. Same inline-auth
+  // shape as breed: one top-level `accelerate` action authorized by owner@active;
+  // the contract's inline `hatchtokens1::transfer{owner→contract}` (burn_hatch) is
+  // covered by authorization propagation from that single action — no explicit
+  // transfer action, no eosio.code. Goes through the unified Sign-intent gate.
+  const accelerate = useCallback(
+    (assetId: string, amount: string) =>
+      run('Accelerate', (s) =>
+        s.push('accelerate', { owner: s.actor, asset_id: assetId, amount }),
+      ),
     [run],
   )
 
@@ -648,6 +674,7 @@ export function useGameActions(): GameActions {
     feed,
     evolve,
     breed,
+    accelerate,
     harvest,
     claimReward,
     refresh,
