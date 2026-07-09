@@ -1,0 +1,4 @@
+{
+  "_deprecated": "DO NOT USE — template_id 662644 is pockethatch1's, not phgamecreatr's. Use tools/lib/resolve-template.mjs to resolve dynamically from chain after createtempl. See tools/setup-phgamecreatr.mjs or tools/config-phgamecreatr.mjs for the correct pattern.",
+  "_note": "If you still need a static args file, run: node tools/gen-args-setspecies.mjs > deploy/args-setspecies.json"
+}

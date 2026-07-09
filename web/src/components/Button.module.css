@@ -1,0 +1,64 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--ph-touch-min);
+  padding: 0 var(--ph-space-5);
+  border: none;
+  border-radius: var(--ph-radius-pill);
+  font: var(--ph-text-label);
+  font-family: var(--ph-font-body);
+  cursor: pointer;
+  transition:
+    transform var(--ph-dur-base) var(--ph-ease-pop),
+    box-shadow var(--ph-dur-base) var(--ph-ease-standard),
+    background-color var(--ph-dur-fast) var(--ph-ease-standard);
+  user-select: none;
+}
+
+.button:disabled {
+  background: var(--ph-surface-sunken);
+  color: var(--ph-text-disabled);
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.primary {
+  background: var(--ph-color-golden);
+  color: var(--ph-text-on-golden);
+  box-shadow: var(--ph-elev-2);
+}
+
+.primary:hover:not(:disabled) {
+  box-shadow: var(--ph-elev-2), var(--ph-glow-golden);
+}
+
+.secondary {
+  background: transparent;
+  color: var(--ph-color-meadow);
+  box-shadow: inset 0 0 0 2px var(--ph-color-mint);
+}
+
+.secondary:hover:not(:disabled) {
+  box-shadow: inset 0 0 0 2px var(--ph-border-focus), var(--ph-elev-1);
+}
+
+.button:active:not(:disabled) {
+  animation: buttonPress var(--ph-dur-base) var(--ph-ease-pop);
+}
+
+@keyframes buttonPress {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(0.96);
+  }
+  70% {
+    transform: scale(1.04);
+  }
+  100% {
+    transform: scale(1);
+  }
+}

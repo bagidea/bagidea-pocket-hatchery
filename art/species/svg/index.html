@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pocket Hatchery — SVG Creature Slot Engine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0B1120;color:#F5F0E8;font-family:'Nunito',system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(95,184,232,.45);border-radius:999px}
+
+/* ── Layout ── */
+.app{display:grid;grid-template-columns:280px 1fr 320px;height:100vh;gap:0}
+.panel{background:rgba(255,255,255,0.018);border-right:1px solid rgba(255,255,255,0.06);overflow-y:auto;padding:20px 16px}
+.panel.right{border-right:none;border-left:1px solid rgba(255,255,255,0.06)}
+.panel h2{font-family:'Baloo 2',system-ui,sans-serif;font-size:16px;font-weight:700;margin-bottom:16px;color:#A78BFA;letter-spacing:0.3px}
+.panel h3{font-size:11px;font-weight:700;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:1.5px;margin:20px 0 8px}
+
+/* ── Species Grid ── */
+.species-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sp-btn{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02);cursor:pointer;transition:all .2s;text-align:left;color:inherit;font-family:inherit;font-size:13px}
+.sp-btn:hover{border-color:rgba(255,255,255,0.2);background:rgba(255,255,255,0.04)}
+.sp-btn.active{border-color:rgba(167,139,250,.5);background:rgba(167,139,250,0.08);box-shadow:0 0 20px rgba(167,139,250,0.1)}
+.sp-emoji{font-size:22px;line-height:1}
+.sp-info{flex:1;min-width:0}
+.sp-name{font-weight:700;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sp-elem{font-size:10px;color:rgba(255,255,255,0.4)}
+
+/* ── Preview ── */
+.preview-area{display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.preview-bg{position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(167,139,250,0.06) 0%,transparent 60%),radial-gradient(ellipse at 30% 70%,rgba(255,203,107,0.04) 0%,transparent 50%)}
+.preview-stage{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:16px}
+.preview-label{font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:1px;text-transform:uppercase;font-weight:700}
+.creature-frame{width:320px;height:320px;display:flex;align-items:center;justify-content:center;position:relative}
+.creature-frame svg{width:260px;height:260px;filter:drop-shadow(0 8px 24px rgba(0,0,0,0.4))}
+.creature-frame .rarity-aura{position:absolute;inset:20px;border-radius:50%;pointer-events:none;transition:all .5s}
+.rarity-aura.common{box-shadow:0 0 0 transparent}
+.rarity-aura.uncommon{box-shadow:0 0 60px 10px rgba(143,214,148,0.15)}
+.rarity-aura.rare{box-shadow:0 0 70px 15px rgba(91,192,190,0.25)}
+.rarity-aura.epic{box-shadow:0 0 80px 20px rgba(176,123,232,0.35)}
+.rarity-aura.legendary{box-shadow:0 0 100px 25px rgba(255,203,107,0.45)}
+.rarity-aura.mythic{box-shadow:0 0 120px 30px rgba(255,158,181,0.5),0 0 200px 50px rgba(167,139,250,0.3)}
+
+.preview-actions{display:flex;gap:8px;margin-top:8px}
+.btn{padding:8px 18px;border-radius:999px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.05);color:#F5F0E8;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;letter-spacing:0.3px}
+.btn:hover{border-color:rgba(255,255,255,0.3);background:rgba(255,255,255,0.1)}
+.btn.accent{border-color:rgba(167,139,250,0.4);background:rgba(167,139,250,0.1);color:#A78BFA}
+.btn.accent:hover{background:rgba(167,139,250,0.2)}
+
+.species-title{text-align:center;margin-top:8px}
+.species-title h1{font-family:'Baloo 2',system-ui,sans-serif;font-size:32px;font-weight:800;line-height:1.2}
+.species-title .sci{font-size:12px;color:rgba(255,255,255,0.35);font-style:italic;margin-top:2px}
+.species-title .rarity-badge{display:inline-block;font-size:10px;font-weight:800;padding:3px 12px;border-radius:999px;margin-top:6px;letter-spacing:1px;text-transform:uppercase}
+.rb-common{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.5)}
+.rb-uncommon{background:rgba(143,214,148,0.15);color:#8FD694}
+.rb-rare{background:rgba(91,192,190,0.15);color:#5BC0BE}
+.rb-epic{background:rgba(176,123,232,0.15);color:#B07BE8}
+.rb-legendary{background:rgba(255,203,107,0.15);color:#F59E0B}
+.rb-mythic{background:rgba(255,158,181,0.15);color:#FF9EB5}
+
+/* ── Trait Slots ── */
+.trait-group{margin-bottom:18px}
+.trait-group label{display:block;font-size:10px;font-weight:700;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.trait-opts{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.trait-opt{padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.02);cursor:pointer;text-align:center;transition:all .2s;font-family:inherit;color:rgba(255,255,255,0.5);font-size:11px}
+.trait-opt:hover{border-color:rgba(255,255,255,0.2);color:rgba(255,255,255,0.8)}
+.trait-opt.active{border-color:rgba(167,139,250,0.5);background:rgba(167,139,250,0.1);color:#A78BFA;font-weight:700}
+
+/* ── Gene Display ── */
+.gene-box{background:rgba(0,0,0,0.3);border-radius:12px;padding:14px;margin-top:16px}
+.gene-box h3{margin-top:0;margin-bottom:8px}
+.gene-hex{font-family:'JetBrains Mono',monospace;font-size:13px;color:#F59E0B;word-break:break-all;line-height:1.5}
+.gene-breakdown{font-size:10px;color:rgba(255,255,255,0.35);margin-top:6px;line-height:1.6}
+
+/* ── Stats ── */
+.stats-row{display:flex;gap:8px;margin-top:6px}
+.stat-mini{flex:1;background:rgba(255,255,255,0.03);border-radius:10px;padding:10px;text-align:center}
+.stat-mini .val{font-family:'Nunito',system-ui,sans-serif;font-size:20px;font-weight:800;color:#F59E0B}
+.stat-mini .lbl{font-size:8px;color:rgba(255,255,255,0.25);font-weight:700;letter-spacing:1px;text-transform:uppercase}
+
+/* ── Header ── */
+.top-bar{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.01)}
+.top-bar .logo{font-family:'Baloo 2',system-ui,sans-serif;font-size:15px;font-weight:800;letter-spacing:-0.3px}
+.top-bar .logo span{color:#F59E0B}
+.top-bar .hint{font-size:10px;color:rgba(255,255,255,0.25)}
+.gene-input-row{display:flex;gap:8px;align-items:center}
+.gene-input-row input{padding:6px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(0,0,0,0.3);color:#F59E0B;font-family:'JetBrains Mono',monospace;font-size:12px;width:240px}
+.gene-input-row input:focus{outline:none;border-color:rgba(167,139,250,0.4)}
+
+@media(max-width:1100px){.app{grid-template-columns:1fr}.panel.left,.panel.right{display:none}}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="logo">🧬 Pocket Hatchery <span>Slot Engine</span></div>
+  <div class="gene-input-row">
+    <span class="hint">Gene (hex):</span>
+    <input id="geneInput" placeholder="0x0000..." spellcheck="false">
+    <button class="btn" onclick="applyGeneInput()" style="font-size:10px;padding:6px 12px">Apply</button>
+    <button class="btn" onclick="randomGene()" style="font-size:10px;padding:6px 12px">🎲 Random</button>
+  </div>
+  <span class="hint">Monanisa — SVG Creature System v1.0</span>
+</div>
+
+<div class="app">
+  <!-- LEFT: Species Selector -->
+  <div class="panel left" id="speciesPanel"></div>
+
+  <!-- CENTER: Preview -->
+  <div class="preview-area">
+    <div class="preview-bg"></div>
+    <div class="preview-stage">
+      <div class="preview-label" id="stageLabel">ADULT FORM</div>
+      <div class="creature-frame" id="creatureFrame">
+        <div class="rarity-aura" id="rarityAura"></div>
+        <svg id="creatureSVG" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+      <div class="species-title">
+        <h1 id="speciesTitle">Foxling</h1>
+        <div class="sci" id="speciesSci">Vulpes magica</div>
+        <div class="rarity-badge rb-common" id="rarityBadge">Common</div>
+      </div>
+      <div class="stats-row" id="statsRow"></div>
+      <div class="preview-actions">
+        <button class="btn" onclick="randomTraits()">🎲 Random Traits</button>
+        <button class="btn" onclick="cycleStage()">🔄 Cycle Stage</button>
+        <button class="btn accent" onclick="exportSVG()">📋 Export SVG</button>
+      </div>
+      <div class="gene-box" id="geneBox"></div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Trait Slots -->
+  <div class="panel right" id="traitPanel"></div>
+</div>
+
+<script src="slot-engine.js"></script>
+<script src="species-registry.js"></script>
+<script>
+// ── State ──
+let currentSpecies = 0; // 0-11
+let currentTraits = [0,0,0]; // trait values (0-3 each)
+let currentRarity = 0; // 0=common..5=mythic
+let currentStage = 2; // 0=egg, 1=baby, 2=adult, 3=rare
+let currentHueShift = 0;
+let currentAccentHue = 0;
+let currentSaturation = 8;   // 0-15 (maps to saturate 0.4-0.85)
+let currentBrightness = 7;  // 0-15 (maps to brightness 0.85-1.15)
+let currentMutations = 0;   // bit flags: 0x1=shiny 0x2=giant 0x4=prismatic 0x8=ethereal
+
+const RARITY_NAMES = ['Common','Uncommon','Rare','Epic','Legendary','Mythic'];
+const RARITY_CLASSES = ['common','uncommon','rare','epic','legendary','mythic'];
+const STAGE_NAMES = ['Egg','Baby','Adult','Rare Form'];
+const STAGE_ICONS = ['🥚','🐣','✨','🌟'];
+
+// ── Render ──
+function renderAll() {
+  renderSpeciesPanel();
+  renderCreature();
+  renderTraitPanel();
+  renderGeneDisplay();
+}
+
+async function renderCreature() {
+  const sp = SPECIES[currentSpecies];
+  const svgEl = document.getElementById('creatureSVG');
+
+  // Load species SVG
+  const url = `species/${sp.id}.svg`;
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('not found');
+    const text = await res.text();
+
+    // Parse SVG
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(text, 'image/svg+xml');
+    const srcSvg = doc.querySelector('svg');
+    if (!srcSvg) throw new Error('no svg');
+
+    // Clone into our SVG
+    svgEl.innerHTML = '';
+    svgEl.setAttribute('viewBox', srcSvg.getAttribute('viewBox') || '0 0 200 200');
+
+    // Copy defs
+    const defs = srcSvg.querySelector('defs');
+    if (defs) {
+      svgEl.appendChild(defs.cloneNode(true));
+    }
+
+    // Create group for creature
+    const creatureG = document.createElementNS('http://www.w3.org/2000/svg','g');
+    creatureG.setAttribute('id','creature');
+
+    // Apply gene-driven hue shift via CSS variables (matches render/engine.js interface)
+    // Gene bits: 4-11→bodyHue(0-255→0-360°), 32-35→saturation(0-15→0.4-0.85), 36-39→brightness(0-15→0.85-1.15)
+    // SVGs pick these up via .gene-tint { filter: hue-rotate(var(--gene-hue-shift)) saturate(var(--gene-sat-mult)) brightness(var(--gene-light-mult)) }
+    const hueDeg = Math.round(currentHueShift * 360 / 255);
+    const satVal = 0.4 + (currentSaturation / 15) * 0.45;
+    const britVal = 0.85 + (currentBrightness / 15) * 0.30;
+    svgEl.style.setProperty('--gene-hue-shift', hueDeg + 'deg');
+    svgEl.style.setProperty('--gene-sat-mult', satVal.toFixed(2));
+    svgEl.style.setProperty('--gene-light-mult', britVal.toFixed(2));
+
+    // Copy all layers, toggle visibility based on traits
+    const allGroups = srcSvg.querySelectorAll('g[id]');
+    allGroups.forEach(g => {
+      if (g.parentElement === srcSvg || g.parentElement === srcSvg.querySelector('g')) {
+        const clone = g.cloneNode(true);
+        const id = clone.getAttribute('id');
+
+        // Determine visibility
+        clone.style.display = getLayerVisibility(id);
+        creatureG.appendChild(clone);
+      }
+    });
+
+    svgEl.appendChild(creatureG);
+
+    // Update UI
+    document.getElementById('speciesTitle').textContent = sp.name;
+    document.getElementById('speciesSci').textContent = sp.sciName;
+
+    const rb = document.getElementById('rarityBadge');
+    rb.textContent = RARITY_NAMES[currentRarity];
+    rb.className = 'rarity-badge rb-' + RARITY_CLASSES[currentRarity];
+
+    const ra = document.getElementById('rarityAura');
+    ra.className = 'rarity-aura ' + RARITY_CLASSES[currentRarity];
+
+    document.getElementById('stageLabel').textContent =
+      STAGE_ICONS[currentStage] + ' ' + STAGE_NAMES[currentStage].toUpperCase();
+
+    // Stats
+    renderStats();
+
+  } catch(e) {
+    svgEl.innerHTML = `<text x="100" y="100" text-anchor="middle" fill="#7C7A92" font-size="12">${sp.emoji} ${sp.name}<tspan x="100" y="120" font-size="9" fill="rgba(255,255,255,0.2)">SVG loading...</tspan></text>`;
+    console.warn(`Failed to load ${sp.id}.svg:`, e.message);
+  }
+}
+
+function getLayerVisibility(layerId) {
+  const sp = SPECIES[currentSpecies];
+
+  // Body is always visible
+  if (layerId === 'body') return '';
+
+  // Stage layers
+  if (layerId.startsWith('stage-')) {
+    const stage = parseInt(layerId.split('-')[1]);
+    return stage === currentStage ? '' : 'none';
+  }
+
+  // Trait layers: slot-{name}-{variant}
+  if (layerId.startsWith('slot-')) {
+    const parts = layerId.split('-');
+    const slotName = parts[1];
+    const variant = parseInt(parts[2]);
+
+    // Find which trait index this slot maps to
+    const slotIdx = sp.slots.findIndex(s => s.id === slotName);
+    if (slotIdx >= 0) {
+      return currentTraits[slotIdx] === variant ? '' : 'none';
+    }
+  }
+
+  // Rarity overlays
+  if (layerId === 'rare-iridescent' && currentRarity >= 4) return '';
+  if (layerId === 'rare-aura' && currentRarity >= 4) return '';
+  if (layerId === 'legendary-aura' && currentRarity >= 4) return '';
+  if (layerId === 'mythic-overlay' && currentRarity >= 5) return '';
+  if (layerId.startsWith('rare-') || layerId.startsWith('legendary-') || layerId.startsWith('mythic-')) {
+    return 'none';
+  }
+
+  // Mutation overlays
+  if (layerId === 'mut-shiny') return currentTraits[3] === 1 ? '' : 'none';
+  if (layerId === 'mut-giant') return currentTraits[3] === 2 ? '' : 'none';
+  if (layerId === 'mut-prismatic') return currentTraits[3] === 3 ? '' : 'none';
+  if (layerId === 'mut-ethereal') return currentTraits[3] === 4 ? '' : 'none';
+
+  return ''; // visible by default
+}
+
+function renderStats() {
+  const sp = SPECIES[currentSpecies];
+  const stats = sp.baseStats;
+  const row = document.getElementById('statsRow');
+
+  // Calculate stats based on rarity
+  const rarityKeys = ['common','uncommon','rare','epic','legendary'];
+  const rk = rarityKeys[Math.min(currentRarity, 4)];
+
+  row.innerHTML = `
+    <div class="stat-mini"><div class="val">${stats[rk].pow}</div><div class="lbl">⚔ Power</div></div>
+    <div class="stat-mini"><div class="val">${stats[rk].charm}</div><div class="lbl">◆ Charm</div></div>
+    <div class="stat-mini"><div class="val">#${(currentSpecies+1).toString().padStart(2,'0')}</div><div class="lbl">Species</div></div>
+  `;
+}
+
+function renderSpeciesPanel() {
+  const panel = document.getElementById('speciesPanel');
+  panel.innerHTML = '<h2>🧬 Species</h2><div class="species-grid">' +
+    SPECIES.map((sp, i) => `
+      <button class="sp-btn${i===currentSpecies?' active':''}" onclick="selectSpecies(${i})">
+        <span class="sp-emoji">${sp.emoji}</span>
+        <span class="sp-info">
+          <div class="sp-name">${sp.name}</div>
+          <div class="sp-elem">${sp.element}</div>
+        </span>
+      </button>
+    `).join('') + '</div>';
+}
+
+function renderTraitPanel() {
+  const sp = SPECIES[currentSpecies];
+  const panel = document.getElementById('traitPanel');
+
+  let html = '<h2>🎨 Trait Slots</h2>';
+
+  sp.slots.forEach((slot, si) => {
+    html += `<div class="trait-group">
+      <label>${slot.icon || '◆'} ${slot.name}</label>
+      <div class="trait-opts">`;
+    slot.variants.forEach((v, vi) => {
+      html += `<button class="trait-opt${currentTraits[si]===vi?' active':''}"
+        onclick="setTrait(${si},${vi})" title="${v.desc||''}">${v.emoji||''} ${v.label}</button>`;
+    });
+    html += '</div></div>';
+  });
+
+  // Rarity selector
+  html += '<h3>⭐ Rarity</h3><div class="trait-opts">';
+  RARITY_NAMES.forEach((r, i) => {
+    html += `<button class="trait-opt${currentRarity===i?' active':''}" onclick="setRarity(${i})">${r}</button>`;
+  });
+  html += '</div>';
+
+  // Stage selector
+  html += '<h3>🌱 Stage</h3><div class="trait-opts">';
+  STAGE_NAMES.forEach((s, i) => {
+    html += `<button class="trait-opt${currentStage===i?' active':''}" onclick="setStage(${i})">${STAGE_ICONS[i]} ${s}</button>`;
+  });
+  html += '</div>';
+
+  // Mutation toggles
+  html += '<h3>🧬 Mutations</h3><div class="trait-opts">';
+  html += `<button class="trait-opt${currentTraits[3]===1?' active':''}" onclick="toggleMutation(1)">✨ Shiny</button>`;
+  html += `<button class="trait-opt${currentTraits[3]===2?' active':''}" onclick="toggleMutation(2)">📏 Giant</button>`;
+  html += `<button class="trait-opt${currentTraits[3]===3?' active':''}" onclick="toggleMutation(3)">🌈 Prismatic</button>`;
+  html += `<button class="trait-opt${currentTraits[3]===4?' active':''}" onclick="toggleMutation(4)">👻 Ethereal</button>`;
+  html += '</div>';
+
+  panel.innerHTML = html;
+}
+
+function renderGeneDisplay() {
+  const box = document.getElementById('geneBox');
+  const gene = encodeGene();
+  box.innerHTML = `
+    <h3>🧬 Encoded Gene (64-bit)</h3>
+    <div class="gene-hex">0x${gene.toString(16).padStart(16,'0').toUpperCase()}</div>
+  `;
+}
+
+// ── Gene Encoding ──
+function encodeGene() {
+  let gene = BigInt(0);
+  gene |= BigInt(currentSpecies) & 0xFn;                // bits 0-3
+  gene |= BigInt(currentHueShift & 0xFF) << 4n;         // bits 4-11
+  gene |= BigInt(currentAccentHue & 0xFF) << 12n;       // bits 12-19
+  gene |= BigInt(0) << 20n;                              // pattern (placeholder)
+  gene |= BigInt(currentSaturation & 0xF) << 32n;       // bits 32-35
+  gene |= BigInt(currentBrightness & 0xF) << 36n;       // bits 36-39
+  gene |= BigInt((currentTraits[0] || 0) & 0xF) << 48n; // bits 48-51
+  gene |= BigInt((currentTraits[1] || 0) & 0xF) << 52n; // bits 52-55
+  gene |= BigInt((currentTraits[2] || 0) & 0xF) << 56n; // bits 56-59
+  gene |= BigInt((currentTraits[3] || 0) & 0xF) << 60n; // bits 60-63 (mutations)
+  return gene;
+}
+
+function decodeGene(hex) {
+  let gene;
+  try {
+    gene = BigInt(hex.startsWith('0x') ? hex : '0x' + hex);
+  } catch { return false; }
+
+  currentSpecies = Number(gene & 0xFn);
+  currentHueShift = Number((gene >> 4n) & 0xFFn);
+  currentAccentHue = Number((gene >> 12n) & 0xFFn);
+  currentTraits[0] = Number((gene >> 48n) & 0xFn);
+  currentTraits[1] = Number((gene >> 52n) & 0xFn);
+  currentTraits[2] = Number((gene >> 56n) & 0xFn);
+  currentTraits[3] = Number((gene >> 60n) & 0xFn);
+
+  // Clamp
+  currentSpecies = Math.min(currentSpecies, 11);
+  currentTraits = currentTraits.map(t => Math.min(t, 3));
+
+  return true;
+}
+
+// ── Actions ──
+function selectSpecies(i) {
+  currentSpecies = i;
+  currentTraits = [0,0,0,0];
+  currentRarity = 0;
+  currentStage = 2;
+  renderAll();
+}
+
+function setTrait(slotIdx, value) {
+  currentTraits[slotIdx] = value;
+  renderAll();
+}
+
+function setRarity(r) {
+  currentRarity = r;
+  renderAll();
+}
+
+function setStage(s) {
+  currentStage = s;
+  renderAll();
+}
+
+function toggleMutation(bit) {
+  currentTraits[3] = currentTraits[3] === bit ? 0 : bit;
+  renderAll();
+}
+
+function randomTraits() {
+  currentTraits = [
+    Math.floor(Math.random()*4),
+    Math.floor(Math.random()*4),
+    Math.floor(Math.random()*4),
+    Math.random() < 0.1 ? [1,2,3,4][Math.floor(Math.random()*4)] : 0
+  ];
+  currentRarity = Math.floor(Math.random()*6);
+  renderAll();
+}
+
+function randomGene() {
+  currentSpecies = Math.floor(Math.random()*12);
+  currentTraits = [Math.floor(Math.random()*4),Math.floor(Math.random()*4),Math.floor(Math.random()*4),0];
+  currentRarity = Math.floor(Math.random()*5);
+  currentStage = 2;
+  renderAll();
+}
+
+function cycleStage() {
+  currentStage = (currentStage + 1) % 4;
+  renderAll();
+}
+
+function applyGeneInput() {
+  const val = document.getElementById('geneInput').value.trim();
+  if (val && decodeGene(val)) {
+    renderAll();
+  }
+}
+
+function exportSVG() {
+  const svgEl = document.getElementById('creatureSVG');
+  const clone = svgEl.cloneNode(true);
+  clone.setAttribute('xmlns','http://www.w3.org/2000/svg');
+  const data = new XMLSerializer().serializeToString(clone);
+  const blob = new Blob([data],{type:'image/svg+xml'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${SPECIES[currentSpecies].id}_t${currentTraits.join('')}_r${currentRarity}.svg`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ── Init ──
+renderAll();
+</script>
+</body>
+</html>

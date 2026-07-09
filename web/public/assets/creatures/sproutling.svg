@@ -1,0 +1,274 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <!-- Head (leaf ball) gradients -->
+    <radialGradient id="headSpring" cx="40%" cy="35%">
+      <stop offset="0%" stop-color="#A8EEB8"/>
+      <stop offset="50%" stop-color="#4ADE80"/>
+      <stop offset="100%" stop-color="#16A34A"/>
+    </radialGradient>
+    <radialGradient id="headSummer" cx="40%" cy="35%">
+      <stop offset="0%" stop-color="#FDE68A"/>
+      <stop offset="55%" stop-color="#F59E0B"/>
+      <stop offset="100%" stop-color="#B45309"/>
+    </radialGradient>
+    <radialGradient id="headAutumn" cx="40%" cy="35%">
+      <stop offset="0%" stop-color="#FED7AA"/>
+      <stop offset="55%" stop-color="#EA580C"/>
+      <stop offset="100%" stop-color="#9A3412"/>
+    </radialGradient>
+    <radialGradient id="headWinter" cx="40%" cy="35%">
+      <stop offset="0%" stop-color="#F0F9FF"/>
+      <stop offset="55%" stop-color="#BAE6FD"/>
+      <stop offset="100%" stop-color="#5D9FC0"/>
+    </radialGradient>
+    <!-- Highlight on head -->
+    <radialGradient id="headHL" cx="34%" cy="28%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.58"/>
+      <stop offset="58%" stop-color="#FFFFFF" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Stem body gradient -->
+    <radialGradient id="stemGrad" cx="40%" cy="35%">
+      <stop offset="0%" stop-color="#86EFAC"/>
+      <stop offset="60%" stop-color="#22C55E"/>
+      <stop offset="100%" stop-color="#166534"/>
+    </radialGradient>
+    <!-- Root gradient -->
+    <linearGradient id="rootGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4ADE80"/>
+      <stop offset="100%" stop-color="#2D5A3A"/>
+    </linearGradient>
+    <!-- Flower head gradient -->
+    <radialGradient id="flowerPetal" cx="50%" cy="40%">
+      <stop offset="0%" stop-color="#FDE0EC"/>
+      <stop offset="100%" stop-color="#F43F5E"/>
+    </radialGradient>
+    <!-- Fruit gradient -->
+    <radialGradient id="fruitRed" cx="40%" cy="30%">
+      <stop offset="0%" stop-color="#FECACA"/>
+      <stop offset="100%" stop-color="#DC2626"/>
+    </radialGradient>
+    <!-- Eye iris -->
+    <radialGradient id="irisGrad" cx="36%" cy="30%">
+      <stop offset="0%" stop-color="#86EFAC"/>
+      <stop offset="55%" stop-color="#16A34A"/>
+      <stop offset="100%" stop-color="#052E16"/>
+    </radialGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="softGlow"><feGaussianBlur stdDeviation="7"/></filter>
+    <style>
+      .gene-tint { filter: hue-rotate(var(--gene-hue-shift, 0deg)) saturate(var(--gene-sat-mult, 1)) brightness(var(--gene-light-mult, 1)); }
+    </style>
+  </defs>
+
+  <g class="gene-tint">
+  <!-- ═══ BODY: Chibi plant — big round leaf head + chubby stem body ═══ -->
+  <g id="body">
+    <!-- Ambient ground shadow -->
+    <ellipse cx="100" cy="168" rx="30" ry="8" fill="#0A3A1A" opacity="0.18"/>
+
+    <!-- === CHUBBY STEM BODY === -->
+    <!-- Body shadow -->
+    <path d="M103,92 Q118,95 120,118 Q120,138 115,150 Q110,158 103,160 Q100,161 97,160 Q90,158 85,150 Q80,138 80,118 Q82,95 97,92Z" fill="#0A3A1A" opacity="0.2"/>
+    <!-- Main body -->
+    <path d="M100,90 Q116,93 118,116 Q118,136 114,148 Q110,157 100,159 Q90,157 86,148 Q82,136 82,116 Q84,93 100,90Z"
+          fill="url(#stemGrad)" stroke="#166534" stroke-width="2.2"/>
+    <!-- Cell-shade shadow band (bottom-right) -->
+    <path d="M100,158 Q112,155 116,142 Q118,130 116,116" fill="none" stroke="#14532D" stroke-width="8" stroke-linecap="round" opacity="0.4"/>
+    <!-- Cell-shade highlight (top-left) -->
+    <ellipse cx="90" cy="106" rx="14" ry="20" fill="#86EFAC" opacity="0.48" transform="rotate(-12 90 106)"/>
+    <!-- Specular highlight -->
+    <ellipse cx="88" cy="100" rx="6" ry="10" fill="url(#headHL)"/>
+    <!-- Rim light (right side) -->
+    <path d="M116,110 Q120,126 116,144 Q112,153 104,157" fill="none" stroke="#4ADE80" stroke-width="2.5" stroke-linecap="round" opacity="0.48"/>
+
+    <!-- Leaf decoration on stem (surface detail) -->
+    <path d="M82,120 Q70,112 72,104 Q78,100 84,108" fill="#4ADE80" stroke="#166534" stroke-width="0.8" opacity="0.75"/>
+    <path d="M82,120 L78,107" fill="none" stroke="#166534" stroke-width="0.7" opacity="0.55"/>
+    <path d="M118,120 Q130,112 128,104 Q122,100 116,108" fill="#4ADE80" stroke="#166534" stroke-width="0.8" opacity="0.75"/>
+    <path d="M118,120 L122,107" fill="none" stroke="#166534" stroke-width="0.7" opacity="0.55"/>
+
+    <!-- === BIG ROUND HEAD (chibi proportion: head r=32) === -->
+    <!-- Head shadow -->
+    <circle cx="102" cy="59" r="33" fill="#0A3A1A" opacity="0.18"/>
+    <!-- Main head -->
+    <circle cx="100" cy="57" r="33" fill="url(#headSpring)" stroke="#166534" stroke-width="2.5"/>
+    <!-- Cell-shade shadow arc (bottom-right of head) -->
+    <path d="M100,88 Q118,86 126,70 Q130,60 124,48" fill="none" stroke="#15803D" stroke-width="9" stroke-linecap="round" opacity="0.38"/>
+    <!-- Cell-shade highlight (top-left of head) -->
+    <ellipse cx="84" cy="44" rx="20" ry="16" fill="#BBFAD0" opacity="0.5" transform="rotate(-20 84 44)"/>
+    <!-- Head specular -->
+    <ellipse cx="80" cy="40" rx="10" ry="8" fill="url(#headHL)"/>
+    <!-- Rim light right edge of head -->
+    <path d="M124,48 Q132,58 130,72 Q126,82 116,88" fill="none" stroke="#86EFAC" stroke-width="3" stroke-linecap="round" opacity="0.48"/>
+
+    <!-- === LEAF VEINS (surface texture on head) === -->
+    <!-- Central vein -->
+    <path d="M100,32 Q100,42 100,56" fill="none" stroke="#15803D" stroke-width="0.8" opacity="0.5"/>
+    <!-- Side veins -->
+    <path d="M100,42 Q92,48 84,50" fill="none" stroke="#15803D" stroke-width="0.6" opacity="0.4"/>
+    <path d="M100,42 Q108,48 116,50" fill="none" stroke="#15803D" stroke-width="0.6" opacity="0.4"/>
+    <path d="M100,52 Q90,58 82,58" fill="none" stroke="#15803D" stroke-width="0.55" opacity="0.35"/>
+    <path d="M100,52 Q110,58 118,58" fill="none" stroke="#15803D" stroke-width="0.55" opacity="0.35"/>
+    <path d="M100,62 Q88,68 80,66" fill="none" stroke="#15803D" stroke-width="0.5" opacity="0.3"/>
+    <path d="M100,62 Q112,68 120,66" fill="none" stroke="#15803D" stroke-width="0.5" opacity="0.3"/>
+
+    <!-- === FACE === -->
+    <!-- Left eye socket -->
+    <ellipse cx="87" cy="60" rx="9.5" ry="10.5" fill="#0A1A0E"/>
+    <!-- Left iris -->
+    <ellipse cx="87" cy="60" rx="7.5" ry="8.5" fill="url(#irisGrad)"/>
+    <!-- Left pupil -->
+    <ellipse cx="87" cy="61" rx="5" ry="5.5" fill="#0A1A0E"/>
+    <!-- Left catchlight main -->
+    <circle cx="83" cy="55" r="3" fill="#FFFFFF"/>
+    <!-- Left catchlight tiny -->
+    <circle cx="91" cy="64" r="1.3" fill="#FFFFFF" opacity="0.75"/>
+
+    <!-- Right eye socket -->
+    <ellipse cx="113" cy="60" rx="9.5" ry="10.5" fill="#0A1A0E"/>
+    <!-- Right iris -->
+    <ellipse cx="113" cy="60" rx="7.5" ry="8.5" fill="url(#irisGrad)"/>
+    <!-- Right pupil -->
+    <ellipse cx="113" cy="61" rx="5" ry="5.5" fill="#0A1A0E"/>
+    <!-- Right catchlight main -->
+    <circle cx="109" cy="55" r="3" fill="#FFFFFF"/>
+    <!-- Right catchlight tiny -->
+    <circle cx="117" cy="64" r="1.3" fill="#FFFFFF" opacity="0.75"/>
+
+    <!-- Eye outline rings -->
+    <ellipse cx="87" cy="60" rx="9.5" ry="10.5" fill="none" stroke="#0A1A0E" stroke-width="1.1"/>
+    <ellipse cx="113" cy="60" rx="9.5" ry="10.5" fill="none" stroke="#0A1A0E" stroke-width="1.1"/>
+
+    <!-- Blush cheeks -->
+    <circle cx="72" cy="68" r="9.5" fill="#FB7185" opacity="0.38"/>
+    <circle cx="128" cy="68" r="9.5" fill="#FB7185" opacity="0.38"/>
+    <!-- Cheek highlight -->
+    <circle cx="70" cy="65" r="4" fill="#FECDD3" opacity="0.3"/>
+    <circle cx="126" cy="65" r="4" fill="#FECDD3" opacity="0.3"/>
+
+    <!-- Mouth (cheerful smile) -->
+    <path d="M92,73 Q100,80 108,73" fill="none" stroke="#166534" stroke-width="1.8" stroke-linecap="round"/>
+    <!-- Cheek dimple dots -->
+    <circle cx="85" cy="70" r="1.2" fill="#16A34A" opacity="0.5"/>
+    <circle cx="115" cy="70" r="1.2" fill="#16A34A" opacity="0.5"/>
+
+    <!-- === ROOT FEET (tapered, organic) === -->
+    <path d="M94,156 Q88,170 84,176 Q88,178 90,173 Q93,168 94,162Z" fill="url(#rootGrad)" stroke="#166534" stroke-width="1"/>
+    <path d="M100,158 Q98,172 99,178 Q102,178 103,172 Q104,165 102,158Z" fill="url(#rootGrad)" stroke="#166534" stroke-width="1"/>
+    <path d="M106,156 Q112,170 116,176 Q112,178 110,173 Q107,168 106,162Z" fill="url(#rootGrad)" stroke="#166534" stroke-width="1"/>
+
+    <!-- === DEFAULT HEAD PLANT: single leaf sprig === -->
+    <path d="M100,26 Q92,8 100,3 Q108,8 100,26Z" fill="#4ADE80" stroke="#166534" stroke-width="1"/>
+    <path d="M100,24 L100,5" fill="none" stroke="#166534" stroke-width="0.7" opacity="0.6"/>
+    <path d="M100,18 Q106,12 112,14" fill="none" stroke="#4ADE80" stroke-width="0.7" opacity="0.55"/>
+  </g>
+
+  <!-- ═══ TRAIT: Head Plant (slot-headplant) ═══ -->
+  <g id="slot-headplant-0"><!-- single leaf: already in body --></g>
+  <g id="slot-headplant-1" style="display:none"><!-- flower crown -->
+    <circle cx="100" cy="22" r="9.5" fill="url(#flowerPetal)"/>
+    <circle cx="100" cy="22" r="4.5" fill="#FBBF24"/>
+    <circle cx="100" cy="22" r="2.5" fill="#F59E0B"/>
+    <!-- Petals -->
+    <ellipse cx="100" cy="11" rx="3" ry="4.5" fill="url(#flowerPetal)" opacity="0.85"/>
+    <ellipse cx="100" cy="33" rx="3" ry="4.5" fill="url(#flowerPetal)" opacity="0.85"/>
+    <ellipse cx="89" cy="22" rx="4.5" ry="3" fill="url(#flowerPetal)" opacity="0.85"/>
+    <ellipse cx="111" cy="22" rx="4.5" ry="3" fill="url(#flowerPetal)" opacity="0.85"/>
+    <!-- Stem -->
+    <path d="M100,29 L100,37" fill="none" stroke="#22C55E" stroke-width="2.2" stroke-linecap="round"/>
+    <path d="M100,34 Q106,30 112,32" fill="none" stroke="#4ADE80" stroke-width="1.2" stroke-linecap="round"/>
+  </g>
+  <g id="slot-headplant-2" style="display:none"><!-- round fruit -->
+    <circle cx="100" cy="18" r="11" fill="url(#fruitRed)" stroke="#B91C1C" stroke-width="0.9"/>
+    <!-- Fruit highlight -->
+    <circle cx="95" cy="13" r="3" fill="#FFFFFF" opacity="0.55"/>
+    <!-- Leaf -->
+    <path d="M102,8 Q110,4 112,8 Q108,12 102,10Z" fill="#4ADE80" stroke="#166534" stroke-width="0.7"/>
+    <!-- Stem -->
+    <path d="M100,28 L100,36" fill="none" stroke="#22C55E" stroke-width="2.2" stroke-linecap="round"/>
+  </g>
+  <g id="slot-headplant-3" style="display:none"><!-- vine crown arc -->
+    <path d="M80,54 Q76,36 90,30 Q95,27 100,29 Q105,27 110,30 Q124,36 120,54" fill="none" stroke="#22C55E" stroke-width="3" stroke-linecap="round"/>
+    <!-- Leaf buds on vine -->
+    <ellipse cx="88" cy="30" rx="4" ry="6" fill="#4ADE80" stroke="#166534" stroke-width="0.8" transform="rotate(-15 88 30)"/>
+    <ellipse cx="100" cy="25" rx="5" ry="7" fill="#4ADE80" stroke="#166534" stroke-width="0.8"/>
+    <ellipse cx="112" cy="30" rx="4" ry="6" fill="#4ADE80" stroke="#166534" stroke-width="0.8" transform="rotate(15 112 30)"/>
+    <!-- Tiny dots -->
+    <circle cx="84" cy="42" r="2.5" fill="#4ADE80"/>
+    <circle cx="116" cy="42" r="2.5" fill="#4ADE80"/>
+  </g>
+
+  <!-- ═══ TRAIT: Root Style (slot-roots) ═══ -->
+  <g id="slot-roots-0"><!-- simple: already in body --></g>
+  <g id="slot-roots-1" style="display:none"><!-- spread wide -->
+    <path d="M94,156 Q82,166 76,176 Q80,179 83,174 Q88,168 92,162Z" fill="url(#rootGrad)" stroke="#166534" stroke-width="1"/>
+    <path d="M100,158 Q98,172 99,178 Q102,178 103,172 Q104,165 102,158Z" fill="url(#rootGrad)" stroke="#166534" stroke-width="1"/>
+    <path d="M106,156 Q118,166 124,176 Q120,179 117,174 Q112,168 108,162Z" fill="url(#rootGrad)" stroke="#166534" stroke-width="1"/>
+    <!-- Extra outer roots -->
+    <path d="M88,158 Q70,166 66,178 Q70,180 74,175 Q80,170 88,164Z" fill="url(#rootGrad)" stroke="#166534" stroke-width="0.9" opacity="0.85"/>
+    <path d="M112,158 Q130,166 134,178 Q130,180 126,175 Q120,170 112,164Z" fill="url(#rootGrad)" stroke="#166534" stroke-width="0.9" opacity="0.85"/>
+  </g>
+  <g id="slot-roots-2" style="display:none"><!-- curly tendrils -->
+    <path d="M94,156 Q84,168 92,176 Q98,172 94,165 Q90,170 88,178 Q86,176 90,170Z" fill="none" stroke="url(#rootGrad)" stroke-width="4.5" stroke-linecap="round"/>
+    <path d="M100,158 Q97,168 100,175 Q102,172 101,165Z" fill="url(#rootGrad)" stroke="#166534" stroke-width="1"/>
+    <path d="M106,156 Q116,168 108,176 Q102,172 106,165 Q110,170 112,178 Q114,176 110,170Z" fill="none" stroke="url(#rootGrad)" stroke-width="4.5" stroke-linecap="round"/>
+  </g>
+  <g id="slot-roots-3" style="display:none"><!-- glowing bioluminescent -->
+    <path d="M94,156 Q88,170 84,176 Q88,178 90,173 Q93,168 94,162Z" fill="#86EFAC" stroke="#4ADE80" stroke-width="1" filter="url(#glow)"/>
+    <path d="M100,158 Q98,172 99,178 Q102,178 103,172 Q104,165 102,158Z" fill="#A7F3D0" stroke="#4ADE80" stroke-width="1" filter="url(#glow)"/>
+    <path d="M106,156 Q112,170 116,176 Q112,178 110,173 Q107,168 106,162Z" fill="#86EFAC" stroke="#4ADE80" stroke-width="1" filter="url(#glow)"/>
+    <!-- Glow spots -->
+    <circle cx="84" cy="172" r="2" fill="#BBFAD0" opacity="0.8" filter="url(#glow)"/>
+    <circle cx="100" cy="174" r="2.2" fill="#BBFAD0" opacity="0.8" filter="url(#glow)"/>
+    <circle cx="116" cy="172" r="2" fill="#BBFAD0" opacity="0.8" filter="url(#glow)"/>
+  </g>
+
+  <!-- ═══ TRAIT: Season Color (slot-season) ═══ -->
+  <g id="slot-season-0"><!-- spring: default green --></g>
+  <g id="slot-season-1" style="display:none"><!-- summer golden -->
+    <circle cx="100" cy="57" r="33" fill="url(#headSummer)" stroke="#B45309" stroke-width="2.5" opacity="0.9"/>
+    <path d="M100,90 Q116,93 118,116 Q118,136 114,148 Q110,157 100,159 Q90,157 86,148 Q82,136 82,116 Q84,93 100,90Z" fill="url(#headSummer)" stroke="#B45309" stroke-width="2.2" opacity="0.9"/>
+    <path d="M94,156 Q88,170 84,176 Q88,178 90,173 Q93,168 94,162Z" fill="#D97706" stroke="#B45309" stroke-width="1" opacity="0.9"/>
+    <path d="M100,158 Q98,172 99,178 Q102,178 103,172 Q104,165 102,158Z" fill="#D97706" stroke="#B45309" stroke-width="1" opacity="0.9"/>
+    <path d="M106,156 Q112,170 116,176 Q112,178 110,173 Q107,168 106,162Z" fill="#D97706" stroke="#B45309" stroke-width="1" opacity="0.9"/>
+  </g>
+  <g id="slot-season-2" style="display:none"><!-- autumn orange -->
+    <circle cx="100" cy="57" r="33" fill="url(#headAutumn)" stroke="#9A3412" stroke-width="2.5" opacity="0.9"/>
+    <path d="M100,90 Q116,93 118,116 Q118,136 114,148 Q110,157 100,159 Q90,157 86,148 Q82,136 82,116 Q84,93 100,90Z" fill="url(#headAutumn)" stroke="#9A3412" stroke-width="2.2" opacity="0.9"/>
+    <path d="M94,156 Q88,170 84,176 Q88,178 90,173 Q93,168 94,162Z" fill="#C2410C" stroke="#9A3412" stroke-width="1" opacity="0.9"/>
+    <path d="M100,158 Q98,172 99,178 Q102,178 103,172 Q104,165 102,158Z" fill="#C2410C" stroke="#9A3412" stroke-width="1" opacity="0.9"/>
+    <path d="M106,156 Q112,170 116,176 Q112,178 110,173 Q107,168 106,162Z" fill="#C2410C" stroke="#9A3412" stroke-width="1" opacity="0.9"/>
+  </g>
+  <g id="slot-season-3" style="display:none"><!-- winter ice -->
+    <circle cx="100" cy="57" r="33" fill="url(#headWinter)" stroke="#5D9FC0" stroke-width="2.5" opacity="0.9"/>
+    <path d="M100,90 Q116,93 118,116 Q118,136 114,148 Q110,157 100,159 Q90,157 86,148 Q82,136 82,116 Q84,93 100,90Z" fill="url(#headWinter)" stroke="#5D9FC0" stroke-width="2.2" opacity="0.9"/>
+    <path d="M94,156 Q88,170 84,176 Q88,178 90,173 Q93,168 94,162Z" fill="#7EC8E0" stroke="#5D9FC0" stroke-width="1" opacity="0.9"/>
+    <path d="M100,158 Q98,172 99,178 Q102,178 103,172 Q104,165 102,158Z" fill="#7EC8E0" stroke="#5D9FC0" stroke-width="1" opacity="0.9"/>
+    <path d="M106,156 Q112,170 116,176 Q112,178 110,173 Q107,168 106,162Z" fill="#7EC8E0" stroke="#5D9FC0" stroke-width="1" opacity="0.9"/>
+    <!-- Snowflake sparkles -->
+    <circle cx="84" cy="50" r="2.8" fill="#FFFFFF" opacity="0.65"/>
+    <circle cx="116" cy="44" r="2.2" fill="#FFFFFF" opacity="0.58"/>
+    <circle cx="96" cy="36" r="3" fill="#FFFFFF" opacity="0.62"/>
+    <path d="M84,50 L84,44 M81,47 L87,47" stroke="#FFFFFF" stroke-width="0.8" opacity="0.55"/>
+    <path d="M116,44 L116,38 M113,41 L119,41" stroke="#FFFFFF" stroke-width="0.7" opacity="0.5"/>
+  </g>
+
+  <!-- ═══ RARITY ═══ -->
+  <g id="rare-iridescent" style="display:none">
+    <ellipse cx="100" cy="94" rx="46" ry="64" fill="none" stroke="#A78BFA" stroke-width="1.5" opacity="0.45" stroke-dasharray="6,4"/>
+  </g>
+  <g id="legendary-aura" style="display:none">
+    <circle cx="100" cy="96" r="70" fill="#4ADE80" opacity="0.08" filter="url(#softGlow)"/>
+    <circle cx="68" cy="68" r="2.5" fill="#FCD34D" opacity="0.55"><animate attributeName="opacity" values="0.55;0.15;0.55" dur="2s" repeatCount="indefinite"/></circle>
+    <circle cx="132" cy="78" r="2" fill="#FCD34D" opacity="0.45"><animate attributeName="opacity" values="0.45;0.1;0.45" dur="1.7s" repeatCount="indefinite"/></circle>
+    <circle cx="74" cy="150" r="2" fill="#4ADE80" opacity="0.4"><animate attributeName="opacity" values="0.4;0.1;0.4" dur="2.3s" repeatCount="indefinite"/></circle>
+  </g>
+  <g id="mut-shiny" style="display:none"><ellipse cx="100" cy="94" rx="48" ry="66" fill="none" stroke="#F59E0B" stroke-width="1.2" opacity="0.35" stroke-dasharray="5,5"/></g>
+  <g id="mut-prismatic" style="display:none"><ellipse cx="100" cy="94" rx="46" ry="64" fill="none" stroke="#A78BFA" stroke-width="1.5" opacity="0.47" filter="url(#glow)"/></g>
+  <g id="mut-ethereal" style="display:none"><circle cx="100" cy="96" r="68" fill="#A78BFA" opacity="0.07" filter="url(#softGlow)"/></g>
+  </g>
+</svg>

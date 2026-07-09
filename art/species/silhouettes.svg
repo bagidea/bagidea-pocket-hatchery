@@ -1,0 +1,255 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600">
+  <defs>
+    <style>
+      text { font-family: 'Baloo 2', 'Nunito', system-ui, sans-serif; }
+      .title { font-size: 20px; font-weight: 800; fill: #3A3A52; }
+      .label { font-size: 12px; font-weight: 700; fill: #7C7A92; text-anchor: middle; }
+      .sci-name { font-size: 9px; font-weight: 600; fill: #B7B3C2; text-anchor: middle; font-style: italic; }
+      .sil { fill: #1a1d2e; }
+      .card { fill: #FFF6E9; rx: 14; }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="600" fill="#FFF6E9"/>
+  <text x="600" y="36" text-anchor="middle" class="title">Pocket Hatchery — Species Silhouette Roster</text>
+  <text x="600" y="54" text-anchor="middle" style="font-size:11px;fill:#7C7A92;font-weight:600;">12 species · 1 silhouette = 1 species · identifiable even at 48px</text>
+
+  <!-- Row 1: Foxling, Owlet, Droplet, Pebblit, Sproutling, Flicker -->
+  <!-- Card template: x,y  width=170 height=230 -->
+
+  <!-- Foxling -->
+  <g transform="translate(20, 70)">
+    <rect width="180" height="240" rx="16" fill="white" stroke="#EBDCC4" stroke-width="1"/>
+    <text x="90" y="20" class="label">🦊 Foxling</text>
+    <text x="90" y="33" class="sci-name">Vulpes magica</text>
+    <g transform="translate(90, 160) scale(1.2)">
+      <!-- Fox silhouette: pointed ears + big bushy tail -->
+      <ellipse cx="0" cy="30" rx="30" ry="38" class="sil"/>
+      <polygon points="-20,-5 -30,-40 -8,-10" class="sil"/>
+      <polygon points="20,-5 30,-40 8,-10" class="sil"/>
+      <ellipse cx="30" cy="20" rx="22" ry="12" transform="rotate(-30 30 20)" class="sil"/>
+      <ellipse cx="-12" cy="55" rx="10" ry="6" class="sil"/>
+      <ellipse cx="12" cy="55" rx="10" ry="6" class="sil"/>
+    </g>
+    <text x="90" y="228" style="font-size:9px;fill:#5BB572;text-anchor:middle;font-weight:700;">Element: 🔥 Fire</text>
+  </g>
+
+  <!-- Owlet -->
+  <g transform="translate(215, 70)">
+    <rect width="180" height="240" rx="16" fill="white" stroke="#EBDCC4" stroke-width="1"/>
+    <text x="90" y="20" class="label">🦉 Owlet</text>
+    <text x="90" y="33" class="sci-name">Strigis rotundus</text>
+    <g transform="translate(90, 160) scale(1.2)">
+      <!-- Owl: one big circle body+head, tiny feet triangle -->
+      <circle cx="0" cy="20" r="35" class="sil"/>
+      <ellipse cx="-15" cy="10" rx="14" ry="16" fill="white"/>
+      <ellipse cx="15" cy="10" rx="14" ry="16" fill="white"/>
+      <circle cx="-15" cy="12" r="6" class="sil"/>
+      <circle cx="15" cy="12" r="6" class="sil"/>
+      <polygon points="-10,55 0,68 10,55" class="sil"/>
+      <ellipse cx="-25" cy="28" rx="12" ry="8" transform="rotate(-20 -25 28)" class="sil"/>
+      <ellipse cx="25" cy="28" rx="12" ry="8" transform="rotate(20 25 28)" class="sil"/>
+    </g>
+    <text x="90" y="228" style="font-size:9px;fill:#5FB8E8;text-anchor:middle;font-weight:700;">Element: 🌬️ Air</text>
+  </g>
+
+  <!-- Droplet -->
+  <g transform="translate(410, 70)">
+    <rect width="180" height="240" rx="16" fill="white" stroke="#EBDCC4" stroke-width="1"/>
+    <text x="90" y="20" class="label">💧 Droplet</text>
+    <text x="90" y="33" class="sci-name">Aqua vivens</text>
+    <g transform="translate(90, 160) scale(1.2)">
+      <!-- Teardrop shape: round bottom, pointed top -->
+      <path d="M0,-45 Q35,-20 35,15 Q35,45 0,55 Q-35,45 -35,15 Q-35,-20 0,-45Z" class="sil"/>
+      <circle cx="-12" cy="5" r="7" fill="white"/>
+      <circle cx="12" cy="5" r="7" fill="white"/>
+      <circle cx="-12" cy="6" r="4" class="sil"/>
+      <circle cx="12" cy="6" r="4" class="sil"/>
+      <ellipse cx="-18" cy="30" rx="12" ry="5" fill="none" stroke="#1a1d2e" stroke-width="0.5" opacity="0.4"/>
+      <ellipse cx="18" cy="30" rx="12" ry="5" fill="none" stroke="#1a1d2e" stroke-width="0.5" opacity="0.4"/>
+    </g>
+    <text x="90" y="228" style="font-size:9px;fill:#5BC0BE;text-anchor:middle;font-weight:700;">Element: 💧 Water</text>
+  </g>
+
+  <!-- Pebblit -->
+  <g transform="translate(605, 70)">
+    <rect width="180" height="240" rx="16" fill="white" stroke="#EBDCC4" stroke-width="1"/>
+    <text x="90" y="20" class="label">🪨 Pebblit</text>
+    <text x="90" y="33" class="sci-name">Lithos vivens</text>
+    <g transform="translate(90, 160) scale(1.2)">
+      <!-- Irregular round rock + 4 stubby legs -->
+      <ellipse cx="0" cy="10" rx="32" ry="28" class="sil"/>
+      <ellipse cx="-15" cy="-5" rx="8" ry="5" fill="#FFF6E9"/>
+      <ellipse cx="15" cy="-5" rx="8" ry="5" fill="#FFF6E9"/>
+      <circle cx="-15" cy="-4" r="4" class="sil"/>
+      <circle cx="15" cy="-4" r="4" class="sil"/>
+      <ellipse cx="-22" cy="40" rx="8" ry="5" class="sil"/>
+      <ellipse cx="-10" cy="42" rx="8" ry="5" class="sil"/>
+      <ellipse cx="10" cy="42" rx="8" ry="5" class="sil"/>
+      <ellipse cx="22" cy="40" rx="8" ry="5" class="sil"/>
+    </g>
+    <text x="90" y="228" style="font-size:9px;fill:#C49A6C;text-anchor:middle;font-weight:700;">Element: 🏔️ Earth</text>
+  </g>
+
+  <!-- Sproutling -->
+  <g transform="translate(800, 70)">
+    <rect width="180" height="240" rx="16" fill="white" stroke="#EBDCC4" stroke-width="1"/>
+    <text x="90" y="20" class="label">🌱 Sproutling</text>
+    <text x="90" y="33" class="sci-name">Herba ambulans</text>
+    <g transform="translate(90, 160) scale(1.2)">
+      <!-- Round body + leaf on top + root legs -->
+      <ellipse cx="0" cy="15" rx="20" ry="25" class="sil"/>
+      <ellipse cx="0" cy="-15" rx="12" ry="18" class="sil"/>
+      <ellipse cx="-8" cy="-12" rx="6" ry="10" fill="#FFF6E9"/>
+      <ellipse cx="8" cy="-12" rx="6" ry="10" fill="#FFF6E9"/>
+      <circle cx="-8" cy="-11" r="3.5" class="sil"/>
+      <circle cx="8" cy="-11" r="3.5" class="sil"/>
+      <path d="M-10,40 Q-15,55 -18,60" stroke="#1a1d2e" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M10,40 Q15,55 18,60" stroke="#1a1d2e" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    </g>
+    <text x="90" y="228" style="font-size:9px;fill:#5BB572;text-anchor:middle;font-weight:700;">Element: 🌿 Nature</text>
+  </g>
+
+  <!-- Flicker -->
+  <g transform="translate(995, 70)">
+    <rect width="180" height="240" rx="16" fill="white" stroke="#EBDCC4" stroke-width="1"/>
+    <text x="90" y="20" class="label">🔥 Flicker</text>
+    <text x="90" y="33" class="sci-name">Ignis animatus</text>
+    <g transform="translate(90, 160) scale(1.2)">
+      <!-- Inverted teardrop flame + arm flames -->
+      <path d="M0,-30 Q30,0 20,35 Q10,50 0,55 Q-10,50 -20,35 Q-30,0 0,-30Z" class="sil"/>
+      <circle cx="-10" cy="5" r="6" fill="white"/>
+      <circle cx="10" cy="5" r="6" fill="white"/>
+      <circle cx="-10" cy="6" r="3" class="sil"/>
+      <circle cx="10" cy="6" r="3" class="sil"/>
+      <path d="M-18,20 Q-30,28 -32,18" stroke="#1a1d2e" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M18,20 Q30,28 32,18" stroke="#1a1d2e" stroke-width="3" fill="none" stroke-linecap="round"/>
+    </g>
+    <text x="90" y="228" style="font-size:9px;fill:#FFCB6B;text-anchor:middle;font-weight:700;">Element: 🔥 Fire</text>
+  </g>
+
+  <!-- Row 2: Glimmer, Wisp, Fluffle, Shellby, Dracling, Buzzle -->
+  <!-- Glimmer -->
+  <g transform="translate(20, 325)">
+    <rect width="180" height="240" rx="16" fill="white" stroke="#EBDCC4" stroke-width="1"/>
+    <text x="90" y="20" class="label">💎 Glimmer</text>
+    <text x="90" y="33" class="sci-name">Crystallus vivens</text>
+    <g transform="translate(90, 160) scale(1.2)">
+      <!-- Hexagonal crystal with eyes -->
+      <polygon points="0,-45 30,-20 30,25 0,50 -30,25 -30,-20" class="sil"/>
+      <rect x="-15" y="-5" width="12" height="14" rx="6" fill="white"/>
+      <rect x="3" y="-5" width="12" height="14" rx="6" fill="white"/>
+      <circle cx="-9" cy="2" r="4" class="sil"/>
+      <circle cx="9" cy="2" r="4" class="sil"/>
+    </g>
+    <text x="90" y="228" style="font-size:9px;fill:#B07BE8;text-anchor:middle;font-weight:700;">Element: ✨ Crystal</text>
+  </g>
+
+  <!-- Wisp -->
+  <g transform="translate(215, 325)">
+    <rect width="180" height="240" rx="16" fill="white" stroke="#EBDCC4" stroke-width="1"/>
+    <text x="90" y="20" class="label">👻 Wisp</text>
+    <text x="90" y="33" class="sci-name">Umbra ludens</text>
+    <g transform="translate(90, 160) scale(1.2)">
+      <!-- Ghost: round top + wavy bottom + glowing eyes -->
+      <path d="M0,-40 Q30,-40 30,-10 Q30,25 20,40 Q15,32 10,40 Q5,32 0,40 Q-5,32 -10,40 Q-15,32 -20,40 Q-30,25 -30,-10 Q-30,-40 0,-40Z" class="sil"/>
+      <ellipse cx="-10" cy="-8" rx="9" ry="11" fill="white"/>
+      <ellipse cx="10" cy="-8" rx="9" ry="11" fill="white"/>
+      <circle cx="-10" cy="-6" r="5" class="sil"/>
+      <circle cx="10" cy="-6" r="5" class="sil"/>
+    </g>
+    <text x="90" y="228" style="font-size:9px;fill:#3A3A52;text-anchor:middle;font-weight:700;">Element: 🌙 Shadow</text>
+  </g>
+
+  <!-- Fluffle -->
+  <g transform="translate(410, 325)">
+    <rect width="180" height="240" rx="16" fill="white" stroke="#EBDCC4" stroke-width="1"/>
+    <text x="90" y="20" class="label">☁️ Fluffle</text>
+    <text x="90" y="33" class="sci-name">Nubes mollis</text>
+    <g transform="translate(90, 160) scale(1.2)">
+      <!-- Round cloud body + droopy ears -->
+      <circle cx="0" cy="10" r="32" class="sil"/>
+      <circle cx="-20" cy="-5" r="12" class="sil"/>
+      <circle cx="20" cy="-5" r="12" class="sil"/>
+      <circle cx="0" cy="-15" r="14" class="sil"/>
+      <ellipse cx="-30" cy="-15" rx="8" ry="20" transform="rotate(25 -30 -15)" class="sil"/>
+      <ellipse cx="30" cy="-15" rx="8" ry="20" transform="rotate(-25 30 -15)" class="sil"/>
+      <circle cx="-8" cy="8" r="7" fill="white"/>
+      <circle cx="8" cy="8" r="7" fill="white"/>
+      <circle cx="-8" cy="9" r="4" class="sil"/>
+      <circle cx="8" cy="9" r="4" class="sil"/>
+      <ellipse cx="-10" cy="40" rx="8" ry="5" class="sil"/>
+      <ellipse cx="10" cy="40" rx="8" ry="5" class="sil"/>
+    </g>
+    <text x="90" y="228" style="font-size:9px;fill:#FFF6E9;text-anchor:middle;font-weight:700;stroke:#EBDCC4;stroke-width:0.5;">Element: 🌬️ Air</text>
+  </g>
+
+  <!-- Shellby -->
+  <g transform="translate(605, 325)">
+    <rect width="180" height="240" rx="16" fill="white" stroke="#EBDCC4" stroke-width="1"/>
+    <text x="90" y="20" class="label">🐚 Shellby</text>
+    <text x="90" y="33" class="sci-name">Cochlea margarita</text>
+    <g transform="translate(90, 160) scale(1.2)">
+      <!-- Snail body + spiral shell on back -->
+      <ellipse cx="0" cy="30" rx="18" ry="10" class="sil"/>
+      <circle cx="0" cy="10" r="20" class="sil"/>
+      <path d="M0,10 Q12,10 12,2 Q12,-6 4,-6 Q-4,-6 -4,4 Q-4,10 8,10" fill="none" stroke="#FFF6E9" stroke-width="1.5"/>
+      <ellipse cx="-20" cy="20" rx="6" ry="3" class="sil"/>
+      <ellipse cx="-30" cy="18" rx="4" ry="2" class="sil"/>
+      <circle cx="-30" cy="17" r="2.5" fill="white"/>
+      <circle cx="-32" cy="16" r="1.5" class="sil"/>
+    </g>
+    <text x="90" y="228" style="font-size:9px;fill:#C9A8FF;text-anchor:middle;font-weight:700;">Element: 💧 Water</text>
+  </g>
+
+  <!-- Dracling -->
+  <g transform="translate(800, 325)">
+    <rect width="180" height="240" rx="16" fill="white" stroke="#EBDCC4" stroke-width="1"/>
+    <text x="90" y="20" class="label">🐉 Dracling</text>
+    <text x="90" y="33" class="sci-name">Draco parvus</text>
+    <g transform="translate(90, 160) scale(1.2)">
+      <!-- Chubby dragon: horns + tiny wings + pointed tail -->
+      <ellipse cx="0" cy="15" rx="28" ry="30" class="sil"/>
+      <polygon points="-10,-12 -16,-38 -4,-15" class="sil"/>
+      <polygon points="10,-12 16,-38 4,-15" class="sil"/>
+      <ellipse cx="-20" cy="5" rx="15" ry="6" transform="rotate(-40 -20 5)" class="sil"/>
+      <ellipse cx="20" cy="5" rx="15" ry="6" transform="rotate(40 20 5)" class="sil"/>
+      <polygon points="0,45 15,60 5,55 0,68 -5,55 -15,60" class="sil"/>
+      <circle cx="-8" cy="12" r="6" fill="white"/>
+      <circle cx="8" cy="12" r="6" fill="white"/>
+      <circle cx="-8" cy="13" r="3.5" class="sil"/>
+      <circle cx="8" cy="13" r="3.5" class="sil"/>
+      <ellipse cx="-12" cy="45" rx="7" ry="4" class="sil"/>
+      <ellipse cx="12" cy="45" rx="7" ry="4" class="sil"/>
+    </g>
+    <text x="90" y="228" style="font-size:9px;fill:#FFD86B;text-anchor:middle;font-weight:700;">Element: 🔥 Fire</text>
+  </g>
+
+  <!-- Buzzle -->
+  <g transform="translate(995, 325)">
+    <rect width="180" height="240" rx="16" fill="white" stroke="#EBDCC4" stroke-width="1"/>
+    <text x="90" y="20" class="label">🐝 Buzzle</text>
+    <text x="90" y="33" class="sci-name">Bombus rotundus</text>
+    <g transform="translate(90, 160) scale(1.2)">
+      <!-- Round bee: striped body + transparent wings + antennae -->
+      <ellipse cx="0" cy="15" rx="25" ry="28" class="sil"/>
+      <ellipse cx="0" cy="5" rx="22" ry="8" fill="#FFF6E9"/>
+      <ellipse cx="0" cy="20" rx="22" ry="7" fill="#FFF6E9"/>
+      <ellipse cx="-30" cy="-5" rx="6" ry="14" transform="rotate(-30 -30 -5)" fill="none" stroke="#1a1d2e" stroke-width="1" opacity="0.4"/>
+      <ellipse cx="30" cy="-5" rx="6" ry="14" transform="rotate(30 30 -5)" fill="none" stroke="#1a1d2e" stroke-width="1" opacity="0.4"/>
+      <circle cx="-10" cy="10" r="6" fill="white"/>
+      <circle cx="10" cy="10" r="6" fill="white"/>
+      <circle cx="-10" cy="11" r="3.5" class="sil"/>
+      <circle cx="10" cy="11" r="3.5" class="sil"/>
+      <path d="M-10,-35 Q-15,-50 -18,-55" stroke="#1a1d2e" stroke-width="1.5" fill="none"/>
+      <circle cx="-18" cy="-58" r="3" class="sil"/>
+      <path d="M10,-35 Q15,-50 18,-55" stroke="#1a1d2e" stroke-width="1.5" fill="none"/>
+      <circle cx="18" cy="-58" r="3" class="sil"/>
+      <ellipse cx="-8" cy="42" rx="6" ry="4" class="sil"/>
+      <ellipse cx="8" cy="42" rx="6" ry="4" class="sil"/>
+    </g>
+    <text x="90" y="228" style="font-size:9px;fill:#C49A6C;text-anchor:middle;font-weight:700;">Element: 🌿 Nature</text>
+  </g>
+
+</svg>

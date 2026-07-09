@@ -1,0 +1,20 @@
+import { chromium } from 'playwright'
+const URL = 'http://127.0.0.1:8787/plugin/pocket-hatchery/panel'
+const browser = await chromium.launch({ headless: true })
+const page = await (await browser.newContext()).newPage()
+page.on('console', (m) => console.log(`[console.${m.type()}] ${m.text()}`))
+page.on('pageerror', (e) => console.log(`[pageerror] ${e.message}`))
+page.on('requestfailed', (r) => console.log(`[reqfailed] ${r.url()} — ${r.failure()?.errorText}`))
+page.on('response', (r) => {
+  const u = r.url()
+  if (/chain\/get_table_rows|get_info|\/office\/|\/plugin\/wax-wallet/.test(u))
+    console.log(`[resp ${r.status()}] ${u}`)
+})
+await page.goto(URL, { waitUntil: 'networkidle' })
+await page.getByRole('button', { name: /Connect via waxwing/i }).click()
+await page.waitForTimeout(6000)
+const txt = await page.evaluate(() => document.body.innerText)
+console.log('\n--- dashboard EGG/creatures ---')
+console.log('collected:', (txt.match(/(\d+)\s+collected/) || [])[1])
+console.log('no-creatures:', /No creatures yet/.test(txt))
+await browser.close()

@@ -1,0 +1,16 @@
+feed_cd = 0
+feed_daily_cap = 100
+feed_boost = 1000
+harvest_cd = 0
+daily_egg_cap = 240
+offline_cap_h = 8
+fed_dur_common = undefined
+fed_dur_uncommon = undefined
+fed_dur_rare = undefined
+earn_mult_common = undefined
+earn_mult_uncommon = undefined
+earn_mult_rare = undefined
+cap_scales_rarity = undefined
+rarity_w_common = 700
+rarity_w_uncommon = 250
+rarity_w_rare = 50

@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <radialGradient id="bodyGrad" cx="50%" cy="40%"><stop offset="0%" stop-color="#6A6A8A"/><stop offset="100%" stop-color="#1E1B4B"/></radialGradient>
+    <radialGradient id="eyeGlowLav" cx="50%" cy="50%"><stop offset="0%" stop-color="#FAFAFA"/><stop offset="50%" stop-color="#A78BFA"/><stop offset="100%" stop-color="#8B5CF6" stop-opacity="0"/></radialGradient>
+    <radialGradient id="eyeGlowCyan" cx="50%" cy="50%"><stop offset="0%" stop-color="#FAFAFA"/><stop offset="50%" stop-color="#7EC8E0"/><stop offset="100%" stop-color="#3B82F6" stop-opacity="0"/></radialGradient>
+    <radialGradient id="eyeGlowGold" cx="50%" cy="50%"><stop offset="0%" stop-color="#FAFAFA"/><stop offset="50%" stop-color="#F59E0B"/><stop offset="100%" stop-color="#D97706" stop-opacity="0"/></radialGradient>
+    <radialGradient id="eyeGlowRB" cx="50%" cy="50%"><stop offset="0%" stop-color="#FAFAFA"/><stop offset="33%" stop-color="#F43F5E"/><stop offset="66%" stop-color="#A78BFA"/><stop offset="100%" stop-color="#7EC8E0" stop-opacity="0"/></radialGradient>
+    <radialGradient id="smokeTail" cx="50%" cy="50%"><stop offset="0%" stop-color="#5C5C7A"/><stop offset="100%" stop-color="#1E1B4B" stop-opacity="0"/></radialGradient>
+    <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="softGlow"><feGaussianBlur stdDeviation="6"/></filter>
+    <filter id="smokeBlur"><feGaussianBlur stdDeviation="4"/></filter>
+      <style>
+      .gene-tint { filter: hue-rotate(var(--gene-hue-shift, 0deg)) saturate(var(--gene-sat-mult, 1)) brightness(var(--gene-light-mult, 1)); }
+    </style>  </defs>
+
+  <g class="gene-tint">
+  <!-- ═══ BODY: Round ghost with smoke tail ═══ -->
+  <g id="body">
+    <!-- Core aura -->
+    <circle cx="100" cy="80" r="45" fill="#A78BFA" opacity="0.05" filter="url(#softGlow)"/>
+    <!-- Main round body -->
+    <circle cx="100" cy="80" r="38" fill="url(#bodyGrad)"/>
+    <!-- Wavy bottom edge (ghost shape) -->
+    <path d="M62,80 Q62,65 72,58 Q82,50 100,48 Q118,50 128,58 Q138,65 138,80 Q138,100 132,108 Q125,112 120,105 Q115,112 112,105 Q108,112 100,108 Q92,112 88,105 Q85,112 80,105 Q75,112 68,108Z" fill="url(#bodyGrad)"/>
+    <!-- Eyes (big, glowing) -->
+    <ellipse cx="85" cy="78" rx="10" ry="12" fill="url(#eyeGlowLav)" filter="url(#glow)"/>
+    <ellipse cx="115" cy="78" rx="10" ry="12" fill="url(#eyeGlowLav)" filter="url(#glow)"/>
+    <ellipse cx="85" cy="79" rx="5.5" ry="7" fill="#1E1B4B"/>
+    <ellipse cx="115" cy="79" rx="5.5" ry="7" fill="#1E1B4B"/>
+    <circle cx="82" cy="74" r="2" fill="#FAFAFA"/>
+    <circle cx="87" cy="81" r="1" fill="#FAFAFA"/>
+    <circle cx="112" cy="74" r="2" fill="#FAFAFA"/>
+    <circle cx="117" cy="81" r="1" fill="#FAFAFA"/>
+    <!-- Mouth -->
+    <path d="M96,92 Q100,97 104,92" fill="none" stroke="#A78BFA" stroke-width="1" stroke-linecap="round" filter="url(#glow)"/>
+    <!-- Phantom arms -->
+    <ellipse cx="68" cy="100" rx="10" ry="6" fill="#5C5C7A" opacity="0.5" transform="rotate(-20 68 100)"/>
+    <ellipse cx="132" cy="100" rx="10" ry="6" fill="#5C5C7A" opacity="0.5" transform="rotate(20 132 100)"/>
+  </g>
+
+  <!-- ═══ TRAIT: Tail Style (slot-tailstyle) ═══ -->
+  <g id="slot-tailstyle-0"><!-- short -->
+    <path d="M100,115 Q100,130 95,148 Q90,155 85,152" fill="none" stroke="url(#smokeTail)" stroke-width="16" stroke-linecap="round" filter="url(#smokeBlur)" opacity="0.6"/>
+  </g>
+  <g id="slot-tailstyle-1" style="display:none"><!-- long -->
+    <path d="M100,115 Q105,135 100,158 Q95,170 90,178 Q88,182 85,180" fill="none" stroke="url(#smokeTail)" stroke-width="15" stroke-linecap="round" filter="url(#smokeBlur)" opacity="0.55"/>
+  </g>
+  <g id="slot-tailstyle-2" style="display:none"><!-- split -->
+    <path d="M100,115 Q100,130 85,148 Q75,158 70,160" fill="none" stroke="url(#smokeTail)" stroke-width="12" stroke-linecap="round" filter="url(#smokeBlur)" opacity="0.5"/>
+    <path d="M100,115 Q100,130 115,148 Q125,158 130,160" fill="none" stroke="url(#smokeTail)" stroke-width="12" stroke-linecap="round" filter="url(#smokeBlur)" opacity="0.5"/>
+  </g>
+  <g id="slot-tailstyle-3" style="display:none"><!-- nebula -->
+    <path d="M100,115 Q95,135 100,155 Q105,170 90,178" fill="none" stroke="url(#smokeTail)" stroke-width="18" stroke-linecap="round" filter="url(#smokeBlur)" opacity="0.45"/>
+    <circle cx="95" cy="140" r="1.5" fill="#A78BFA" opacity="0.5"><animate attributeName="opacity" values="0.5;0.1;0.5" dur="2s" repeatCount="indefinite"/></circle>
+    <circle cx="100" cy="155" r="1" fill="#FAFAFA" opacity="0.4"><animate attributeName="opacity" values="0.4;0.05;0.4" dur="1.5s" repeatCount="indefinite"/></circle>
+    <circle cx="92" cy="168" r="1.5" fill="#A78BFA" opacity="0.35"><animate attributeName="opacity" values="0.35;0.05;0.35" dur="2.5s" repeatCount="indefinite"/></circle>
+  </g>
+
+  <!-- ═══ TRAIT: Glow Color (slot-glow) ═══ -->
+  <g id="slot-glow-0"><!-- lavender: default eye glow --></g>
+  <g id="slot-glow-1" style="display:none"><!-- cyan -->
+    <circle cx="100" cy="80" r="40" fill="#7EC8E0" opacity="0.05" filter="url(#softGlow)"/>
+    <ellipse cx="85" cy="78" rx="10" ry="12" fill="url(#eyeGlowCyan)" filter="url(#glow)"/>
+    <ellipse cx="115" cy="78" rx="10" ry="12" fill="url(#eyeGlowCyan)" filter="url(#glow)"/>
+    <path d="M96,92 Q100,97 104,92" fill="none" stroke="#7EC8E0" stroke-width="1" stroke-linecap="round" filter="url(#glow)"/>
+  </g>
+  <g id="slot-glow-2" style="display:none"><!-- gold -->
+    <circle cx="100" cy="80" r="40" fill="#F59E0B" opacity="0.05" filter="url(#softGlow)"/>
+    <ellipse cx="85" cy="78" rx="10" ry="12" fill="url(#eyeGlowGold)" filter="url(#glow)"/>
+    <ellipse cx="115" cy="78" rx="10" ry="12" fill="url(#eyeGlowGold)" filter="url(#glow)"/>
+    <path d="M96,92 Q100,97 104,92" fill="none" stroke="#F59E0B" stroke-width="1" stroke-linecap="round" filter="url(#glow)"/>
+  </g>
+  <g id="slot-glow-3" style="display:none"><!-- rainbow -->
+    <circle cx="100" cy="80" r="40" fill="#A78BFA" opacity="0.04" filter="url(#softGlow)"/>
+    <ellipse cx="85" cy="78" rx="10" ry="12" fill="url(#eyeGlowRB)" filter="url(#glow)"/>
+    <ellipse cx="115" cy="78" rx="10" ry="12" fill="url(#eyeGlowRB)" filter="url(#glow)"/>
+  </g>
+
+  <!-- ═══ TRAIT: Opacity (slot-opacity) ═══ -->
+  <g id="slot-opacity-0"><!-- opaque: default --></g>
+  <g id="slot-opacity-1" style="display:none"><!-- semi -->
+    <rect x="50" y="40" width="100" height="120" fill="#070B16" opacity="0.3" rx="10"/>
+  </g>
+  <g id="slot-opacity-2" style="display:none"><!-- ghostly -->
+    <rect x="50" y="40" width="100" height="120" fill="#070B16" opacity="0.55" rx="10"/>
+  </g>
+  <g id="slot-opacity-3" style="display:none"><!-- prism -->
+    <rect x="50" y="40" width="100" height="120" fill="url(#eyeGlowRB)" opacity="0.08" rx="10"/>
+  </g>
+
+  <!-- ═══ RARITY ═══ -->
+  <g id="rare-iridescent" style="display:none">
+    <circle cx="100" cy="80" r="42" fill="none" stroke="#A78BFA" stroke-width="1.5" opacity="0.4" stroke-dasharray="6,4"/>
+  </g>
+  <g id="legendary-aura" style="display:none">
+    <circle cx="100" cy="80" r="55" fill="#A78BFA" opacity="0.06" filter="url(#softGlow)"/>
+    <circle cx="72" cy="65" r="2" fill="#A78BFA" opacity="0.5"><animate attributeName="opacity" values="0.5;0.15;0.5" dur="2s" repeatCount="indefinite"/></circle>
+    <circle cx="128" cy="70" r="1.5" fill="#FAFAFA" opacity="0.4"><animate attributeName="opacity" values="0.4;0.1;0.4" dur="1.6s" repeatCount="indefinite"/></circle>
+  </g>
+  <g id="mut-shiny" style="display:none"><circle cx="100" cy="80" r="44" fill="none" stroke="#F59E0B" stroke-width="1" opacity="0.3" stroke-dasharray="5,5"/></g>
+  <g id="mut-prismatic" style="display:none"><circle cx="100" cy="80" r="42" fill="none" stroke="#A78BFA" stroke-width="1.5" opacity="0.4" filter="url(#glow)"/></g>
+  <g id="mut-ethereal" style="display:none"><circle cx="100" cy="80" r="50" fill="#A78BFA" opacity="0.06" filter="url(#softGlow)"/></g>
+  </g>
+</svg>

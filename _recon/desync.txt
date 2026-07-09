@@ -1,0 +1,5 @@
+total=24  desynced=3
+asset_id | creatures.owner | AA.owner | stage | burned
+1099603751699 | officewax123 | waxwingsuper | 0 | false
+1099603751700 | waxwingsuper | officewax123 | 0 | false
+1099603751707 | waxwingsuper | officewax123 | 0 | false

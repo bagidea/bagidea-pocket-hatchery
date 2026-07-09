@@ -1,0 +1,156 @@
+[
+  {
+    "_note": "Blazetail — Fire Uncommon (skip 662889 Emberling, already exists)",
+    "authorized_creator": "phgamecreatr",
+    "collection_name": "phgamecreatr",
+    "schema_name": "creatures",
+    "transferable": true,
+    "burnable": true,
+    "max_supply": 0,
+    "immutable_data": [
+      {"key": "species", "value": ["string", "Blazetail"]},
+      {"key": "family", "value": ["string", "Fire"]},
+      {"key": "rarity", "value": ["string", "Uncommon"]}
+    ]
+  },
+  {
+    "_note": "Drakember — Fire Rare",
+    "authorized_creator": "phgamecreatr",
+    "collection_name": "phgamecreatr",
+    "schema_name": "creatures",
+    "transferable": true,
+    "burnable": true,
+    "max_supply": 0,
+    "immutable_data": [
+      {"key": "species", "value": ["string", "Drakember"]},
+      {"key": "family", "value": ["string", "Fire"]},
+      {"key": "rarity", "value": ["string", "Rare"]}
+    ]
+  },
+  {
+    "_note": "Aquaring — Water Common",
+    "authorized_creator": "phgamecreatr",
+    "collection_name": "phgamecreatr",
+    "schema_name": "creatures",
+    "transferable": true,
+    "burnable": true,
+    "max_supply": 0,
+    "immutable_data": [
+      {"key": "species", "value": ["string", "Aquaring"]},
+      {"key": "family", "value": ["string", "Water"]},
+      {"key": "rarity", "value": ["string", "Common"]}
+    ]
+  },
+  {
+    "_note": "Tidalfin — Water Uncommon",
+    "authorized_creator": "phgamecreatr",
+    "collection_name": "phgamecreatr",
+    "schema_name": "creatures",
+    "transferable": true,
+    "burnable": true,
+    "max_supply": 0,
+    "immutable_data": [
+      {"key": "species", "value": ["string", "Tidalfin"]},
+      {"key": "family", "value": ["string", "Water"]},
+      {"key": "rarity", "value": ["string", "Uncommon"]}
+    ]
+  },
+  {
+    "_note": "Leviathorn — Water Rare",
+    "authorized_creator": "phgamecreatr",
+    "collection_name": "phgamecreatr",
+    "schema_name": "creatures",
+    "transferable": true,
+    "burnable": true,
+    "max_supply": 0,
+    "immutable_data": [
+      {"key": "species", "value": ["string", "Leviathorn"]},
+      {"key": "family", "value": ["string", "Water"]},
+      {"key": "rarity", "value": ["string", "Rare"]}
+    ]
+  },
+  {
+    "_note": "Terrabud — Earth Common",
+    "authorized_creator": "phgamecreatr",
+    "collection_name": "phgamecreatr",
+    "schema_name": "creatures",
+    "transferable": true,
+    "burnable": true,
+    "max_supply": 0,
+    "immutable_data": [
+      {"key": "species", "value": ["string", "Terrabud"]},
+      {"key": "family", "value": ["string", "Earth"]},
+      {"key": "rarity", "value": ["string", "Common"]}
+    ]
+  },
+  {
+    "_note": "Mossback — Earth Uncommon",
+    "authorized_creator": "phgamecreatr",
+    "collection_name": "phgamecreatr",
+    "schema_name": "creatures",
+    "transferable": true,
+    "burnable": true,
+    "max_supply": 0,
+    "immutable_data": [
+      {"key": "species", "value": ["string", "Mossback"]},
+      {"key": "family", "value": ["string", "Earth"]},
+      {"key": "rarity", "value": ["string", "Uncommon"]}
+    ]
+  },
+  {
+    "_note": "Zephyrling — Air Common",
+    "authorized_creator": "phgamecreatr",
+    "collection_name": "phgamecreatr",
+    "schema_name": "creatures",
+    "transferable": true,
+    "burnable": true,
+    "max_supply": 0,
+    "immutable_data": [
+      {"key": "species", "value": ["string", "Zephyrling"]},
+      {"key": "family", "value": ["string", "Air"]},
+      {"key": "rarity", "value": ["string", "Common"]}
+    ]
+  },
+  {
+    "_note": "Stormwing — Air Uncommon",
+    "authorized_creator": "phgamecreatr",
+    "collection_name": "phgamecreatr",
+    "schema_name": "creatures",
+    "transferable": true,
+    "burnable": true,
+    "max_supply": 0,
+    "immutable_data": [
+      {"key": "species", "value": ["string", "Stormwing"]},
+      {"key": "family", "value": ["string", "Air"]},
+      {"key": "rarity", "value": ["string", "Uncommon"]}
+    ]
+  },
+  {
+    "_note": "Wispember — Spirit Rare",
+    "authorized_creator": "phgamecreatr",
+    "collection_name": "phgamecreatr",
+    "schema_name": "creatures",
+    "transferable": true,
+    "burnable": true,
+    "max_supply": 0,
+    "immutable_data": [
+      {"key": "species", "value": ["string", "Wispember"]},
+      {"key": "family", "value": ["string", "Spirit"]},
+      {"key": "rarity", "value": ["string", "Rare"]}
+    ]
+  },
+  {
+    "_note": "Nyxling — Shadow Legendary",
+    "authorized_creator": "phgamecreatr",
+    "collection_name": "phgamecreatr",
+    "schema_name": "creatures",
+    "transferable": true,
+    "burnable": true,
+    "max_supply": 0,
+    "immutable_data": [
+      {"key": "species", "value": ["string", "Nyxling"]},
+      {"key": "family", "value": ["string", "Shadow"]},
+      {"key": "rarity", "value": ["string", "Legendary"]}
+    ]
+  }
+]

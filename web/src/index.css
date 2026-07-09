@@ -1,0 +1,41 @@
+/* Pocket Hatchery — Global styles */
+/* Monanisa · 2026-07-02 */
+
+* { box-sizing: border-box; }
+
+html, body, #root { min-height: 100svh; }
+
+body {
+  margin: 0;
+  font: 400 16px/1.5 'Nunito', 'Mali', system-ui, sans-serif;
+  color: #1E1B4B;
+  background: linear-gradient(175deg,
+    #BAE6FD 0%, #D1FAE5 20%, #FFF7ED 45%, #FEF3C7 70%, #FDE6D0 100%
+  );
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root { display: flex; flex-direction: column; width: 100%; }
+
+h1, h2, h3, p { margin: 0; }
+
+button {
+  font-family: inherit;
+  border: none;
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 3px solid #5FB8E8;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Pocket Hatchery — UI Kit Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet" />
+<!-- The single source of truth. Engineers import this in the real app. -->
+<link rel="stylesheet" href="./tokens.css" />
+<style>
+  /* ====== Demo-only layout. Every value below references a --ph-* token. ====== */
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font: var(--ph-text-body);
+    color: var(--ph-text-primary);
+    background:
+      radial-gradient(1200px 600px at 50% -10%, #FFFDF7 0%, var(--ph-surface-canvas) 60%);
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: var(--ph-space-6) var(--ph-space-5) var(--ph-space-8); }
+  header.hero { text-align: center; margin-bottom: var(--ph-space-6); }
+  header.hero h1 { font: var(--ph-text-h1); margin: 0 0 var(--ph-space-2); }
+  header.hero p { font: var(--ph-text-body); color: var(--ph-text-muted); margin: 0; }
+  section { margin-top: var(--ph-space-7); }
+  section > h2 { font: var(--ph-text-h2); margin: 0 0 var(--ph-space-2); }
+  section > .hint { font: var(--ph-text-caption); color: var(--ph-text-muted); margin: 0 0 var(--ph-space-4); }
+  .row { display: flex; flex-wrap: wrap; gap: var(--ph-space-4); align-items: center; }
+  .panel {
+    background: var(--ph-surface-raised); border-radius: var(--ph-radius-2xl);
+    box-shadow: var(--ph-elev-2); padding: var(--ph-space-5);
+  }
+
+  /* ====== BUTTONS (ART.md §7 "juice") ====== */
+  .btn {
+    font: var(--ph-text-label); border: 0; cursor: pointer;
+    min-height: var(--ph-touch-min); padding: 0 var(--ph-space-5);
+    border-radius: var(--ph-radius-pill);
+    transition: transform var(--ph-dur-fast) var(--ph-ease-pop),
+                box-shadow var(--ph-dur-base) var(--ph-ease-standard),
+                filter var(--ph-dur-fast) var(--ph-ease-standard);
+    display: inline-flex; align-items: center; gap: var(--ph-space-2);
+  }
+  .btn:focus-visible { outline: 3px solid var(--ph-border-focus); outline-offset: 2px; }
+  .btn--primary { background: var(--ph-color-golden); color: var(--ph-text-on-golden); box-shadow: var(--ph-elev-2); }
+  .btn--primary:hover { box-shadow: var(--ph-elev-2), var(--ph-glow-golden); }
+  .btn--primary:active { transform: scale(0.96); }
+  .btn--primary.is-pop { animation: pop var(--ph-dur-base) var(--ph-ease-pop); }
+  @keyframes pop { 0%{transform:scale(1)} 40%{transform:scale(0.96)} 70%{transform:scale(1.04)} 100%{transform:scale(1)} }
+  .btn--secondary { background: transparent; color: var(--ph-color-meadow);
+    box-shadow: inset 0 0 0 2px var(--ph-color-mint); }
+  .btn--secondary:hover { background: rgba(143,214,148,0.14); }
+  .btn--secondary:active { transform: scale(0.97); }
+  .btn[disabled] { background: var(--ph-surface-sunken); color: var(--ph-text-disabled);
+    box-shadow: none; cursor: not-allowed; transform: none; }
+  .btn--wallet { background: #fff; color: var(--ph-text-primary); box-shadow: var(--ph-elev-2);
+    box-shadow: inset 0 0 0 2px var(--ph-border-soft), var(--ph-elev-1); }
+  .btn--wallet:hover { box-shadow: inset 0 0 0 2px var(--ph-border-focus), var(--ph-elev-2); }
+  .btn--wallet .cloud { font-size: 18px; }
+
+  /* ====== RESOURCE BAR ====== */
+  .resbar { display: inline-flex; gap: var(--ph-space-3); align-items: center;
+    background: var(--ph-surface-raised); border-radius: var(--ph-radius-pill);
+    box-shadow: var(--ph-elev-1); padding: var(--ph-space-2) var(--ph-space-4); height: 40px; }
+  .res { display: inline-flex; align-items: center; gap: var(--ph-space-2);
+    font: var(--ph-text-label); }
+  .res .val { font-family: var(--ph-font-numeric); font-weight: var(--ph-weight-heavy);
+    font-variant-numeric: tabular-nums; }
+  .res .ico { width: 22px; height: 22px; display: grid; place-items: center; font-size: 16px; }
+  .res--egg .ico { filter: drop-shadow(var(--ph-glow-golden)); }
+  .res-sep { width: 1px; height: 18px; background: var(--ph-border-soft); }
+
+  /* ====== CREATURE CARDS + rarity frames ====== */
+  .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--ph-space-4); }
+  @media (max-width: 720px){ .cards { grid-template-columns: repeat(2,1fr); } }
+  .ccard {
+    position: relative; background: var(--ph-surface-raised);
+    border-radius: var(--ph-radius-xl); padding: var(--ph-space-3);
+    box-shadow: var(--ph-elev-2);
+    border: 4px solid var(--frame, var(--ph-rarity-common));
+    transition: transform var(--ph-dur-base) var(--ph-ease-pop);
+  }
+  .ccard:hover { transform: translateY(-4px); }
+  .ccard[data-rarity="legendary"] { box-shadow: var(--ph-elev-2), var(--ph-glow-legendary);
+    border-image: linear-gradient(135deg,#FFD86B,#FFE9A8,#C9A8FF,#FFD86B) 1; }
+  .ccard .art { aspect-ratio: 1/1; border-radius: var(--ph-radius-md);
+    background: radial-gradient(circle at 50% 35%, #FFFDF7, var(--aura, var(--ph-rarity-common-aura)));
+    display: grid; place-items: center; font-size: 56px; }
+  .ccard .badge { position: absolute; top: 10px; right: 10px;
+    background: var(--frame); color: #fff; font: var(--ph-text-caption); font-weight: 800;
+    padding: 2px 10px; border-radius: var(--ph-radius-pill); box-shadow: var(--ph-elev-1); }
+  .ccard .name { display:flex; justify-content: space-between; align-items:center;
+    margin-top: var(--ph-space-3); font: var(--ph-text-label); }
+  .ccard .tier { font: var(--ph-text-caption); color: var(--frame); font-weight: 800; }
+  .ccard[data-rarity="common"]    { --frame: var(--ph-rarity-common);    --aura: var(--ph-rarity-common-aura); }
+  .ccard[data-rarity="rare"]      { --frame: var(--ph-rarity-rare);      --aura: var(--ph-rarity-rare-aura); }
+  .ccard[data-rarity="epic"]      { --frame: var(--ph-rarity-epic);      --aura: var(--ph-rarity-epic-aura); }
+  .ccard[data-rarity="legendary"] { --frame: var(--ph-rarity-legendary); --aura: var(--ph-rarity-legendary-aura); }
+
+  /* ====== PROGRESS (hatch / evolution) ====== */
+  .progress { max-width: 420px; }
+  .progress .track { height: 14px; border-radius: var(--ph-radius-pill);
+    background: var(--ph-surface-sunken); overflow: hidden; box-shadow: inset 0 1px 3px rgba(58,58,82,0.12); }
+  .progress .fill { height: 100%; width: 62%; border-radius: var(--ph-radius-pill);
+    background: linear-gradient(90deg, var(--ph-color-golden), #FFE3A6);
+    box-shadow: var(--ph-glow-golden);
+    transition: width var(--ph-dur-slow) var(--ph-ease-decelerate); }
+  .progress .meta { display:flex; justify-content: space-between; margin-top: var(--ph-space-2);
+    font: var(--ph-text-caption); color: var(--ph-text-muted); }
+  .progress.evolve .fill { background: linear-gradient(90deg, var(--ph-color-lavender), #E6D5FF); box-shadow: 0 0 24px var(--ph-rarity-epic-aura); }
+
+  /* ====== TOAST ====== */
+  .toast { display:inline-flex; align-items:center; gap: var(--ph-space-2);
+    background: var(--ph-surface-raised); color: var(--ph-text-primary);
+    border-radius: var(--ph-radius-pill); padding: var(--ph-space-2) var(--ph-space-4);
+    min-height: 40px; box-shadow: var(--ph-elev-2); font: var(--ph-text-label); }
+  .toast .dot { width:22px;height:22px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:13px; }
+  .toast--success .dot { background: var(--ph-success); }
+  .toast--danger .dot  { background: var(--ph-danger); }
+  .toast.is-in { animation: toastIn var(--ph-dur-base) var(--ph-ease-decelerate); }
+  @keyframes toastIn { from{ transform: translateY(-12px); opacity:0 } to{ transform: translateY(0); opacity:1 } }
+
+  /* ====== MODAL + BOTTOM SHEET ====== */
+  .overlay { position: fixed; inset: 0; background: var(--ph-scrim); display: none;
+    align-items: center; justify-content: center; z-index: 50; padding: var(--ph-space-4); }
+  .overlay.is-open { display: flex; }
+  .modal { background: var(--ph-surface-raised); border-radius: var(--ph-radius-2xl);
+    max-width: 420px; width: 100%; padding: var(--ph-space-5); box-shadow: var(--ph-elev-3);
+    animation: pop var(--ph-dur-base) var(--ph-ease-pop); text-align:center; }
+  .modal h3 { font: var(--ph-text-h2); margin: var(--ph-space-2) 0; }
+  .modal p { color: var(--ph-text-muted); margin: 0 0 var(--ph-space-5); }
+  .sheet-overlay { position: fixed; inset:0; background: var(--ph-scrim); display:none; z-index:50; }
+  .sheet-overlay.is-open { display:block; }
+  .sheet { position: fixed; left:0; right:0; bottom:0; z-index:51;
+    background: var(--ph-surface-raised); border-radius: var(--ph-radius-2xl) var(--ph-radius-2xl) 0 0;
+    padding: var(--ph-space-5); box-shadow: var(--ph-elev-3); max-width: 980px; margin: 0 auto;
+    transform: translateY(100%); transition: transform var(--ph-dur-slow) var(--ph-ease-spring); }
+  .sheet.is-open { transform: translateY(0); }
+  .sheet .grabber { width: 44px; height: 5px; border-radius: var(--ph-radius-pill);
+    background: var(--ph-border-soft); margin: 0 auto var(--ph-space-4); }
+
+  .swatch-grid { display:grid; grid-template-columns: repeat(auto-fill,minmax(120px,1fr)); gap: var(--ph-space-3); }
+  .sw { border-radius: var(--ph-radius-md); padding: var(--ph-space-3); box-shadow: var(--ph-elev-1);
+    font: var(--ph-text-caption); }
+  .sw .chip { height: 40px; border-radius: var(--ph-radius-sm); margin-bottom: var(--ph-space-2);
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.04); }
+  .sw code { font-family: var(--ph-font-numeric); color: var(--ph-text-muted); }
+  .tall { max-height: 140px; overflow-y: auto; background: var(--ph-surface-sunken);
+    border-radius: var(--ph-radius-md); padding: var(--ph-space-3); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <h1>🥚 Pocket Hatchery — UI Kit</h1>
+    <p>v0.1 · all components below are live & driven by <code>tokens.css</code> · scroll any panel to see the office blue-glass scrollbar</p>
+  </header>
+
+  <!-- BUTTONS -->
+  <section>
+    <h2>Buttons</h2>
+    <p class="hint">primary = golden CTA · secondary = mint outline · disabled · click primary to feel the "pop" juice</p>
+    <div class="panel row">
+      <button class="btn btn--primary" id="popBtn">🥚 HATCH</button>
+      <button class="btn btn--secondary">View Farm</button>
+      <button class="btn btn--primary" disabled>HATCH</button>
+      <button class="btn btn--wallet"><span class="cloud">☁️</span> Connect Wallet</button>
+    </div>
+  </section>
+
+  <!-- RESOURCE BAR -->
+  <section>
+    <h2>Resource bar</h2>
+    <p class="hint">EGG currency + Energy · tabular numerals · egg icon carries the golden glow token</p>
+    <div class="panel row">
+      <div class="resbar">
+        <span class="res res--egg"><span class="ico">🥚</span><span class="val">230</span></span>
+        <span class="res-sep"></span>
+        <span class="res"><span class="ico">⚡</span><span class="val">5,860</span></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- CREATURE CARDS -->
+  <section>
+    <h2>Creature cards — rarity frames</h2>
+    <p class="hint">frame colour + aura + tier label come straight from <code>--ph-rarity-*</code>; legendary gets an animated iridescent border + glow</p>
+    <div class="cards">
+      <div class="ccard" data-rarity="common"><span class="badge">Lv.1</span><div class="art">🐑</div><div class="name"><span>Woolby</span><span class="tier">Common</span></div></div>
+      <div class="ccard" data-rarity="rare"><span class="badge">Lv.1</span><div class="art">🐰</div><div class="name"><span>Hopkin</span><span class="tier">Rare</span></div></div>
+      <div class="ccard" data-rarity="epic"><span class="badge">Lv.1</span><div class="art">🦊</div><div class="name"><span>Foxling</span><span class="tier">Epic</span></div></div>
+      <div class="ccard" data-rarity="legendary"><span class="badge">Lv.1</span><div class="art">🐥</div><div class="name"><span>Auric</span><span class="tier">Legendary</span></div></div>
+    </div>
+  </section>
+
+  <!-- PROGRESS -->
+  <section>
+    <h2>Progress — hatching & evolution</h2>
+    <p class="hint">golden fill = hatch · lavender fill = evolution moment · animates on width change</p>
+    <div class="panel">
+      <div class="progress" style="margin-bottom:24px">
+        <div class="track"><div class="fill" id="hatchFill"></div></div>
+        <div class="meta"><span>🥚 Hatching…</span><span id="hatchPct">62%</span></div>
+      </div>
+      <div class="progress evolve">
+        <div class="track"><div class="fill" style="width:84%"></div></div>
+        <div class="meta"><span>✨ Evolving to Adult</span><span>84%</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TOAST -->
+  <section>
+    <h2>Toast</h2>
+    <p class="hint">success / danger variants · slides in from top</p>
+    <div class="panel row">
+      <div class="toast toast--success is-in"><span class="dot">✓</span> Egg hatched! Meet Foxling.</div>
+      <div class="toast toast--danger"><span class="dot">!</span> Transaction failed — try again.</div>
+    </div>
+  </section>
+
+  <!-- MODAL / SHEET -->
+  <section>
+    <h2>Modal & Bottom-sheet</h2>
+    <p class="hint">modal = centered confirm · bottom-sheet = mobile actions · both dim with the scrim token</p>
+    <div class="panel row">
+      <button class="btn btn--primary" onclick="document.getElementById('ov').classList.add('is-open')">Open modal</button>
+      <button class="btn btn--secondary" onclick="document.getElementById('shOv').classList.add('is-open');document.getElementById('sh').classList.add('is-open')">Open bottom-sheet</button>
+    </div>
+  </section>
+
+  <!-- SCROLLBAR PROOF -->
+  <section>
+    <h2>Office blue-glass scrollbar</h2>
+    <p class="hint">scroll the box — slim 8px blue-glass thumb, the office signature</p>
+    <div class="panel">
+      <div class="tall">
+        <p>Pocket Hatchery — a cozy-premium creature collector on WAX.</p>
+        <p>Hatch eggs. Raise fluffy chibi creatures. Watch them evolve through four stages.</p>
+        <p>Each creature is an NFT; rarity tiers are Common, Rare, Epic, Legendary.</p>
+        <p>The farm is isometric, lit by golden hour, dusted with magic sparkles.</p>
+        <p>Players connect with WAX Cloud Wallet (MyCloudWallet) on mainnet.</p>
+        <p>Every interaction has juice — press, bounce, pop, particle.</p>
+        <p>Scroll keeps going so you can really see the thumb glide.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- TOKEN SWATCHES -->
+  <section>
+    <h2>Palette tokens</h2>
+    <div class="panel swatch-grid">
+      <div class="sw"><div class="chip" style="background:var(--ph-color-cream)"></div>Cream<br><code>#FFF6E9</code></div>
+      <div class="sw"><div class="chip" style="background:var(--ph-color-golden)"></div>Golden / CTA<br><code>#FFCB6B</code></div>
+      <div class="sw"><div class="chip" style="background:var(--ph-color-mint)"></div>Mint<br><code>#8FD694</code></div>
+      <div class="sw"><div class="chip" style="background:var(--ph-color-coral)"></div>Coral<br><code>#FF9EB5</code></div>
+      <div class="sw"><div class="chip" style="background:var(--ph-color-lavender)"></div>Lavender<br><code>#C9A8FF</code></div>
+      <div class="sw"><div class="chip" style="background:var(--ph-color-ink)"></div>Ink (text)<br><code>#3A3A52</code></div>
+      <div class="sw"><div class="chip" style="background:var(--ph-rarity-rare)"></div>Rare<br><code>#5FB8E8</code></div>
+      <div class="sw"><div class="chip" style="background:var(--ph-rarity-epic)"></div>Epic<br><code>#B07BE8</code></div>
+      <div class="sw"><div class="chip" style="background:var(--ph-rarity-legendary)"></div>Legendary<br><code>#FFD86B</code></div>
+    </div>
+  </section>
+
+</div>
+
+<!-- MODAL -->
+<div class="overlay" id="ov" onclick="if(event.target===this)this.classList.remove('is-open')">
+  <div class="modal">
+    <div style="font-size:48px">🥚</div>
+    <h3>Hatch this egg?</h3>
+    <p>Costs 50 EGG. A new creature will join your farm.</p>
+    <div class="row" style="justify-content:center">
+      <button class="btn btn--secondary" onclick="document.getElementById('ov').classList.remove('is-open')">Cancel</button>
+      <button class="btn btn--primary" onclick="document.getElementById('ov').classList.remove('is-open')">Hatch now</button>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM SHEET -->
+<div class="sheet-overlay" id="shOv" onclick="document.getElementById('shOv').classList.remove('is-open');document.getElementById('sh').classList.remove('is-open')"></div>
+<div class="sheet" id="sh">
+  <div class="grabber"></div>
+  <h3 style="margin:0 0 12px;font:var(--ph-text-h3)">Creature actions</h3>
+  <div class="row" style="flex-direction:column;align-items:stretch">
+    <button class="btn btn--primary" style="justify-content:center">Feed (+10 ⚡)</button>
+    <button class="btn btn--secondary" style="justify-content:center">List on market</button>
+    <button class="btn btn--secondary" style="justify-content:center">Rename</button>
+  </div>
+</div>
+
+<script>
+  // button "pop" juice
+  document.getElementById('popBtn').addEventListener('click', function(){
+    this.classList.remove('is-pop'); void this.offsetWidth; this.classList.add('is-pop');
+  });
+  // animate hatch progress so the fill transition is visible
+  let p = 62; const fill = document.getElementById('hatchFill'); const pct = document.getElementById('hatchPct');
+  setInterval(function(){ p = p >= 100 ? 35 : p + 4; fill.style.width = p + '%'; pct.textContent = p + '%'; }, 1400);
+</script>
+</body>
+</html>

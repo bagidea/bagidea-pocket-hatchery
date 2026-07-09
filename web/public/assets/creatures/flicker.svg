@@ -1,0 +1,237 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <!-- Body cell-shading gradients -->
+    <radialGradient id="bodyBase" cx="42%" cy="36%">
+      <stop offset="0%" stop-color="#FFCC80"/>
+      <stop offset="45%" stop-color="#FF6B35"/>
+      <stop offset="100%" stop-color="#C02000"/>
+    </radialGradient>
+    <radialGradient id="bodyHL" cx="35%" cy="28%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.55"/>
+      <stop offset="60%" stop-color="#FFFFFF" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Flame corona variants -->
+    <linearGradient id="flameOrange" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="#E84020"/>
+      <stop offset="35%" stop-color="#FF7030"/>
+      <stop offset="65%" stop-color="#FFB840"/>
+      <stop offset="100%" stop-color="#FFEEAA" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="flameGolden" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="#B8780A"/>
+      <stop offset="35%" stop-color="#DDA020"/>
+      <stop offset="65%" stop-color="#FFD856"/>
+      <stop offset="100%" stop-color="#FFFDE4" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="flameBlue" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="#0D47A1"/>
+      <stop offset="35%" stop-color="#1E88E5"/>
+      <stop offset="65%" stop-color="#80D8FF"/>
+      <stop offset="100%" stop-color="#E3F2FD" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="flamePurple" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="#4A148C"/>
+      <stop offset="35%" stop-color="#8E24AA"/>
+      <stop offset="65%" stop-color="#E040FB"/>
+      <stop offset="100%" stop-color="#F3E5F5" stop-opacity="0"/>
+    </linearGradient>
+    <!-- Eye iris gradient -->
+    <radialGradient id="irisL" cx="38%" cy="32%">
+      <stop offset="0%" stop-color="#FFB020"/>
+      <stop offset="55%" stop-color="#E06000"/>
+      <stop offset="100%" stop-color="#8B2500"/>
+    </radialGradient>
+    <radialGradient id="irisR" cx="38%" cy="32%">
+      <stop offset="0%" stop-color="#FFB020"/>
+      <stop offset="55%" stop-color="#E06000"/>
+      <stop offset="100%" stop-color="#8B2500"/>
+    </radialGradient>
+    <!-- Soft ambient glow -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="softGlow"><feGaussianBlur stdDeviation="7"/></filter>
+    <filter id="rimLight">
+      <feGaussianBlur stdDeviation="1.5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <style>
+      .gene-tint { filter: hue-rotate(var(--gene-hue-shift, 0deg)) saturate(var(--gene-sat-mult, 1)) brightness(var(--gene-light-mult, 1)); }
+    </style>
+  </defs>
+
+  <g class="gene-tint">
+  <!-- ═══ BODY: Chibi flame spirit — round body + flame crown ═══ -->
+  <g id="body">
+    <!-- Ambient body halo -->
+    <ellipse cx="100" cy="118" rx="50" ry="46" fill="#FF5010" opacity="0.1" filter="url(#softGlow)"/>
+
+    <!-- === FLAME CROWN (default orange) === -->
+    <!-- Outer flame shape — tall wispy -->
+    <path d="M100,36 Q110,58 116,80 Q121,102 110,118 Q105,124 100,125 Q95,124 90,118 Q79,102 84,80 Q90,58 100,36Z"
+          fill="url(#flameOrange)" opacity="0.9"/>
+    <!-- Inner brighter core flame -->
+    <path d="M100,44 Q107,63 110,84 Q113,104 105,116 Q102,121 100,122 Q98,121 95,116 Q87,104 90,84 Q93,63 100,44Z"
+          fill="#FFD060" opacity="0.45"/>
+    <!-- Left side flame arm -->
+    <path d="M88,90 Q74,80 68,88 Q64,96 72,104 Q80,110 88,105"
+          fill="url(#flameOrange)" opacity="0.75"/>
+    <!-- Right side flame arm -->
+    <path d="M112,90 Q126,80 132,88 Q136,96 128,104 Q120,110 112,105"
+          fill="url(#flameOrange)" opacity="0.75"/>
+
+    <!-- === CHIBI BODY (round, cell-shaded) === -->
+    <!-- Drop shadow -->
+    <ellipse cx="103" cy="126" rx="39" ry="34" fill="#700800" opacity="0.2"/>
+    <!-- Base body -->
+    <ellipse cx="100" cy="122" rx="40" ry="35" fill="url(#bodyBase)" stroke="#8B1A00" stroke-width="2.5"/>
+    <!-- Cell-shade shadow band (bottom-right arc) -->
+    <path d="M100,154 Q126,152 138,134 Q144,122 138,108" fill="none" stroke="#B83010" stroke-width="8" stroke-linecap="round" opacity="0.4"/>
+    <!-- Cell-shade highlight patch (top-left) -->
+    <ellipse cx="84" cy="108" rx="22" ry="15" fill="#FFAA60" opacity="0.55" transform="rotate(-18 84 108)"/>
+    <!-- Top specular highlight -->
+    <ellipse cx="80" cy="105" rx="11" ry="7" fill="url(#bodyHL)"/>
+    <!-- Rim light (right edge) -->
+    <path d="M128,110 Q140,122 136,138 Q130,148 120,152" fill="none" stroke="#FF9050" stroke-width="3" stroke-linecap="round" opacity="0.5" filter="url(#rimLight)"/>
+
+    <!-- === SCALE TEXTURE (surface detail) === -->
+    <ellipse cx="100" cy="138" rx="10" ry="5" fill="none" stroke="#C04010" stroke-width="0.7" opacity="0.35" transform="rotate(0 100 138)"/>
+    <ellipse cx="86" cy="132" rx="8" ry="4" fill="none" stroke="#C04010" stroke-width="0.7" opacity="0.3" transform="rotate(-15 86 132)"/>
+    <ellipse cx="114" cy="132" rx="8" ry="4" fill="none" stroke="#C04010" stroke-width="0.7" opacity="0.3" transform="rotate(15 114 132)"/>
+
+    <!-- === FACE === -->
+    <!-- Left eye socket -->
+    <ellipse cx="87" cy="116" rx="9.5" ry="10.5" fill="#1A0500"/>
+    <!-- Left iris -->
+    <ellipse cx="87" cy="116" rx="7.5" ry="8.5" fill="url(#irisL)"/>
+    <!-- Left pupil -->
+    <ellipse cx="87" cy="117" rx="5" ry="5.5" fill="#1A0500"/>
+    <!-- Left catchlight main -->
+    <circle cx="83" cy="111" r="3" fill="#FFFFFF"/>
+    <!-- Left catchlight tiny -->
+    <circle cx="91" cy="120" r="1.3" fill="#FFFFFF" opacity="0.75"/>
+
+    <!-- Right eye socket -->
+    <ellipse cx="113" cy="116" rx="9.5" ry="10.5" fill="#1A0500"/>
+    <!-- Right iris -->
+    <ellipse cx="113" cy="116" rx="7.5" ry="8.5" fill="url(#irisR)"/>
+    <!-- Right pupil -->
+    <ellipse cx="113" cy="117" rx="5" ry="5.5" fill="#1A0500"/>
+    <!-- Right catchlight main -->
+    <circle cx="109" cy="111" r="3" fill="#FFFFFF"/>
+    <!-- Right catchlight tiny -->
+    <circle cx="117" cy="120" r="1.3" fill="#FFFFFF" opacity="0.75"/>
+
+    <!-- Eye outline rings -->
+    <ellipse cx="87" cy="116" rx="9.5" ry="10.5" fill="none" stroke="#1A0500" stroke-width="1"/>
+    <ellipse cx="113" cy="116" rx="9.5" ry="10.5" fill="none" stroke="#1A0500" stroke-width="1"/>
+
+    <!-- Blush cheeks -->
+    <circle cx="72" cy="124" r="9.5" fill="#FF5577" opacity="0.38"/>
+    <circle cx="128" cy="124" r="9.5" fill="#FF5577" opacity="0.38"/>
+    <!-- Cheek highlight (makes blush look soft/3D) -->
+    <circle cx="70" cy="121" r="4" fill="#FF88AA" opacity="0.3"/>
+    <circle cx="126" cy="121" r="4" fill="#FF88AA" opacity="0.3"/>
+
+    <!-- Mouth (cute wide smile) -->
+    <path d="M91,130 Q100,138 109,130" fill="none" stroke="#6B1500" stroke-width="2" stroke-linecap="round"/>
+    <!-- Tiny teeth hint -->
+    <path d="M96,131 Q100,133 104,131" fill="none" stroke="#FFFFFF" stroke-width="1.2" stroke-linecap="round" opacity="0.6"/>
+
+    <!-- Flame feet wisps -->
+    <path d="M90,154 Q85,164 89,170 Q93,165 91,157Z" fill="#FF8030" opacity="0.65"/>
+    <path d="M100,156 Q97,167 101,172 Q105,167 103,157Z" fill="#FFA040" opacity="0.7"/>
+    <path d="M110,154 Q115,164 111,170 Q107,165 109,157Z" fill="#FF8030" opacity="0.65"/>
+  </g>
+
+  <!-- ═══ TRAIT: Flame Color (slot-flamecolor) ═══ -->
+  <g id="slot-flamecolor-0"><!-- orange: default —no extra layers--></g>
+  <g id="slot-flamecolor-1" style="display:none"><!-- golden -->
+    <path d="M100,36 Q110,58 116,80 Q121,102 110,118 Q105,124 100,125 Q95,124 90,118 Q79,102 84,80 Q90,58 100,36Z" fill="url(#flameGolden)" opacity="0.88"/>
+    <path d="M88,90 Q74,80 68,88 Q64,96 72,104 Q80,110 88,105" fill="url(#flameGolden)" opacity="0.7"/>
+    <path d="M112,90 Q126,80 132,88 Q136,96 128,104 Q120,110 112,105" fill="url(#flameGolden)" opacity="0.7"/>
+    <ellipse cx="100" cy="122" rx="40" ry="35" fill="#C88A00" opacity="0.42"/>
+  </g>
+  <g id="slot-flamecolor-2" style="display:none"><!-- blue -->
+    <path d="M100,36 Q110,58 116,80 Q121,102 110,118 Q105,124 100,125 Q95,124 90,118 Q79,102 84,80 Q90,58 100,36Z" fill="url(#flameBlue)" opacity="0.88"/>
+    <path d="M88,90 Q74,80 68,88 Q64,96 72,104 Q80,110 88,105" fill="url(#flameBlue)" opacity="0.7"/>
+    <path d="M112,90 Q126,80 132,88 Q136,96 128,104 Q120,110 112,105" fill="url(#flameBlue)" opacity="0.7"/>
+    <ellipse cx="100" cy="122" rx="40" ry="35" fill="#0D47A1" opacity="0.42"/>
+  </g>
+  <g id="slot-flamecolor-3" style="display:none"><!-- purple -->
+    <path d="M100,36 Q110,58 116,80 Q121,102 110,118 Q105,124 100,125 Q95,124 90,118 Q79,102 84,80 Q90,58 100,36Z" fill="url(#flamePurple)" opacity="0.88"/>
+    <path d="M88,90 Q74,80 68,88 Q64,96 72,104 Q80,110 88,105" fill="url(#flamePurple)" opacity="0.7"/>
+    <path d="M112,90 Q126,80 132,88 Q136,96 128,104 Q120,110 112,105" fill="url(#flamePurple)" opacity="0.7"/>
+    <ellipse cx="100" cy="122" rx="40" ry="35" fill="#4A148C" opacity="0.42"/>
+  </g>
+
+  <!-- ═══ TRAIT: Flame Shape (slot-flameshape) ═══ -->
+  <g id="slot-flameshape-0"><!-- wispy: default —no extra--></g>
+  <g id="slot-flameshape-1" style="display:none"><!-- triple crown -->
+    <path d="M100,28 Q106,48 108,70 Q110,92 103,110 Q100,115 97,110 Q90,92 92,70 Q94,48 100,28Z" fill="url(#flameOrange)" opacity="0.92"/>
+    <path d="M85,44 Q80,28 86,24 Q92,30 90,46Z" fill="url(#flameOrange)" opacity="0.78"/>
+    <path d="M115,44 Q120,28 114,24 Q108,30 110,46Z" fill="url(#flameOrange)" opacity="0.78"/>
+  </g>
+  <g id="slot-flameshape-2" style="display:none"><!-- wide fan -->
+    <path d="M100,54 Q122,58 134,74 Q142,90 132,106 Q116,118 100,120 Q84,118 68,106 Q58,90 66,74 Q78,58 100,54Z" fill="url(#flameOrange)" opacity="0.72"/>
+    <path d="M100,54 Q112,62 116,80 Q110,98 100,104 Q90,98 84,80 Q88,62 100,54Z" fill="url(#flameOrange)" opacity="0.9"/>
+  </g>
+  <g id="slot-flameshape-3" style="display:none"><!-- spiral -->
+    <path d="M100,42 Q114,54 120,74 Q126,94 114,110" fill="none" stroke="#FFA040" stroke-width="7" stroke-linecap="round" opacity="0.68"/>
+    <path d="M100,42 Q86,54 80,74 Q74,94 86,110" fill="none" stroke="#FF6B35" stroke-width="5.5" stroke-linecap="round" opacity="0.6"/>
+    <circle cx="100" cy="42" r="6" fill="#FFD060" opacity="0.95"/>
+    <circle cx="100" cy="42" r="3" fill="#FFFFFF" opacity="0.7"/>
+  </g>
+
+  <!-- ═══ TRAIT: Spark Level (slot-sparks) ═══ -->
+  <g id="slot-sparks-0">
+    <circle cx="86" cy="54" r="2.2" fill="#FFD060" opacity="0.72"/>
+    <circle cx="115" cy="48" r="2" fill="#FFD060" opacity="0.62"/>
+  </g>
+  <g id="slot-sparks-1" style="display:none">
+    <circle cx="82" cy="52" r="2.5" fill="#FFD060" opacity="0.82" filter="url(#glow)"/>
+    <circle cx="118" cy="44" r="3" fill="#FFD060" opacity="0.72" filter="url(#glow)"/>
+    <circle cx="72" cy="74" r="2" fill="#FFA040" opacity="0.62"/>
+    <circle cx="128" cy="68" r="1.8" fill="#FFA040" opacity="0.57"/>
+    <circle cx="93" cy="38" r="2.2" fill="#FFFFFF" opacity="0.52"/>
+    <circle cx="108" cy="44" r="1.7" fill="#FFFFFF" opacity="0.47"/>
+  </g>
+  <g id="slot-sparks-2" style="display:none">
+    <circle cx="76" cy="48" r="3" fill="#FFD060" opacity="0.9" filter="url(#glow)"/>
+    <circle cx="124" cy="40" r="3.5" fill="#FFD060" opacity="0.85" filter="url(#glow)"/>
+    <circle cx="66" cy="72" r="2.2" fill="#FFA040" opacity="0.72"/>
+    <circle cx="134" cy="66" r="2.2" fill="#FFA040" opacity="0.67"/>
+    <circle cx="86" cy="32" r="2.5" fill="#FFFFFF" opacity="0.67"/>
+    <circle cx="114" cy="38" r="2.8" fill="#FFFFFF" opacity="0.57"/>
+    <circle cx="72" cy="96" r="2" fill="#FFD060" opacity="0.62"/>
+    <circle cx="128" cy="90" r="2" fill="#FFD060" opacity="0.57"/>
+    <path d="M86,34 L80,50 M100,28 L96,44 M114,34 L120,50" fill="none" stroke="#FFD060" stroke-width="0.9" opacity="0.42" stroke-dasharray="2,3"/>
+  </g>
+  <g id="slot-sparks-3" style="display:none">
+    <circle cx="76" cy="44" r="3" fill="#A78BFA" opacity="0.92" filter="url(#glow)"/>
+    <circle cx="124" cy="36" r="3.5" fill="#A78BFA" opacity="0.87" filter="url(#glow)"/>
+    <circle cx="64" cy="68" r="2.5" fill="#60A5FA" opacity="0.77"/>
+    <circle cx="136" cy="62" r="2.2" fill="#60A5FA" opacity="0.72"/>
+    <circle cx="86" cy="28" r="2.8" fill="#FFFFFF" opacity="0.72"/>
+    <circle cx="114" cy="32" r="2.5" fill="#FFFFFF" opacity="0.62"/>
+    <path d="M76,44 L86,28 L124,36 L114,32" fill="none" stroke="#A78BFA" stroke-width="0.7" opacity="0.47"/>
+    <path d="M64,68 L76,44 L124,36 L136,62" fill="none" stroke="#A78BFA" stroke-width="0.6" opacity="0.37"/>
+  </g>
+
+  <!-- ═══ RARITY ═══ -->
+  <g id="rare-iridescent" style="display:none">
+    <ellipse cx="100" cy="112" rx="52" ry="58" fill="none" stroke="#A78BFA" stroke-width="1.5" opacity="0.47" stroke-dasharray="6,4"/>
+  </g>
+  <g id="legendary-aura" style="display:none">
+    <circle cx="100" cy="112" r="64" fill="#FF6B35" opacity="0.08" filter="url(#softGlow)"/>
+    <circle cx="68" cy="72" r="2.8" fill="#FFD060" opacity="0.57"><animate attributeName="opacity" values="0.57;0.15;0.57" dur="2s" repeatCount="indefinite"/></circle>
+    <circle cx="134" cy="64" r="3.2" fill="#FFFFFF" opacity="0.47"><animate attributeName="opacity" values="0.47;0.1;0.47" dur="1.5s" repeatCount="indefinite"/></circle>
+    <circle cx="74" cy="148" r="2.2" fill="#FFD060" opacity="0.42"><animate attributeName="opacity" values="0.42;0.1;0.42" dur="2.2s" repeatCount="indefinite"/></circle>
+  </g>
+  <g id="mut-shiny" style="display:none"><ellipse cx="100" cy="112" rx="54" ry="60" fill="none" stroke="#FFD060" stroke-width="1.2" opacity="0.37" stroke-dasharray="5,5"/></g>
+  <g id="mut-prismatic" style="display:none"><ellipse cx="100" cy="112" rx="52" ry="58" fill="none" stroke="#A78BFA" stroke-width="1.5" opacity="0.47" filter="url(#glow)"/></g>
+  <g id="mut-ethereal" style="display:none"><circle cx="100" cy="112" r="60" fill="#A78BFA" opacity="0.08" filter="url(#softGlow)"/></g>
+  </g>
+</svg>

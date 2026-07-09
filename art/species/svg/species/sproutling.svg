@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="stemGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#7ED88A"/><stop offset="100%" stop-color="#059669"/></linearGradient>
+    <radialGradient id="headGrad" cx="50%" cy="40%"><stop offset="0%" stop-color="#8FE89A"/><stop offset="100%" stop-color="#22C55E"/></radialGradient>
+    <radialGradient id="springGrad" cx="50%" cy="40%"><stop offset="0%" stop-color="#8FE89A"/><stop offset="100%" stop-color="#059669"/></radialGradient>
+    <radialGradient id="summerGrad" cx="50%" cy="40%"><stop offset="0%" stop-color="#F59E0B"/><stop offset="100%" stop-color="#D4A030"/></radialGradient>
+    <radialGradient id="autumnGrad" cx="50%" cy="40%"><stop offset="0%" stop-color="#FF9E6B"/><stop offset="100%" stop-color="#C44A20"/></radialGradient>
+    <radialGradient id="winterGrad" cx="50%" cy="40%"><stop offset="0%" stop-color="#DBEAFE"/><stop offset="100%" stop-color="#A8C8E8"/></radialGradient>
+    <radialGradient id="flowerGrad" cx="50%" cy="40%"><stop offset="0%" stop-color="#FFD0E0"/><stop offset="100%" stop-color="#F43F5E"/></radialGradient>
+    <linearGradient id="rootGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#22C55E"/><stop offset="100%" stop-color="#3A7A4A"/></linearGradient>
+    <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="softGlow"><feGaussianBlur stdDeviation="5"/></filter>
+      <style>
+      .gene-tint { filter: hue-rotate(var(--gene-hue-shift, 0deg)) saturate(var(--gene-sat-mult, 1)) brightness(var(--gene-light-mult, 1)); }
+    </style>  </defs>
+
+  <g class="gene-tint">
+  <!-- ═══ BODY: Plant stem + leaf head + root legs ═══ -->
+  <g id="body">
+    <!-- Stem body -->
+    <rect x="94" y="65" width="12" height="55" rx="6" fill="url(#stemGrad)" stroke="#059669" stroke-width="0.8"/>
+    <!-- Head (round leaf area) -->
+    <circle cx="100" cy="58" r="28" fill="url(#headGrad)" stroke="#059669" stroke-width="1"/>
+    <!-- Eyes -->
+    <ellipse cx="90" cy="55" rx="6" ry="7.5" fill="#1E1B4B"/>
+    <ellipse cx="110" cy="55" rx="6" ry="7.5" fill="#1E1B4B"/>
+    <circle cx="87" cy="51" r="2.2" fill="#FAFAFA"/>
+    <circle cx="91" cy="57" r="1" fill="#FAFAFA"/>
+    <circle cx="107" cy="51" r="2.2" fill="#FAFAFA"/>
+    <circle cx="111" cy="57" r="1" fill="#FAFAFA"/>
+    <!-- Mouth -->
+    <path d="M96,64 Q100,68 104,64" fill="none" stroke="#1E1B4B" stroke-width="1" stroke-linecap="round"/>
+    <!-- Blush -->
+    <circle cx="80" cy="60" r="5" fill="#F43F5E" opacity="0.25"/>
+    <circle cx="120" cy="60" r="5" fill="#F43F5E" opacity="0.25"/>
+    <!-- Root legs -->
+    <path d="M96,120 Q88,145 82,158" fill="none" stroke="url(#rootGrad)" stroke-width="5" stroke-linecap="round"/>
+    <path d="M100,120 Q96,150 95,160" fill="none" stroke="url(#rootGrad)" stroke-width="5" stroke-linecap="round"/>
+    <path d="M104,120 Q112,145 118,158" fill="none" stroke="url(#rootGrad)" stroke-width="5" stroke-linecap="round"/>
+  </g>
+
+  <!-- ═══ TRAIT: Head Plant (slot-headplant) ═══ -->
+  <g id="slot-headplant-0"><!-- single leaf -->
+    <path d="M100,30 Q92,10 100,4 Q108,10 100,30Z" fill="#7ED88A" stroke="#059669" stroke-width="0.8"/>
+    <path d="M100,28 L100,8" fill="none" stroke="#059669" stroke-width="0.5" opacity="0.5"/>
+  </g>
+  <g id="slot-headplant-1" style="display:none"><!-- flower -->
+    <circle cx="100" cy="22" r="8" fill="url(#flowerGrad)"/>
+    <circle cx="100" cy="22" r="4" fill="#F59E0B"/>
+    <path d="M100,30 L100,38" fill="none" stroke="#22C55E" stroke-width="2"/>
+    <ellipse cx="88" cy="40" rx="6" ry="3" fill="#7ED88A" transform="rotate(-20 88 40)"/>
+  </g>
+  <g id="slot-headplant-2" style="display:none"><!-- fruit -->
+    <circle cx="100" cy="18" r="10" fill="#F43F5E" stroke="#E87090" stroke-width="0.8"/>
+    <circle cx="96" cy="14" r="2" fill="#FAFAFA" opacity="0.5"/>
+    <path d="M100,28 L100,38" fill="none" stroke="#22C55E" stroke-width="2"/>
+    <ellipse cx="92" cy="40" rx="5" ry="2.5" fill="#7ED88A" transform="rotate(-15 92 40)"/>
+  </g>
+  <g id="slot-headplant-3" style="display:none"><!-- vine crown -->
+    <path d="M82,50 Q78,35 90,30 Q95,28 100,30 Q105,28 110,30 Q122,35 118,50" fill="none" stroke="#22C55E" stroke-width="2.5" stroke-linecap="round"/>
+    <circle cx="90" cy="30" r="3" fill="#7ED88A"/>
+    <circle cx="100" cy="26" r="3.5" fill="#7ED88A"/>
+    <circle cx="110" cy="30" r="3" fill="#7ED88A"/>
+  </g>
+
+  <!-- ═══ TRAIT: Root Style (slot-roots) ═══ -->
+  <g id="slot-roots-0"><!-- simple: default roots --></g>
+  <g id="slot-roots-1" style="display:none"><!-- spread -->
+    <path d="M96,120 Q80,140 70,158" fill="none" stroke="url(#rootGrad)" stroke-width="5" stroke-linecap="round"/>
+    <path d="M104,120 Q120,140 130,158" fill="none" stroke="url(#rootGrad)" stroke-width="5" stroke-linecap="round"/>
+    <path d="M94,120 Q76,148 74,160" fill="none" stroke="#3A7A4A" stroke-width="4" stroke-linecap="round"/>
+    <path d="M106,120 Q124,148 126,160" fill="none" stroke="#3A7A4A" stroke-width="4" stroke-linecap="round"/>
+  </g>
+  <g id="slot-roots-2" style="display:none"><!-- curly -->
+    <path d="M96,120 Q82,138 90,150 Q98,160 88,162" fill="none" stroke="url(#rootGrad)" stroke-width="4.5" stroke-linecap="round"/>
+    <path d="M100,120 Q96,140 94,155" fill="none" stroke="url(#rootGrad)" stroke-width="4.5" stroke-linecap="round"/>
+    <path d="M104,120 Q118,138 110,150 Q102,160 112,162" fill="none" stroke="url(#rootGrad)" stroke-width="4.5" stroke-linecap="round"/>
+  </g>
+  <g id="slot-roots-3" style="display:none"><!-- glowing -->
+    <path d="M96,120 Q88,145 82,158" fill="none" stroke="#6EE7B7" stroke-width="5" stroke-linecap="round" filter="url(#glow)"/>
+    <path d="M100,120 Q96,150 95,160" fill="none" stroke="#6EE7B7" stroke-width="5" stroke-linecap="round" filter="url(#glow)"/>
+    <path d="M104,120 Q112,145 118,158" fill="none" stroke="#6EE7B7" stroke-width="5" stroke-linecap="round" filter="url(#glow)"/>
+  </g>
+
+  <!-- ═══ TRAIT: Season Color (slot-season) ═══ -->
+  <g id="slot-season-0"><!-- spring: default green --></g>
+  <g id="slot-season-1" style="display:none"><!-- summer -->
+    <circle cx="100" cy="58" r="28" fill="url(#summerGrad)" stroke="#C49828" stroke-width="1" opacity="0.85"/>
+    <rect x="94" y="65" width="12" height="55" rx="6" fill="#D4A030" stroke="#C49828" stroke-width="0.8" opacity="0.85"/>
+  </g>
+  <g id="slot-season-2" style="display:none"><!-- autumn -->
+    <circle cx="100" cy="58" r="28" fill="url(#autumnGrad)" stroke="#A84018" stroke-width="1" opacity="0.85"/>
+    <rect x="94" y="65" width="12" height="55" rx="6" fill="#C44A20" stroke="#A84018" stroke-width="0.8" opacity="0.85"/>
+  </g>
+  <g id="slot-season-3" style="display:none"><!-- winter -->
+    <circle cx="100" cy="58" r="28" fill="url(#winterGrad)" stroke="#90B0D0" stroke-width="1" opacity="0.85"/>
+    <rect x="94" y="65" width="12" height="55" rx="6" fill="#B0D0E8" stroke="#90B0D0" stroke-width="0.8" opacity="0.85"/>
+    <circle cx="85" cy="52" r="2.5" fill="#FAFAFA" opacity="0.6"/>
+    <circle cx="108" cy="48" r="2" fill="#FAFAFA" opacity="0.5"/>
+    <circle cx="98" cy="44" r="3" fill="#FAFAFA" opacity="0.55"/>
+  </g>
+
+  <!-- ═══ RARITY ═══ -->
+  <g id="rare-iridescent" style="display:none">
+    <ellipse cx="98" cy="88" rx="40" ry="55" fill="none" stroke="#A78BFA" stroke-width="1.5" opacity="0.4" stroke-dasharray="6,4"/>
+  </g>
+  <g id="legendary-aura" style="display:none">
+    <circle cx="98" cy="90" r="55" fill="#34D399" opacity="0.08" filter="url(#softGlow)"/>
+    <circle cx="70" cy="70" r="2" fill="#F59E0B" opacity="0.5"><animate attributeName="opacity" values="0.5;0.15;0.5" dur="2s" repeatCount="indefinite"/></circle>
+    <circle cx="125" cy="80" r="1.5" fill="#F59E0B" opacity="0.4"><animate attributeName="opacity" values="0.4;0.1;0.4" dur="1.7s" repeatCount="indefinite"/></circle>
+  </g>
+  <g id="mut-shiny" style="display:none"><ellipse cx="98" cy="88" rx="42" ry="57" fill="none" stroke="#F59E0B" stroke-width="1" opacity="0.3" stroke-dasharray="5,5"/></g>
+  <g id="mut-prismatic" style="display:none"><ellipse cx="98" cy="88" rx="40" ry="55" fill="none" stroke="#A78BFA" stroke-width="1.5" opacity="0.4" filter="url(#glow)"/></g>
+  <g id="mut-ethereal" style="display:none"><circle cx="98" cy="90" r="52" fill="#A78BFA" opacity="0.06" filter="url(#softGlow)"/></g>
+  </g>
+</svg>

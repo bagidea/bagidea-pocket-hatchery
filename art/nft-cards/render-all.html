@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1400">
+<title>Pocket Hatchery — All 12 Species NFT Cards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ═══ Reused from showcase.html — NFT Card System CSS ═══ */
+:root {
+  --cream: #FFF6E9; --ink: #3A3A52; --muted: #7C7A92;
+  --golden: #FFCB6B; --coral: #FF9EB5; --lavender: #C9A8FF;
+  --mint: #8FD694; --sky: #A8DCF0; --earth: #C49A6C;
+  --r-common:#8FD694; --r-uncommon:#5BC0BE; --r-rare:#5FB8E8;
+  --r-epic:#B07BE8; --r-legendary:#FFD86B; --r-mythic:#F0E0FF;
+  --card-w:280px; --card-h:400px; --card-radius:22px;
+  --card-bg:#0f1119; --card-bg-light:#1a1d2e;
+  --font-display:"Baloo 2","Fredoka",system-ui,sans-serif;
+  --font-body:"Nunito","Mali",system-ui,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#070b16;color:var(--ink);font-family:var(--font-body);min-height:100vh}
+
+/* Hero */
+.hero{text-align:center;padding:48px 24px 32px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-160px;left:50%;transform:translateX(-50%);width:700px;height:400px;background:radial-gradient(ellipse,rgba(201,168,255,.12) 0%,transparent 70%);pointer-events:none}
+.hero h1{font-family:var(--font-display);font-size:42px;font-weight:800;color:#F5F0E8;letter-spacing:-0.5px}
+.hero h1 span{color:var(--golden)}
+.hero p{color:var(--muted);font-size:16px;margin-top:10px;max-width:600px;margin-left:auto;margin-right:auto}
+
+/* Grid */
+.cards-grid{display:flex;flex-wrap:wrap;gap:32px 24px;justify-content:center;padding:16px 32px 64px;max-width:1300px;margin:0 auto}
+
+/* Card */
+.card-wrap{perspective:900px;width:var(--card-w);height:var(--card-h);cursor:pointer}
+.card-face{position:absolute;inset:0;backface-visibility:hidden;border-radius:var(--card-radius);overflow:hidden}
+.card-front{background:var(--card-bg);display:flex;flex-direction:column;border:3px solid transparent;background-clip:padding-box}
+.card-front::before{content:'';position:absolute;inset:-3px;border-radius:calc(var(--card-radius) + 3px);z-index:-1}
+.card-front::after{content:'';position:absolute;inset:6px;border-radius:calc(var(--card-radius) - 6px);border:1px solid rgba(255,255,255,0.06);pointer-events:none;z-index:2}
+
+/* Tier borders */
+.t-c .card-front::before{background:linear-gradient(160deg,#8FD694,#5BB572,#4A9E5E)}
+.t-u .card-front::before{background:linear-gradient(160deg,#7ED6D4,#5BC0BE,#3DA5A3)}
+.t-r .card-front::before{background:linear-gradient(160deg,#8FD0F4,#5FB8E8,#3D8FBF);box-shadow:0 0 26px rgba(95,184,232,.22)}
+.t-e .card-front::before{background:linear-gradient(160deg,#C9A0F8,#B07BE8,#8A4FD4);box-shadow:0 0 30px rgba(176,123,232,.28)}
+.t-l .card-front::before{background:linear-gradient(160deg,#FFE8A0,#FFD86B,#F0B830,#FFD86B);box-shadow:0 0 40px rgba(255,216,107,.35);animation:shimmer 3s ease-in-out infinite}
+.t-m .card-front::before{background:linear-gradient(160deg,#ff9a9e,#fad0c4,#a18cd1,#fbc2eb,#a6c1ee,#96e6a1);box-shadow:0 0 50px rgba(240,224,255,.4);animation:rainbow 4s linear infinite}
+@keyframes shimmer{0%,100%{box-shadow:0 0 40px rgba(255,216,107,.35)}50%{box-shadow:0 0 55px rgba(255,216,107,.6)}}
+@keyframes rainbow{0%{filter:hue-rotate(0deg)}100%{filter:hue-rotate(360deg)}}
+
+/* Top bar */
+.card-top-bar{display:flex;justify-content:space-between;align-items:center;padding:12px 16px 6px;position:relative;z-index:3}
+.rarity-icon{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#0f1119}
+.t-c .rarity-icon{background:var(--r-common)}.t-u .rarity-icon{background:var(--r-uncommon)}
+.t-r .rarity-icon{background:var(--r-rare)}.t-e .rarity-icon{background:var(--r-epic)}
+.t-l .rarity-icon{background:var(--r-legendary)}.t-m .rarity-icon{background:linear-gradient(135deg,#ff9a9e,#a18cd1,#a6c1ee,#96e6a1);animation:rainbow 4s linear infinite}
+.card-id{font-family:var(--font-body);font-size:11px;font-weight:700;color:rgba(255,255,255,0.3);letter-spacing:1px}
+
+/* Art window */
+.art-window{position:relative;margin:0 14px;height:190px;border-radius:16px;overflow:hidden;display:flex;align-items:center;justify-content:center;z-index:1}
+.art-aura{position:absolute;inset:0;border-radius:16px;pointer-events:none}
+.t-c .art-aura{background:radial-gradient(ellipse at 50% 45%,rgba(143,214,148,.22) 0%,transparent 65%)}
+.t-u .art-aura{background:radial-gradient(ellipse at 50% 45%,rgba(91,192,190,.25) 0%,transparent 65%)}
+.t-r .art-aura{background:radial-gradient(ellipse at 50% 45%,rgba(95,184,232,.28) 0%,transparent 65%)}
+.t-e .art-aura{background:radial-gradient(ellipse at 50% 45%,rgba(176,123,232,.30) 0%,transparent 65%)}
+.t-l .art-aura{background:radial-gradient(ellipse at 50% 45%,rgba(255,216,107,.35) 0%,transparent 65%);animation:auraPulse 2.5s ease-in-out infinite}
+.t-m .art-aura{background:radial-gradient(ellipse at 40% 40%,rgba(255,255,255,.10) 0%,transparent 50%),radial-gradient(ellipse at 50% 45%,rgba(255,154,158,.15) 0%,transparent 50%),radial-gradient(ellipse at 60% 50%,rgba(166,193,238,.15) 0%,transparent 50%)}
+@keyframes auraPulse{0%,100%{opacity:.8}50%{opacity:1}}
+.art-placeholder{width:150px;height:150px;position:relative;z-index:1}
+.art-placeholder img,.art-placeholder object{width:100%;height:100%;filter:drop-shadow(0 6px 12px rgba(0,0,0,.3))}
+.art-placeholder svg{width:100%;height:100%;filter:drop-shadow(0 6px 12px rgba(0,0,0,.3))}
+
+/* Info */
+.card-info{padding:6px 16px 10px;position:relative;z-index:3;display:flex;flex-direction:column;gap:4px}
+.stage-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:999px;padding:2px 10px;font-size:10px;font-weight:700;color:rgba(255,255,255,.45);letter-spacing:1px;text-transform:uppercase;width:fit-content}
+.stage-badge .dot{width:5px;height:5px;border-radius:50%;background:var(--golden)}
+.creature-name{font-family:var(--font-display);font-size:18px;font-weight:700;color:#F5F0E8;letter-spacing:-0.3px}
+.species-label{font-size:11px;color:var(--muted);font-weight:600;margin-top:-2px}
+.genetics-row{display:flex;align-items:center;gap:5px;margin:2px 0}
+.genetics-label{font-size:8px;font-weight:700;color:rgba(255,255,255,.22);letter-spacing:1px}
+.gene-dot{width:7px;height:7px;border-radius:50%;border:1px solid rgba(255,255,255,.12)}
+.stats-row{display:flex;gap:10px;margin-top:2px}
+.stat-item{display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.04);border-radius:7px;padding:3px 8px}
+.stat-icon{font-size:12px;line-height:1}
+.stat-value{font-family:var(--font-body);font-size:12px;font-weight:800;color:#F5F0E8}
+.stat-label{font-size:8px;color:rgba(255,255,255,.3);font-weight:700;letter-spacing:.5px}
+
+/* Rarity footer */
+.rarity-footer{padding:0 16px 12px;position:relative;z-index:3}
+.rarity-bar{display:flex;align-items:center;gap:8px}
+.rarity-line{flex:1;height:1px;opacity:.3}
+.t-c .rarity-line{background:var(--r-common)}.t-u .rarity-line{background:var(--r-uncommon)}
+.t-r .rarity-line{background:var(--r-rare)}.t-e .rarity-line{background:var(--r-epic)}
+.t-l .rarity-line{background:var(--r-legendary)}.t-m .rarity-line{background:linear-gradient(90deg,#ff9a9e,#a18cd1,#a6c1ee,#96e6a1)}
+.rarity-name{font-family:var(--font-body);font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase}
+.t-c .rarity-name{color:var(--r-common)}.t-u .rarity-name{color:var(--r-uncommon)}
+.t-r .rarity-name{color:var(--r-rare)}.t-e .rarity-name{color:var(--r-epic)}
+.t-l .rarity-name{color:var(--r-legendary)}
+.t-m .rarity-name{background:linear-gradient(90deg,#ff9a9e,#a18cd1,#a6c1ee,#96e6a1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+/* Print */
+@media print{body{background:white}.card-wrap{break-inside:avoid}}
+</style>
+</head>
+<body>
+
+<section class="hero">
+  <h1>Pocket Hatchery<br><span>All 12 Species · NFT Cards</span></h1>
+  <p>Every creature is unique — genetic traits encoded on-chain, reflected in color and pattern. Collect, breed, trade with verifiable provenance.</p>
+</section>
+
+<section class="cards-grid">
+
+<!-- ══════════════════════════════════════════════════════════
+  SPECIES DISTRIBUTION (even spread across 6 tiers):
+  Common(2) · Uncommon(2) · Rare(2) · Epic(2) · Legendary(2) · Mythic(2)
+  ══════════════════════════════════════════════════════════ -->
+
+<!-- ── COMMON ── -->
+<div class="card-wrap t-c">
+  <div class="card-face card-front">
+    <div class="card-top-bar"><div class="rarity-icon">C</div><div class="card-id">#0001</div></div>
+    <div class="art-window"><div class="art-aura"></div><div class="art-placeholder"><object data="../species/svg/species/foxling.svg" type="image/svg+xml"></object></div></div>
+    <div class="card-info">
+      <div class="stage-badge"><span class="dot"></span> Juvenile · Stage 1</div>
+      <div class="creature-name">Foxling</div>
+      <div class="species-label">Vulpes magica — The Meadow Sprite</div>
+      <div class="genetics-row"><span class="genetics-label">DNA</span><span class="gene-dot" style="background:#8FD694"></span><span class="gene-dot" style="background:#FFCB6B"></span><span class="gene-dot" style="background:#FF9EB5"></span></div>
+      <div class="stats-row"><div class="stat-item"><span class="stat-icon">⚔</span><span class="stat-value">5</span><span class="stat-label">POW</span></div><div class="stat-item"><span class="stat-icon">◆</span><span class="stat-value">8</span><span class="stat-label">CHARM</span></div></div>
+    </div>
+    <div class="rarity-footer"><div class="rarity-bar"><span class="rarity-line"></span><span class="rarity-name">Common</span><span class="rarity-line"></span></div></div>
+  </div>
+</div>
+
+<div class="card-wrap t-c">
+  <div class="card-face card-front">
+    <div class="card-top-bar"><div class="rarity-icon">C</div><div class="card-id">#0002</div></div>
+    <div class="art-window"><div class="art-aura"></div><div class="art-placeholder"><object data="../species/svg/species/sproutling.svg" type="image/svg+xml"></object></div></div>
+    <div class="card-info">
+      <div class="stage-badge"><span class="dot"></span> Hatchling · Stage 1</div>
+      <div class="creature-name">Sproutling</div>
+      <div class="species-label">Herba ambulans — The Garden Walker</div>
+      <div class="genetics-row"><span class="genetics-label">DNA</span><span class="gene-dot" style="background:#5BB572"></span><span class="gene-dot" style="background:#FFCB6B"></span><span class="gene-dot" style="background:#C49A6C"></span></div>
+      <div class="stats-row"><div class="stat-item"><span class="stat-icon">⚔</span><span class="stat-value">4</span><span class="stat-label">POW</span></div><div class="stat-item"><span class="stat-icon">◆</span><span class="stat-value">10</span><span class="stat-label">CHARM</span></div></div>
+    </div>
+    <div class="rarity-footer"><div class="rarity-bar"><span class="rarity-line"></span><span class="rarity-name">Common</span><span class="rarity-line"></span></div></div>
+  </div>
+</div>
+
+<!-- ── UNCOMMON ── -->
+<div class="card-wrap t-u">
+  <div class="card-face card-front">
+    <div class="card-top-bar"><div class="rarity-icon">U</div><div class="card-id">#0104</div></div>
+    <div class="art-window"><div class="art-aura"></div><div class="art-placeholder"><object data="../species/svg/species/owlet.svg" type="image/svg+xml"></object></div></div>
+    <div class="card-info">
+      <div class="stage-badge"><span class="dot"></span> Adult · Stage 2</div>
+      <div class="creature-name">Owlet</div>
+      <div class="species-label">Strigis rotundus — The Sky Watcher</div>
+      <div class="genetics-row"><span class="genetics-label">DNA</span><span class="gene-dot" style="background:#5BC0BE"></span><span class="gene-dot" style="background:#A8DCF0"></span><span class="gene-dot" style="background:#FFF6E9"></span></div>
+      <div class="stats-row"><div class="stat-item"><span class="stat-icon">⚔</span><span class="stat-value">11</span><span class="stat-label">POW</span></div><div class="stat-item"><span class="stat-icon">◆</span><span class="stat-value">15</span><span class="stat-label">CHARM</span></div></div>
+    </div>
+    <div class="rarity-footer"><div class="rarity-bar"><span class="rarity-line"></span><span class="rarity-name">Uncommon</span><span class="rarity-line"></span></div></div>
+  </div>
+</div>
+
+<div class="card-wrap t-u">
+  <div class="card-face card-front">
+    <div class="card-top-bar"><div class="rarity-icon">U</div><div class="card-id">#0121</div></div>
+    <div class="art-window"><div class="art-aura"></div><div class="art-placeholder"><object data="../species/svg/species/buzzle.svg" type="image/svg+xml"></object></div></div>
+    <div class="card-info">
+      <div class="stage-badge"><span class="dot"></span> Adult · Stage 2</div>
+      <div class="creature-name">Buzzle</div>
+      <div class="species-label">Bombus rotundus — The Honey Keeper</div>
+      <div class="genetics-row"><span class="genetics-label">DNA</span><span class="gene-dot" style="background:#FFCB6B"></span><span class="gene-dot" style="background:#C49A6C"></span><span class="gene-dot" style="background:#5BC0BE"></span></div>
+      <div class="stats-row"><div class="stat-item"><span class="stat-icon">⚔</span><span class="stat-value">9</span><span class="stat-label">POW</span></div><div class="stat-item"><span class="stat-icon">◆</span><span class="stat-value">16</span><span class="stat-label">CHARM</span></div></div>
+    </div>
+    <div class="rarity-footer"><div class="rarity-bar"><span class="rarity-line"></span><span class="rarity-name">Uncommon</span><span class="rarity-line"></span></div></div>
+  </div>
+</div>
+
+<!-- ── RARE ── -->
+<div class="card-wrap t-r">
+  <div class="card-face card-front">
+    <div class="card-top-bar"><div class="rarity-icon">R</div><div class="card-id">#0203</div></div>
+    <div class="art-window"><div class="art-aura"></div><div class="art-placeholder"><object data="../species/svg/species/droplet.svg" type="image/svg+xml"></object></div></div>
+    <div class="card-info">
+      <div class="stage-badge"><span class="dot"></span> Evolved · Stage 3</div>
+      <div class="creature-name">Droplet</div>
+      <div class="species-label">Aqua vivens — The Tide Whisper</div>
+      <div class="genetics-row"><span class="genetics-label">DNA</span><span class="gene-dot" style="background:#5FB8E8"></span><span class="gene-dot" style="background:#FFCB6B"></span><span class="gene-dot" style="background:#B07BE8"></span></div>
+      <div class="stats-row"><div class="stat-item"><span class="stat-icon">⚔</span><span class="stat-value">17</span><span class="stat-label">POW</span></div><div class="stat-item"><span class="stat-icon">◆</span><span class="stat-value">22</span><span class="stat-label">CHARM</span></div></div>
+    </div>
+    <div class="rarity-footer"><div class="rarity-bar"><span class="rarity-line"></span><span class="rarity-name">Rare</span><span class="rarity-line"></span></div></div>
+  </div>
+</div>
+
+<div class="card-wrap t-r">
+  <div class="card-face card-front">
+    <div class="card-top-bar"><div class="rarity-icon">R</div><div class="card-id">#0217</div></div>
+    <div class="art-window"><div class="art-aura"></div><div class="art-placeholder"><object data="../species/svg/species/shellby.svg" type="image/svg+xml"></object></div></div>
+    <div class="card-info">
+      <div class="stage-badge"><span class="dot"></span> Evolved · Stage 3</div>
+      <div class="creature-name">Shellby</div>
+      <div class="species-label">Cochlea margarita — The Pearl Keeper</div>
+      <div class="genetics-row"><span class="genetics-label">DNA</span><span class="gene-dot" style="background:#C9A8FF"></span><span class="gene-dot" style="background:#FF9EB5"></span><span class="gene-dot" style="background:#5FB8E8"></span></div>
+      <div class="stats-row"><div class="stat-item"><span class="stat-icon">⚔</span><span class="stat-value">20</span><span class="stat-label">POW</span></div><div class="stat-item"><span class="stat-icon">◆</span><span class="stat-value">19</span><span class="stat-label">CHARM</span></div></div>
+    </div>
+    <div class="rarity-footer"><div class="rarity-bar"><span class="rarity-line"></span><span class="rarity-name">Rare</span><span class="rarity-line"></span></div></div>
+  </div>
+</div>
+
+<!-- ── EPIC ── -->
+<div class="card-wrap t-e">
+  <div class="card-face card-front">
+    <div class="card-top-bar"><div class="rarity-icon">E</div><div class="card-id">#0306</div></div>
+    <div class="art-window"><div class="art-aura"></div><div class="art-placeholder"><object data="../species/svg/species/flicker.svg" type="image/svg+xml"></object></div></div>
+    <div class="card-info">
+      <div class="stage-badge"><span class="dot"></span> Rare Form · Stage 4</div>
+      <div class="creature-name">Flicker</div>
+      <div class="species-label">Ignis animatus — The Flame Dancer</div>
+      <div class="genetics-row"><span class="genetics-label">DNA</span><span class="gene-dot" style="background:#B07BE8"></span><span class="gene-dot" style="background:#FFD86B"></span><span class="gene-dot" style="background:#B07BE8"></span></div>
+      <div class="stats-row"><div class="stat-item"><span class="stat-icon">⚔</span><span class="stat-value">28</span><span class="stat-label">POW</span></div><div class="stat-item"><span class="stat-icon">◆</span><span class="stat-value">30</span><span class="stat-label">CHARM</span></div></div>
+    </div>
+    <div class="rarity-footer"><div class="rarity-bar"><span class="rarity-line"></span><span class="rarity-name">Epic</span><span class="rarity-line"></span></div></div>
+  </div>
+</div>
+
+<div class="card-wrap t-e">
+  <div class="card-face card-front">
+    <div class="card-top-bar"><div class="rarity-icon">E</div><div class="card-id">#0309</div></div>
+    <div class="art-window"><div class="art-aura"></div><div class="art-placeholder"><object data="../species/svg/species/fluffle.svg" type="image/svg+xml"></object></div></div>
+    <div class="card-info">
+      <div class="stage-badge"><span class="dot"></span> Rare Form · Stage 4</div>
+      <div class="creature-name">Fluffle</div>
+      <div class="species-label">Nubes mollis — The Dream Weaver</div>
+      <div class="genetics-row"><span class="genetics-label">DNA</span><span class="gene-dot" style="background:#F0E0FF"></span><span class="gene-dot" style="background:#C9A8FF"></span><span class="gene-dot" style="background:#FFD86B"></span></div>
+      <div class="stats-row"><div class="stat-item"><span class="stat-icon">⚔</span><span class="stat-value">25</span><span class="stat-label">POW</span></div><div class="stat-item"><span class="stat-icon">◆</span><span class="stat-value">35</span><span class="stat-label">CHARM</span></div></div>
+    </div>
+    <div class="rarity-footer"><div class="rarity-bar"><span class="rarity-line"></span><span class="rarity-name">Epic</span><span class="rarity-line"></span></div></div>
+  </div>
+</div>
+
+<!-- ── LEGENDARY ── -->
+<div class="card-wrap t-l">
+  <div class="card-face card-front">
+    <div class="card-top-bar"><div class="rarity-icon">L</div><div class="card-id">#0407</div></div>
+    <div class="art-window"><div class="art-aura"></div><div class="art-placeholder"><object data="../species/svg/species/glimmer.svg" type="image/svg+xml"></object></div></div>
+    <div class="card-info">
+      <div class="stage-badge"><span class="dot"></span> Legendary · Max</div>
+      <div class="creature-name">Glimmer</div>
+      <div class="species-label">Crystallus vivens — The Crystal Heart</div>
+      <div class="genetics-row"><span class="genetics-label">DNA</span><span class="gene-dot" style="background:#FFD86B"></span><span class="gene-dot" style="background:#FFE8A0"></span><span class="gene-dot" style="background:#FFD86B"></span></div>
+      <div class="stats-row"><div class="stat-item"><span class="stat-icon">⚔</span><span class="stat-value">44</span><span class="stat-label">POW</span></div><div class="stat-item"><span class="stat-icon">◆</span><span class="stat-value">50</span><span class="stat-label">CHARM</span></div></div>
+    </div>
+    <div class="rarity-footer"><div class="rarity-bar"><span class="rarity-line"></span><span class="rarity-name">Legendary</span><span class="rarity-line"></span></div></div>
+  </div>
+</div>
+
+<div class="card-wrap t-l">
+  <div class="card-face card-front">
+    <div class="card-top-bar"><div class="rarity-icon">L</div><div class="card-id">#0415</div></div>
+    <div class="art-window"><div class="art-aura"></div><div class="art-placeholder"><object data="../species/svg/species/dracling.svg" type="image/svg+xml"></object></div></div>
+    <div class="card-info">
+      <div class="stage-badge"><span class="dot"></span> Legendary · Max</div>
+      <div class="creature-name">Dracling</div>
+      <div class="species-label">Draco parvus — The Sunborn</div>
+      <div class="genetics-row"><span class="genetics-label">DNA</span><span class="gene-dot" style="background:#FFD86B"></span><span class="gene-dot" style="background:#FF9EB5"></span><span class="gene-dot" style="background:#FFCB6B"></span></div>
+      <div class="stats-row"><div class="stat-item"><span class="stat-icon">⚔</span><span class="stat-value">48</span><span class="stat-label">POW</span></div><div class="stat-item"><span class="stat-icon">◆</span><span class="stat-value">42</span><span class="stat-label">CHARM</span></div></div>
+    </div>
+    <div class="rarity-footer"><div class="rarity-bar"><span class="rarity-line"></span><span class="rarity-name">Legendary</span><span class="rarity-line"></span></div></div>
+  </div>
+</div>
+
+<!-- ── MYTHIC ── -->
+<div class="card-wrap t-m">
+  <div class="card-face card-front">
+    <div class="card-top-bar"><div class="rarity-icon">M</div><div class="card-id">#0508</div></div>
+    <div class="art-window"><div class="art-aura"></div><div class="art-placeholder"><object data="../species/svg/species/wisp.svg" type="image/svg+xml"></object></div></div>
+    <div class="card-info">
+      <div class="stage-badge"><span class="dot"></span> Primal · Eternal</div>
+      <div class="creature-name">Wisp</div>
+      <div class="species-label">Umbra ludens — The First Spark</div>
+      <div class="genetics-row"><span class="genetics-label">DNA</span><span class="gene-dot" style="background:linear-gradient(135deg,#ff9a9e,#a18cd1)"></span><span class="gene-dot" style="background:linear-gradient(135deg,#fad0c4,#fbc2eb)"></span><span class="gene-dot" style="background:linear-gradient(135deg,#a6c1ee,#96e6a1)"></span></div>
+      <div class="stats-row"><div class="stat-item"><span class="stat-icon">⚔</span><span class="stat-value">66</span><span class="stat-label">POW</span></div><div class="stat-item"><span class="stat-icon">◆</span><span class="stat-value">74</span><span class="stat-label">CHARM</span></div></div>
+    </div>
+    <div class="rarity-footer"><div class="rarity-bar"><span class="rarity-line"></span><span class="rarity-name">Mythic</span><span class="rarity-line"></span></div></div>
+  </div>
+</div>
+
+<div class="card-wrap t-m">
+  <div class="card-face card-front">
+    <div class="card-top-bar"><div class="rarity-icon">M</div><div class="card-id">#0518</div></div>
+    <div class="art-window"><div class="art-aura"></div><div class="art-placeholder"><object data="../species/svg/species/pebblit.svg" type="image/svg+xml"></object></div></div>
+    <div class="card-info">
+      <div class="stage-badge"><span class="dot"></span> Primal · Eternal</div>
+      <div class="creature-name">Pebblit</div>
+      <div class="species-label">Lithos vivens — The Mountain Heart</div>
+      <div class="genetics-row"><span class="genetics-label">DNA</span><span class="gene-dot" style="background:linear-gradient(135deg,#C49A6C,#FFD86B)"></span><span class="gene-dot" style="background:linear-gradient(135deg,#FFF,#F0E0FF)"></span><span class="gene-dot" style="background:linear-gradient(135deg,#a18cd1,#fbc2eb)"></span></div>
+      <div class="stats-row"><div class="stat-item"><span class="stat-icon">⚔</span><span class="stat-value">70</span><span class="stat-label">POW</span></div><div class="stat-item"><span class="stat-icon">◆</span><span class="stat-value">60</span><span class="stat-label">CHARM</span></div></div>
+    </div>
+    <div class="rarity-footer"><div class="rarity-bar"><span class="rarity-line"></span><span class="rarity-name">Mythic</span><span class="rarity-line"></span></div></div>
+  </div>
+</div>
+
+</section>
+</body>
+</html>

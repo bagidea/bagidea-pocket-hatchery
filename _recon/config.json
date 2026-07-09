@@ -1,0 +1,1 @@
+{"code":500,"message":"Internal Service Error","error":{"code":3060003,"name":"contract_table_query_exception","what":"Contract Table Query Exception","details":[{"message":"Table configv3 is not specified in the ABI","file":"chain_plugin.cpp","line_number":1552,"method":"get_table_type"}]}}

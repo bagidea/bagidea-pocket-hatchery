@@ -1,0 +1,36 @@
+{
+  "cmd": "pushaction",
+  "args": {
+    "contract": "phgamecreatr",
+    "action": "setconfig",
+    "data": {
+      "cfg": {
+        "token_contract": "hatchtokens1",
+        "collection": "phgamecreatr",
+        "schema_name": "creatures",
+        "fee_account": "phgamecreatr",
+        "paused": false,
+        "hatch_cost": 150,
+        "evolve_cost": 50,
+        "breed_cost": "5.0000 HATCH",
+        "feed_cost": 0,
+        "slot_cost": 0,
+        "cosmetic_cost": 0,
+        "name_cost": "0.0000 HATCH",
+        "install_cap_bonus": 0,
+        "feed_cd": 3600,
+        "harvest_cd": 3600,
+        "breed_cd": 86400,
+        "feed_daily_cap": 100,
+        "daily_egg_cap": 240,
+        "offline_cap_h": 8,
+        "tap_egg_cap": 60,
+        "feed_boost": 1000,
+        "season_index": 1,
+        "season_started": 0,
+        "rng_oracle": "phgamecreatr"
+      }
+    },
+    "actor": "phgamecreatr"
+  }
+}

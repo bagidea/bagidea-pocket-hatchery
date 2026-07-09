@@ -1,0 +1,1 @@
+{"authorized_creator":"pockethatch1","collection_name":"pockethatch1","schema_name":"creatures","schema_format":[{"name":"genetics","type":"string"},{"name":"stage","type":"uint32"},{"name":"growth","type":"uint64"},{"name":"name","type":"string"}]}
