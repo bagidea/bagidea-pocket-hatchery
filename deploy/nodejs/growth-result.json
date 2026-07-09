@@ -1,0 +1,16 @@
+{
+  "steps": [
+    {
+      "step": "initplayer",
+      "ok": true,
+      "txid": "eaa77315793f2e3beadf94b5bc84cabac2f0057118354c7ff7f893fc9b1500c7",
+      "block": 413678679
+    },
+    {
+      "step": "hatch",
+      "ok": false,
+      "error": "[object Object],[object Object]"
+    }
+  ],
+  "supply_before": "10000000.0000 HATCH"
+}

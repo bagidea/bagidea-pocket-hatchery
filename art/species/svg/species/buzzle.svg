@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <radialGradient id="bodyGrad" cx="50%" cy="40%"><stop offset="0%" stop-color="#FFE8A0"/><stop offset="60%" stop-color="#F59E0B"/><stop offset="100%" stop-color="#E6A800"/></radialGradient>
+    <radialGradient id="stripeGrad" cx="50%" cy="50%"><stop offset="0%" stop-color="#F97316"/><stop offset="100%" stop-color="#92400E"/></radialGradient>
+    <linearGradient id="wingGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#FAFAFA" stop-opacity="0.8"/><stop offset="50%" stop-color="#DBEAFE" stop-opacity="0.5"/><stop offset="100%" stop-color="#38BDF8" stop-opacity="0.3"/></linearGradient>
+    <linearGradient id="wingIri" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#F43F5E" stop-opacity="0.5"/><stop offset="33%" stop-color="#A78BFA" stop-opacity="0.4"/><stop offset="66%" stop-color="#7EC8E0" stop-opacity="0.4"/><stop offset="100%" stop-color="#34D399" stop-opacity="0.3"/></linearGradient>
+    <radialGradient id="fluffGrad" cx="50%" cy="50%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="100%" stop-color="#FAFAFA"/></radialGradient>
+    <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="softGlow"><feGaussianBlur stdDeviation="5"/></filter>
+      <style>
+      .gene-tint { filter: hue-rotate(var(--gene-hue-shift, 0deg)) saturate(var(--gene-sat-mult, 1)) brightness(var(--gene-light-mult, 1)); }
+    </style>  </defs>
+
+  <g class="gene-tint">
+  <!-- ═══ BODY: Chubby bee ═══ -->
+  <g id="body">
+    <!-- Body (round chubby) -->
+    <ellipse cx="100" cy="110" rx="34" ry="36" fill="url(#bodyGrad)" stroke="#CA8A04" stroke-width="1"/>
+    <!-- Stripes (2-stripe default) -->
+    <path d="M66,100 Q100,96 134,100" fill="none" stroke="url(#stripeGrad)" stroke-width="10" opacity="0.7"/>
+    <path d="M66,120 Q100,116 134,120" fill="none" stroke="url(#stripeGrad)" stroke-width="10" opacity="0.7"/>
+    <!-- Head -->
+    <circle cx="100" cy="72" r="26" fill="url(#bodyGrad)" stroke="#CA8A04" stroke-width="1"/>
+    <!-- Antennae -->
+    <path d="M90,50 Q85,30 82,25" fill="none" stroke="#F97316" stroke-width="2.5" stroke-linecap="round"/>
+    <circle cx="82" cy="24" r="3" fill="#F97316"/>
+    <path d="M110,50 Q115,30 118,25" fill="none" stroke="#F97316" stroke-width="2.5" stroke-linecap="round"/>
+    <circle cx="118" cy="24" r="3" fill="#F97316"/>
+    <!-- Eyes -->
+    <ellipse cx="88" cy="68" rx="6.5" ry="8" fill="#1E1B4B"/>
+    <ellipse cx="112" cy="68" rx="6.5" ry="8" fill="#1E1B4B"/>
+    <circle cx="85" cy="64" r="2.2" fill="#FAFAFA"/>
+    <circle cx="89" cy="70" r="1" fill="#FAFAFA"/>
+    <circle cx="109" cy="64" r="2.2" fill="#FAFAFA"/>
+    <circle cx="113" cy="70" r="1" fill="#FAFAFA"/>
+    <!-- Cheeks -->
+    <circle cx="80" cy="76" r="5" fill="#F43F5E" opacity="0.2"/>
+    <circle cx="120" cy="76" r="5" fill="#F43F5E" opacity="0.2"/>
+    <!-- Mouth -->
+    <path d="M96,78 Q100,83 104,78" fill="none" stroke="#1E1B4B" stroke-width="1" stroke-linecap="round"/>
+    <!-- Stinger -->
+    <polygon points="100,146 96,156 104,156" fill="#1E1B4B"/>
+  </g>
+
+  <!-- ═══ TRAIT: Stripe Pattern (slot-stripes) ═══ -->
+  <g id="slot-stripes-0"><!-- 2-stripe: default --></g>
+  <g id="slot-stripes-1" style="display:none"><!-- 3-stripe -->
+    <path d="M66,92 Q100,88 134,92" fill="none" stroke="url(#stripeGrad)" stroke-width="8" opacity="0.7"/>
+    <path d="M66,110 Q100,106 134,110" fill="none" stroke="url(#stripeGrad)" stroke-width="8" opacity="0.7"/>
+    <path d="M66,128 Q100,124 134,128" fill="none" stroke="url(#stripeGrad)" stroke-width="8" opacity="0.7"/>
+  </g>
+  <g id="slot-stripes-2" style="display:none"><!-- wavy -->
+    <path d="M66,94 Q80,86 100,92 Q120,98 134,94" fill="none" stroke="url(#stripeGrad)" stroke-width="9" opacity="0.7"/>
+    <path d="M66,114 Q80,122 100,116 Q120,110 134,114" fill="none" stroke="url(#stripeGrad)" stroke-width="9" opacity="0.7"/>
+  </g>
+  <g id="slot-stripes-3" style="display:none"><!-- diamond -->
+    <path d="M66,96 Q100,92 134,96" fill="none" stroke="url(#stripeGrad)" stroke-width="8" opacity="0.7"/>
+    <polygon points="82,104 88,98 94,104 88,110" fill="url(#stripeGrad)" opacity="0.6"/>
+    <polygon points="100,104 106,98 112,104 106,110" fill="url(#stripeGrad)" opacity="0.6"/>
+    <polygon points="118,104 124,98 130,104 124,110" fill="url(#stripeGrad)" opacity="0.6"/>
+    <path d="M66,124 Q100,120 134,124" fill="none" stroke="url(#stripeGrad)" stroke-width="8" opacity="0.7"/>
+  </g>
+
+  <!-- ═══ TRAIT: Wing Style (slot-wingstyle) ═══ -->
+  <g id="slot-wingstyle-0"><!-- round -->
+    <ellipse cx="78" cy="90" rx="18" ry="14" fill="url(#wingGrad)" stroke="#38BDF8" stroke-width="0.5" transform="rotate(-30 78 90)"/>
+    <ellipse cx="122" cy="90" rx="18" ry="14" fill="url(#wingGrad)" stroke="#38BDF8" stroke-width="0.5" transform="rotate(30 122 90)"/>
+  </g>
+  <g id="slot-wingstyle-1" style="display:none"><!-- pointed -->
+    <path d="M78,90 Q58,78 62,100 Q66,106 78,102Z" fill="url(#wingGrad)" stroke="#38BDF8" stroke-width="0.5"/>
+    <path d="M122,90 Q142,78 138,100 Q134,106 122,102Z" fill="url(#wingGrad)" stroke="#38BDF8" stroke-width="0.5"/>
+  </g>
+  <g id="slot-wingstyle-2" style="display:none"><!-- butterfly -->
+    <path d="M78,88 Q52,68 58,95 Q62,108 78,100Z" fill="url(#wingGrad)" stroke="#38BDF8" stroke-width="0.6"/>
+    <path d="M78,88 Q58,85 62,92" fill="none" stroke="#A78BFA" stroke-width="1" opacity="0.4"/>
+    <path d="M122,88 Q148,68 142,95 Q138,108 122,100Z" fill="url(#wingGrad)" stroke="#38BDF8" stroke-width="0.6"/>
+    <path d="M122,88 Q142,85 138,92" fill="none" stroke="#A78BFA" stroke-width="1" opacity="0.4"/>
+  </g>
+  <g id="slot-wingstyle-3" style="display:none"><!-- iridescent -->
+    <ellipse cx="78" cy="90" rx="20" ry="15" fill="url(#wingIri)" stroke="#A78BFA" stroke-width="0.5" transform="rotate(-30 78 90)" filter="url(#glow)"/>
+    <ellipse cx="122" cy="90" rx="20" ry="15" fill="url(#wingIri)" stroke="#A78BFA" stroke-width="0.5" transform="rotate(30 122 90)" filter="url(#glow)"/>
+  </g>
+
+  <!-- ═══ TRAIT: Fluff Collar (slot-collar) ═══ -->
+  <g id="slot-collar-0"></g><!-- none -->
+  <g id="slot-collar-1" style="display:none"><!-- small -->
+    <path d="M76,84 Q82,78 88,84 Q94,78 100,84 Q106,78 112,84 Q118,78 124,84" fill="none" stroke="url(#fluffGrad)" stroke-width="6" stroke-linecap="round" opacity="0.8"/>
+  </g>
+  <g id="slot-collar-2" style="display:none"><!-- fluffy -->
+    <circle cx="78" cy="84" r="8" fill="url(#fluffGrad)" opacity="0.7"/>
+    <circle cx="86" cy="82" r="9" fill="url(#fluffGrad)" opacity="0.75"/>
+    <circle cx="94" cy="80" r="8" fill="url(#fluffGrad)" opacity="0.8"/>
+    <circle cx="100" cy="82" r="9" fill="url(#fluffGrad)" opacity="0.8"/>
+    <circle cx="106" cy="80" r="8" fill="url(#fluffGrad)" opacity="0.8"/>
+    <circle cx="114" cy="82" r="9" fill="url(#fluffGrad)" opacity="0.75"/>
+    <circle cx="122" cy="84" r="8" fill="url(#fluffGrad)" opacity="0.7"/>
+  </g>
+  <g id="slot-collar-3" style="display:none"><!-- regal -->
+    <path d="M74,88 Q78,76 84,84 Q90,72 96,82 Q100,70 104,82 Q110,72 116,84 Q122,76 126,88" fill="none" stroke="url(#fluffGrad)" stroke-width="7" stroke-linecap="round" opacity="0.9"/>
+    <path d="M74,88 Q80,80 84,84" fill="none" stroke="#F59E0B" stroke-width="1.5" opacity="0.5"/>
+    <path d="M116,84 Q120,80 126,88" fill="none" stroke="#F59E0B" stroke-width="1.5" opacity="0.5"/>
+  </g>
+
+  <!-- ═══ RARITY ═══ -->
+  <g id="rare-iridescent" style="display:none">
+    <ellipse cx="100" cy="105" rx="44" ry="52" fill="none" stroke="#A78BFA" stroke-width="1.5" opacity="0.4" stroke-dasharray="6,4"/>
+  </g>
+  <g id="legendary-aura" style="display:none">
+    <circle cx="100" cy="105" r="55" fill="#F59E0B" opacity="0.06" filter="url(#softGlow)"/>
+    <circle cx="72" cy="75" r="2" fill="#F59E0B" opacity="0.5"><animate attributeName="opacity" values="0.5;0.15;0.5" dur="2s" repeatCount="indefinite"/></circle>
+    <circle cx="128" cy="80" r="1.5" fill="#FAFAFA" opacity="0.4"><animate attributeName="opacity" values="0.4;0.1;0.4" dur="1.6s" repeatCount="indefinite"/></circle>
+    <circle cx="95" cy="140" r="2" fill="#F59E0B" opacity="0.35"><animate attributeName="opacity" values="0.35;0.1;0.35" dur="2.2s" repeatCount="indefinite"/></circle>
+  </g>
+  <g id="mut-shiny" style="display:none"><ellipse cx="100" cy="105" rx="46" ry="54" fill="none" stroke="#F59E0B" stroke-width="1" opacity="0.3" stroke-dasharray="5,5"/></g>
+  <g id="mut-prismatic" style="display:none"><ellipse cx="100" cy="105" rx="44" ry="52" fill="none" stroke="#A78BFA" stroke-width="1.5" opacity="0.4" filter="url(#glow)"/></g>
+  <g id="mut-ethereal" style="display:none"><circle cx="100" cy="105" r="52" fill="#A78BFA" opacity="0.06" filter="url(#softGlow)"/></g>
+  </g>
+</svg>

@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <radialGradient id="graniteGrad" cx="45%" cy="40%"><stop offset="0%" stop-color="#D4B896"/><stop offset="100%" stop-color="#A07848"/></radialGradient>
+    <radialGradient id="obsidianGrad" cx="45%" cy="40%"><stop offset="0%" stop-color="#4A4A5A"/><stop offset="100%" stop-color="#1A1A2E"/></radialGradient>
+    <radialGradient id="marbleGrad" cx="45%" cy="40%"><stop offset="0%" stop-color="#FAFAFA"/><stop offset="100%" stop-color="#D4C8B0"/></radialGradient>
+    <radialGradient id="geodeGrad" cx="45%" cy="40%"><stop offset="0%" stop-color="#D4B896"/><stop offset="80%" stop-color="#8A6A4A"/><stop offset="100%" stop-color="#A78BFA"/></radialGradient>
+    <radialGradient id="mossGrad" cx="50%" cy="50%"><stop offset="0%" stop-color="#6EE7B7"/><stop offset="100%" stop-color="#22C55E"/></radialGradient>
+    <linearGradient id="crystalGrad" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="#8B5CF6"/><stop offset="100%" stop-color="#E8D5FF"/></linearGradient>
+    <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="softGlow"><feGaussianBlur stdDeviation="5"/></filter>
+      <style>
+      .gene-tint { filter: hue-rotate(var(--gene-hue-shift, 0deg)) saturate(var(--gene-sat-mult, 1)) brightness(var(--gene-light-mult, 1)); }
+    </style>  </defs>
+
+  <g class="gene-tint">
+  <!-- ═══ BODY: Irregular round rock + 4 stubby legs ═══ -->
+  <g id="body">
+    <!-- Rock body -->
+    <path d="M78,60 Q95,52 115,56 Q132,62 135,82 Q140,105 138,120 Q132,135 115,140 Q95,145 78,138 Q62,132 58,115 Q52,95 58,78 Q62,62 78,60Z" fill="url(#graniteGrad)" stroke="#8A6438" stroke-width="1.2"/>
+    <!-- Texture speckles -->
+    <circle cx="85" cy="75" r="3" fill="#8A6438" opacity="0.3"/>
+    <circle cx="110" cy="85" r="2.5" fill="#8A6438" opacity="0.25"/>
+    <circle cx="95" cy="110" r="3.5" fill="#8A6438" opacity="0.2"/>
+    <circle cx="115" cy="105" r="2" fill="#8A6438" opacity="0.3"/>
+    <circle cx="80" cy="100" r="2" fill="#8A6438" opacity="0.25"/>
+    <!-- Eyes (small, cute) -->
+    <circle cx="88" cy="85" r="6.5" fill="#FAFAFA"/>
+    <circle cx="112" cy="85" r="6.5" fill="#FAFAFA"/>
+    <circle cx="88" cy="86" r="4" fill="#1E1B4B"/>
+    <circle cx="112" cy="86" r="4" fill="#1E1B4B"/>
+    <circle cx="86" cy="83" r="1.5" fill="#FAFAFA"/>
+    <circle cx="110" cy="83" r="1.5" fill="#FAFAFA"/>
+    <!-- Mouth -->
+    <path d="M96,96 Q100,100 104,96" fill="none" stroke="#1E1B4B" stroke-width="1" stroke-linecap="round" opacity="0.6"/>
+    <!-- 4 stubby legs -->
+    <rect x="72" y="138" width="12" height="18" rx="6" fill="#F97316" stroke="#8A6438" stroke-width="0.8"/>
+    <rect x="88" y="140" width="12" height="18" rx="6" fill="#F97316" stroke="#8A6438" stroke-width="0.8"/>
+    <rect x="102" y="140" width="12" height="18" rx="6" fill="#F97316" stroke="#8A6438" stroke-width="0.8"/>
+    <rect x="116" y="138" width="12" height="18" rx="6" fill="#F97316" stroke="#8A6438" stroke-width="0.8"/>
+  </g>
+
+  <!-- ═══ TRAIT: Stone Type (slot-stone) ═══ -->
+  <g id="slot-stone-0"><!-- granite: default body --></g>
+  <g id="slot-stone-1" style="display:none"><!-- obsidian -->
+    <path d="M78,60 Q95,52 115,56 Q132,62 135,82 Q140,105 138,120 Q132,135 115,140 Q95,145 78,138 Q62,132 58,115 Q52,95 58,78 Q62,62 78,60Z" fill="url(#obsidianGrad)" stroke="#0A0A18" stroke-width="1.2"/>
+  </g>
+  <g id="slot-stone-2" style="display:none"><!-- marble -->
+    <path d="M78,60 Q95,52 115,56 Q132,62 135,82 Q140,105 138,120 Q132,135 115,140 Q95,145 78,138 Q62,132 58,115 Q52,95 58,78 Q62,62 78,60Z" fill="url(#marbleGrad)" stroke="#C4B898" stroke-width="1.2"/>
+    <path d="M70,80 Q90,90 85,110 Q95,105 100,120 Q115,85 130,90" fill="none" stroke="#E8E0D0" stroke-width="1.5" opacity="0.5"/>
+  </g>
+  <g id="slot-stone-3" style="display:none"><!-- geode -->
+    <path d="M78,60 Q95,52 115,56 Q132,62 135,82 Q140,105 138,120 Q132,135 115,140 Q95,145 78,138 Q62,132 58,115 Q52,95 58,78 Q62,62 78,60Z" fill="url(#geodeGrad)" stroke="#8A6A4A" stroke-width="1.2"/>
+    <path d="M90,50 Q100,48 110,50" fill="none" stroke="#A78BFA" stroke-width="2" opacity="0.6" filter="url(#glow)"/>
+  </g>
+
+  <!-- ═══ TRAIT: Moss Coverage (slot-moss) ═══ -->
+  <g id="slot-moss-0"><!-- minimal -->
+    <circle cx="78" cy="78" r="8" fill="url(#mossGrad)" opacity="0.7"/>
+    <circle cx="125" cy="95" r="6" fill="url(#mossGrad)" opacity="0.5"/>
+  </g>
+  <g id="slot-moss-1" style="display:none"><!-- patchy -->
+    <circle cx="78" cy="78" r="10" fill="url(#mossGrad)" opacity="0.7"/>
+    <circle cx="125" cy="95" r="8" fill="url(#mossGrad)" opacity="0.6"/>
+    <circle cx="100" cy="60" r="9" fill="url(#mossGrad)" opacity="0.65"/>
+    <circle cx="70" cy="110" r="7" fill="url(#mossGrad)" opacity="0.5"/>
+  </g>
+  <g id="slot-moss-2" style="display:none"><!-- full-coat -->
+    <circle cx="80" cy="70" r="14" fill="url(#mossGrad)" opacity="0.8"/>
+    <circle cx="120" cy="75" r="12" fill="url(#mossGrad)" opacity="0.75"/>
+    <circle cx="105" cy="55" r="10" fill="url(#mossGrad)" opacity="0.8"/>
+    <circle cx="70" cy="100" r="12" fill="url(#mossGrad)" opacity="0.7"/>
+    <circle cx="130" cy="105" r="10" fill="url(#mossGrad)" opacity="0.7"/>
+    <circle cx="95" cy="130" r="11" fill="url(#mossGrad)" opacity="0.6"/>
+  </g>
+  <g id="slot-moss-3" style="display:none"><!-- flowering -->
+    <circle cx="80" cy="70" r="14" fill="url(#mossGrad)" opacity="0.8"/>
+    <circle cx="120" cy="75" r="12" fill="url(#mossGrad)" opacity="0.75"/>
+    <circle cx="100" cy="130" r="10" fill="url(#mossGrad)" opacity="0.7"/>
+    <circle cx="78" cy="65" r="3" fill="#F43F5E"/>
+    <circle cx="118" cy="70" r="2.5" fill="#A78BFA"/>
+    <circle cx="105" cy="125" r="3" fill="#F59E0B"/>
+  </g>
+
+  <!-- ═══ TRAIT: Crystal Growth (slot-crystals) ═══ -->
+  <g id="slot-crystals-0"></g><!-- none -->
+  <g id="slot-crystals-1" style="display:none"><!-- small -->
+    <polygon points="92,52 94,44 96,52" fill="url(#crystalGrad)" filter="url(#glow)"/>
+    <polygon points="115,58 118,50 120,58" fill="url(#crystalGrad)" opacity="0.7"/>
+  </g>
+  <g id="slot-crystals-2" style="display:none"><!-- cluster -->
+    <polygon points="88,55 91,42 94,55" fill="url(#crystalGrad)" filter="url(#glow)"/>
+    <polygon points="94,52 98,44 100,54" fill="url(#crystalGrad)" opacity="0.8"/>
+    <polygon points="112,56 116,46 118,57" fill="url(#crystalGrad)" opacity="0.7"/>
+    <polygon points="120,58 123,50 125,59" fill="url(#crystalGrad)" opacity="0.6"/>
+  </g>
+  <g id="slot-crystals-3" style="display:none"><!-- crown -->
+    <polygon points="82,62 86,38 90,62" fill="url(#crystalGrad)" filter="url(#glow)"/>
+    <polygon points="90,56 96,28 100,56" fill="url(#crystalGrad)" filter="url(#glow)"/>
+    <polygon points="100,54 104,24 108,55" fill="url(#crystalGrad)" filter="url(#glow)"/>
+    <polygon points="110,56 116,38 120,62" fill="url(#crystalGrad)" filter="url(#glow)"/>
+    <circle cx="100" cy="38" r="2" fill="#FAFAFA" opacity="0.6"/>
+  </g>
+
+  <!-- ═══ RARITY ═══ -->
+  <g id="rare-iridescent" style="display:none">
+    <ellipse cx="100" cy="100" rx="46" ry="48" fill="none" stroke="#A78BFA" stroke-width="1.5" opacity="0.4" stroke-dasharray="6,4"/>
+  </g>
+  <g id="legendary-aura" style="display:none">
+    <circle cx="100" cy="100" r="55" fill="#34D399" opacity="0.08" filter="url(#softGlow)"/>
+    <circle cx="75" cy="80" r="2.5" fill="#22C55E" opacity="0.5"><animate attributeName="opacity" values="0.5;0.15;0.5" dur="2s" repeatCount="indefinite"/></circle>
+  </g>
+  <g id="mut-shiny" style="display:none"><ellipse cx="100" cy="100" rx="48" ry="50" fill="none" stroke="#F59E0B" stroke-width="1" opacity="0.3" stroke-dasharray="5,5"/></g>
+  <g id="mut-prismatic" style="display:none"><ellipse cx="100" cy="100" rx="46" ry="48" fill="none" stroke="#A78BFA" stroke-width="1.5" opacity="0.4" filter="url(#glow)"/></g>
+  <g id="mut-ethereal" style="display:none"><circle cx="100" cy="100" r="52" fill="#A78BFA" opacity="0.06" filter="url(#softGlow)"/></g>
+  </g>
+</svg>

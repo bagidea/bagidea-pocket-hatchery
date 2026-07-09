@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <radialGradient id="bodyGrad" cx="50%" cy="38%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="70%" stop-color="#FAFAFA"/><stop offset="100%" stop-color="#F0E0D0"/></radialGradient>
+    <radialGradient id="earGrad" cx="50%" cy="0%"><stop offset="0%" stop-color="#FAFAFA"/><stop offset="100%" stop-color="#E8D5C0"/></radialGradient>
+    <radialGradient id="cheekGrad" cx="50%" cy="50%"><stop offset="0%" stop-color="#FFD0E0"/><stop offset="100%" stop-color="#F43F5E" stop-opacity="0"/></radialGradient>
+    <filter id="fluffBlur"><feGaussianBlur stdDeviation="1.5"/></filter>
+    <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="softGlow"><feGaussianBlur stdDeviation="6"/></filter>
+      <style>
+      .gene-tint { filter: hue-rotate(var(--gene-hue-shift, 0deg)) saturate(var(--gene-sat-mult, 1)) brightness(var(--gene-light-mult, 1)); }
+    </style>  </defs>
+
+  <g class="gene-tint">
+  <!-- ═══ BODY: Fluffy cloud ball ═══ -->
+  <g id="body">
+    <!-- Fluff outer layer (softened) -->
+    <circle cx="100" cy="95" r="45" fill="url(#bodyGrad)" filter="url(#fluffBlur)" opacity="0.7"/>
+    <!-- Main body -->
+    <circle cx="100" cy="95" r="40" fill="url(#bodyGrad)" stroke="#E8D5C0" stroke-width="0.8"/>
+    <!-- Fluff bumps around edge -->
+    <circle cx="72" cy="72" r="14" fill="url(#bodyGrad)"/>
+    <circle cx="128" cy="72" r="14" fill="url(#bodyGrad)"/>
+    <circle cx="70" cy="100" r="12" fill="url(#bodyGrad)"/>
+    <circle cx="130" cy="105" r="12" fill="url(#bodyGrad)"/>
+    <circle cx="85" cy="130" r="13" fill="url(#bodyGrad)"/>
+    <circle cx="115" cy="130" r="13" fill="url(#bodyGrad)"/>
+    <circle cx="100" cy="60" r="12" fill="url(#bodyGrad)"/>
+    <!-- Eyes -->
+    <ellipse cx="84" cy="88" rx="7" ry="8.5" fill="#1E1B4B"/>
+    <ellipse cx="116" cy="88" rx="7" ry="8.5" fill="#1E1B4B"/>
+    <circle cx="81" cy="84" r="2.5" fill="#FAFAFA"/>
+    <circle cx="87" cy="90" r="1.2" fill="#FAFAFA"/>
+    <circle cx="113" cy="84" r="2.5" fill="#FAFAFA"/>
+    <circle cx="119" cy="90" r="1.2" fill="#FAFAFA"/>
+    <!-- Cheeks -->
+    <circle cx="74" cy="96" r="8" fill="url(#cheekGrad)"/>
+    <circle cx="126" cy="96" r="8" fill="url(#cheekGrad)"/>
+    <!-- Mouth -->
+    <path d="M96,98 Q100,103 104,98" fill="none" stroke="#1E1B4B" stroke-width="1" stroke-linecap="round"/>
+    <!-- Tiny paws -->
+    <ellipse cx="82" cy="130" rx="8" ry="5" fill="#F0E0D0"/>
+    <ellipse cx="118" cy="130" rx="8" ry="5" fill="#F0E0D0"/>
+  </g>
+
+  <!-- ═══ TRAIT: Fluff Level (slot-fluff) ═══ -->
+  <g id="slot-fluff-0"><!-- smooth -->
+    <circle cx="100" cy="95" r="40" fill="none" stroke="#E8D5C0" stroke-width="1.5" opacity="0.3"/>
+  </g>
+  <g id="slot-fluff-1" style="display:none"><!-- fluffy: default bumpy body --></g>
+  <g id="slot-fluff-2" style="display:none"><!-- extra-fluffy -->
+    <circle cx="65" cy="80" r="16" fill="url(#bodyGrad)" filter="url(#fluffBlur)" opacity="0.6"/>
+    <circle cx="135" cy="80" r="16" fill="url(#bodyGrad)" filter="url(#fluffBlur)" opacity="0.6"/>
+    <circle cx="75" cy="138" r="14" fill="url(#bodyGrad)" filter="url(#fluffBlur)" opacity="0.5"/>
+    <circle cx="125" cy="138" r="14" fill="url(#bodyGrad)" filter="url(#fluffBlur)" opacity="0.5"/>
+    <circle cx="60" cy="110" r="12" fill="url(#bodyGrad)" filter="url(#fluffBlur)" opacity="0.4"/>
+    <circle cx="140" cy="110" r="12" fill="url(#bodyGrad)" filter="url(#fluffBlur)" opacity="0.4"/>
+  </g>
+  <g id="slot-fluff-3" style="display:none"><!-- cloud-like -->
+    <ellipse cx="100" cy="95" rx="55" ry="48" fill="url(#bodyGrad)" filter="url(#fluffBlur)" opacity="0.35"/>
+    <circle cx="60" cy="75" r="20" fill="url(#bodyGrad)" filter="url(#fluffBlur)" opacity="0.5"/>
+    <circle cx="140" cy="75" r="20" fill="url(#bodyGrad)" filter="url(#fluffBlur)" opacity="0.5"/>
+    <circle cx="70" cy="140" r="16" fill="url(#bodyGrad)" filter="url(#fluffBlur)" opacity="0.4"/>
+    <circle cx="130" cy="140" r="16" fill="url(#bodyGrad)" filter="url(#fluffBlur)" opacity="0.4"/>
+    <circle cx="55" cy="105" r="15" fill="url(#bodyGrad)" filter="url(#fluffBlur)" opacity="0.35"/>
+    <circle cx="145" cy="105" r="15" fill="url(#bodyGrad)" filter="url(#fluffBlur)" opacity="0.35"/>
+  </g>
+
+  <!-- ═══ TRAIT: Ear Length (slot-earlen) ═══ -->
+  <g id="slot-earlen-0"><!-- short -->
+    <ellipse cx="72" cy="62" rx="8" ry="12" fill="url(#earGrad)" stroke="#E8D5C0" stroke-width="0.6" transform="rotate(-25 72 62)"/>
+    <ellipse cx="128" cy="62" rx="8" ry="12" fill="url(#earGrad)" stroke="#E8D5C0" stroke-width="0.6" transform="rotate(25 128 62)"/>
+  </g>
+  <g id="slot-earlen-1" style="display:none"><!-- medium -->
+    <path d="M72,62 Q58,45 62,32 Q66,28 72,45" fill="url(#earGrad)" stroke="#E8D5C0" stroke-width="0.6"/>
+    <path d="M128,62 Q142,45 138,32 Q134,28 128,45" fill="url(#earGrad)" stroke="#E8D5C0" stroke-width="0.6"/>
+  </g>
+  <g id="slot-earlen-2" style="display:none"><!-- long droopy -->
+    <path d="M72,62 Q48,55 45,35 Q44,28 50,30 Q56,32 58,48" fill="url(#earGrad)" stroke="#E8D5C0" stroke-width="0.6"/>
+    <path d="M128,62 Q152,55 155,35 Q156,28 150,30 Q144,32 142,48" fill="url(#earGrad)" stroke="#E8D5C0" stroke-width="0.6"/>
+    <!-- Ear tips (mint accent) -->
+    <circle cx="48" cy="28" r="3" fill="#34D399" opacity="0.6"/>
+    <circle cx="152" cy="28" r="3" fill="#34D399" opacity="0.6"/>
+  </g>
+  <g id="slot-earlen-3" style="display:none"><!-- curled -->
+    <path d="M72,62 Q58,48 62,35 Q66,24 72,32 Q68,40 72,50" fill="url(#earGrad)" stroke="#E8D5C0" stroke-width="0.6"/>
+    <path d="M128,62 Q142,48 138,35 Q134,24 128,32 Q132,40 128,50" fill="url(#earGrad)" stroke="#E8D5C0" stroke-width="0.6"/>
+  </g>
+
+  <!-- ═══ TRAIT: Ear Style (slot-earstyle) ═══ -->
+  <g id="slot-earstyle-0"><!-- straight: same as ear length default --></g>
+  <g id="slot-earstyle-1" style="display:none"><!-- floppy overlay -->
+    <path d="M72,65 Q65,72 62,78" fill="none" stroke="#E8D5C0" stroke-width="6" stroke-linecap="round"/>
+    <path d="M128,65 Q135,72 138,78" fill="none" stroke="#E8D5C0" stroke-width="6" stroke-linecap="round"/>
+  </g>
+  <g id="slot-earstyle-2" style="display:none"><!-- curled tips -->
+    <path d="M68,58 Q60,50 64,44 Q66,42 68,46" fill="none" stroke="#34D399" stroke-width="2" stroke-linecap="round"/>
+    <path d="M132,58 Q140,50 136,44 Q134,42 132,46" fill="none" stroke="#34D399" stroke-width="2" stroke-linecap="round"/>
+  </g>
+  <g id="slot-earstyle-3" style="display:none"><!-- ribbon -->
+    <path d="M68,55 Q62,48 66,42 Q68,40 70,44" fill="none" stroke="#F43F5E" stroke-width="2" stroke-linecap="round"/>
+    <path d="M132,55 Q138,48 134,42 Q132,40 130,44" fill="none" stroke="#F43F5E" stroke-width="2" stroke-linecap="round"/>
+    <path d="M66,42 Q64,38 68,36" fill="none" stroke="#F43F5E" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M134,42 Q136,38 132,36" fill="none" stroke="#F43F5E" stroke-width="1.5" stroke-linecap="round"/>
+  </g>
+
+  <!-- ═══ RARITY ═══ -->
+  <g id="rare-iridescent" style="display:none">
+    <ellipse cx="100" cy="95" rx="48" ry="50" fill="none" stroke="#A78BFA" stroke-width="1.5" opacity="0.4" stroke-dasharray="6,4"/>
+  </g>
+  <g id="legendary-aura" style="display:none">
+    <circle cx="100" cy="95" r="58" fill="#FAFAFA" opacity="0.06" filter="url(#softGlow)"/>
+    <circle cx="72" cy="70" r="2.5" fill="#FAFAFA" opacity="0.5"><animate attributeName="opacity" values="0.5;0.15;0.5" dur="2s" repeatCount="indefinite"/></circle>
+    <circle cx="130" cy="75" r="2" fill="#F59E0B" opacity="0.4"><animate attributeName="opacity" values="0.4;0.1;0.4" dur="1.5s" repeatCount="indefinite"/></circle>
+  </g>
+  <g id="mut-shiny" style="display:none"><ellipse cx="100" cy="95" rx="50" ry="52" fill="none" stroke="#F59E0B" stroke-width="1" opacity="0.3" stroke-dasharray="5,5"/></g>
+  <g id="mut-prismatic" style="display:none"><ellipse cx="100" cy="95" rx="48" ry="50" fill="none" stroke="#A78BFA" stroke-width="1.5" opacity="0.4" filter="url(#glow)"/></g>
+  <g id="mut-ethereal" style="display:none"><circle cx="100" cy="95" r="55" fill="#A78BFA" opacity="0.06" filter="url(#softGlow)"/></g>
+  </g>
+</svg>

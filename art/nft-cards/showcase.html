@@ -1,0 +1,1627 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pocket Hatchery — NFT Card System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@600;700;800&family=Mali:wght@600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   POCKET HATCHERY — NFT CARD SHOWCASE
+   Monanisa (Designer) · v1.0 · 2026-07-03
+   ============================================================ */
+
+:root {
+  /* Brand (from tokens.css) */
+  --cream: #FAFAFA;
+  --ink: #1E1B4B;
+  --muted: #94A3B8;
+  --golden: #F59E0B;
+  --coral: #F43F5E;
+  --lavender: #A78BFA;
+  --mint: #34D399;
+  --meadow: #22C55E;
+  --sky: #38BDF8;
+  --earth: #F97316;
+
+  /* Rarity colors (6 tiers) */
+  --r-common:   #22C55E;
+  --r-uncommon: #06B6D4;
+  --r-rare:     #3B82F6;
+  --r-epic:     #8B5CF6;
+  --r-legendary:#F59E0B;
+  --r-mythic:   #F0E0FF;
+
+  --r-common-a:   rgba(34,197,94,0.45);
+  --r-uncommon-a: rgba(6,182,212,0.48);
+  --r-rare-a:     rgba(59,130,246,0.50);
+  --r-epic-a:     rgba(139,92,246,0.55);
+  --r-legendary-a:rgba(245,158,11,0.60);
+  --r-mythic-a:   rgba(240,224,255,0.65);
+
+  /* Card */
+  --card-w: 300px;
+  --card-h: 432px;
+  --card-radius: 24px;
+  --card-bg: #0f1119;
+  --card-bg-light: #1a1d2e;
+
+  /* Fonts */
+  --font-display: "Baloo 2", "Fredoka", system-ui, sans-serif;
+  --font-body: "Nunito", "Mali", system-ui, sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: #0B1120;
+  color: var(--ink);
+  font-family: var(--font-body);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ---- Scrollbar (office signature) ---- */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(95,184,232,.55);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(95,184,232,.8); }
+
+/* ---- Hero ---- */
+.hero {
+  text-align: center;
+  padding: 60px 24px 48px;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -200px; left: 50%; transform: translateX(-50%);
+  width: 800px; height: 500px;
+  background: radial-gradient(ellipse, rgba(201,168,255,.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero h1 {
+  font-family: var(--font-display);
+  font-size: 48px;
+  font-weight: 800;
+  color: #F5F0E8;
+  letter-spacing: -0.5px;
+}
+.hero h1 span { color: var(--golden); }
+.hero p {
+  color: var(--muted);
+  font-size: 18px;
+  margin-top: 12px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ---- Grid ---- */
+.cards-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 40px 32px;
+  justify-content: center;
+  padding: 24px 40px 80px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* ---- Tier section ---- */
+.tier-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.tier-label {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* ============================================================
+   NFT CARD
+   ============================================================ */
+.card-wrap {
+  perspective: 900px;
+  width: var(--card-w);
+  height: var(--card-h);
+  cursor: pointer;
+}
+.card-inner {
+  position: relative;
+  width: 100%; height: 100%;
+  transition: transform 0.7s cubic-bezier(0.4,0,0.2,1);
+  transform-style: preserve-3d;
+}
+.card-wrap:hover .card-inner {
+  transform: rotateY(180deg);
+}
+
+/* ---- Shared face ---- */
+.card-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  border-radius: var(--card-radius);
+  overflow: hidden;
+}
+
+/* ============================================================
+   FRONT FACE
+   ============================================================ */
+.card-front {
+  background: var(--card-bg);
+  display: flex;
+  flex-direction: column;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+
+/* ---- Frame border (gradient per rarity, layered behind) ---- */
+.card-front::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: calc(var(--card-radius) + 3px);
+  z-index: -1;
+}
+/* Common */
+.tier-common .card-front::before {
+  background: linear-gradient(160deg, #22C55E 0%, #16A34A 50%, #15803D 100%);
+}
+/* Uncommon */
+.tier-uncommon .card-front::before {
+  background: linear-gradient(160deg, #22D3EE 0%, #06B6D4 40%, #0891B2 100%);
+}
+/* Rare */
+.tier-rare .card-front::before {
+  background: linear-gradient(160deg, #60A5FA 0%, #3B82F6 40%, #2563EB 100%);
+  box-shadow: 0 0 30px rgba(59,130,246,0.30);
+}
+/* Epic */
+.tier-epic .card-front::before {
+  background: linear-gradient(160deg, #A78BFA 0%, #8B5CF6 40%, #7C3AED 100%);
+  box-shadow: 0 0 35px rgba(139,92,246,0.35);
+}
+/* Legendary */
+.tier-legendary .card-front::before {
+  background: linear-gradient(160deg, #FDE68A 0%, #F59E0B 30%, #D97706 60%, #F59E0B 100%);
+  box-shadow: 0 0 45px rgba(245,158,11,0.45);
+  animation: legendaryShimmer 3s ease-in-out infinite;
+}
+@keyframes legendaryShimmer {
+  0%, 100% { box-shadow: 0 0 45px rgba(245,158,11,0.45); }
+  50% { box-shadow: 0 0 60px rgba(245,158,11,0.70), 0 0 90px rgba(245,158,11,0.30); }
+}
+/* Mythic */
+.tier-mythic .card-front::before {
+  background: linear-gradient(160deg,
+    #ff9a9e 0%, #fad0c4 14%, #fad0c4 15%, #a18cd1 28%, #a18cd1 29%,
+    #fbc2eb 42%, #fbc2eb 43%, #a6c1ee 56%, #a6c1ee 57%,
+    #d4fc79 70%, #d4fc79 71%, #96e6a1 84%, #96e6a1 85%, #ff9a9e 100%);
+  box-shadow: 0 0 55px rgba(240,224,255,0.45), 0 0 100px rgba(255,255,255,0.15);
+  animation: mythicRainbow 4s linear infinite;
+}
+@keyframes mythicRainbow {
+  0% { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(360deg); }
+}
+
+/* Inner frame (subtle inset border on card surface) */
+.card-front::after {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border-radius: calc(var(--card-radius) - 6px);
+  border: 1px solid rgba(255,255,255,0.06);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* ---- Top bar ---- */
+.card-top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px 8px;
+  position: relative;
+  z-index: 3;
+}
+.rarity-icon {
+  width: 28px; height: 28px;
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px;
+  font-weight: 800;
+  color: #0f1119;
+}
+.tier-common .rarity-icon { background: var(--r-common); }
+.tier-uncommon .rarity-icon { background: var(--r-uncommon); }
+.tier-rare .rarity-icon { background: var(--r-rare); }
+.tier-epic .rarity-icon { background: var(--r-epic); }
+.tier-legendary .rarity-icon { background: var(--r-legendary); }
+.tier-mythic .rarity-icon {
+  background: linear-gradient(135deg, #ff9a9e, #a18cd1, #a6c1ee, #96e6a1);
+  animation: mythicRainbow 4s linear infinite;
+}
+.card-id {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.3);
+  letter-spacing: 1px;
+}
+
+/* ---- Art window ---- */
+.art-window {
+  position: relative;
+  margin: 0 16px;
+  height: 210px;
+  border-radius: 18px;
+  overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1;
+}
+.art-aura {
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  pointer-events: none;
+}
+.tier-common .art-aura {
+  background: radial-gradient(ellipse at 50% 45%, rgba(34,197,94,0.30) 0%, transparent 65%);
+}
+.tier-uncommon .art-aura {
+  background: radial-gradient(ellipse at 50% 45%, rgba(6,182,212,0.32) 0%, transparent 65%);
+}
+.tier-rare .art-aura {
+  background: radial-gradient(ellipse at 50% 45%, rgba(59,130,246,0.34) 0%, transparent 65%);
+}
+.tier-epic .art-aura {
+  background: radial-gradient(ellipse at 50% 45%, rgba(139,92,246,0.36) 0%, transparent 65%);
+}
+.tier-legendary .art-aura {
+  background: radial-gradient(ellipse at 50% 45%, rgba(245,158,11,0.42) 0%, transparent 65%);
+  animation: legendaryAura 2.5s ease-in-out infinite;
+}
+@keyframes legendaryAura {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; }
+}
+.tier-mythic .art-aura {
+  background:
+    radial-gradient(ellipse at 40% 40%, rgba(255,255,255,0.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 45%, rgba(255,154,158,0.18) 0%, transparent 50%),
+    radial-gradient(ellipse at 60% 50%, rgba(166,193,238,0.18) 0%, transparent 50%);
+}
+
+.art-placeholder {
+  width: 140px; height: 140px;
+  position: relative;
+  z-index: 1;
+}
+/* Inline SVG creature in art window */
+.art-placeholder svg {
+  width: 100%; height: 100%;
+  filter: drop-shadow(0 8px 16px rgba(0,0,0,0.3));
+}
+.art-bg-pattern {
+  position: absolute;
+  inset: 0;
+  opacity: 0.04;
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(255,255,255,0.8) 1px, transparent 1px),
+    radial-gradient(circle at 70% 60%, rgba(255,255,255,0.6) 1px, transparent 1px),
+    radial-gradient(circle at 40% 80%, rgba(255,255,255,0.5) 1px, transparent 1px);
+  background-size: 60px 60px, 80px 80px, 50px 50px;
+}
+
+/* Sparkle particles (epic+) */
+.sparkles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+.sparkle {
+  position: absolute;
+  width: 4px; height: 4px;
+  background: white;
+  border-radius: 50%;
+  animation: sparkleFloat 3s ease-in-out infinite;
+}
+.sparkle:nth-child(1) { top: 15%; left: 20%; animation-delay: 0s; }
+.sparkle:nth-child(2) { top: 25%; left: 75%; animation-delay: 0.8s; }
+.sparkle:nth-child(3) { top: 65%; left: 15%; animation-delay: 1.6s; }
+.sparkle:nth-child(4) { top: 70%; left: 82%; animation-delay: 2.2s; }
+.sparkle:nth-child(5) { top: 40%; left: 88%; animation-delay: 1.0s; }
+@keyframes sparkleFloat {
+  0%, 100% { opacity: 0; transform: scale(0.3); }
+  50% { opacity: 1; transform: scale(1); }
+}
+
+/* ---- Info section ---- */
+.card-info {
+  padding: 8px 18px 14px;
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.stage-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 999px;
+  padding: 3px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  width: fit-content;
+}
+.stage-badge .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--golden);
+}
+.creature-name {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: #F5F0E8;
+  letter-spacing: -0.3px;
+}
+.species-label {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 600;
+  margin-top: -4px;
+}
+
+/* ---- Genetics strip ---- */
+.genetics-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 2px 0;
+}
+.genetics-label {
+  font-size: 9px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.25);
+  letter-spacing: 1px;
+}
+.gene-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.15);
+}
+.gene-dot.d1 { background: var(--r-common); }
+.gene-dot.d2 { background: var(--golden); }
+.gene-dot.d3 { background: var(--coral); }
+.gene-dot.d4 { background: var(--r-epic); }
+.gene-dot.d5 { background: var(--r-rare); }
+.gene-dot.d6 { background: var(--r-uncommon); }
+
+/* ---- Stats row ---- */
+.stats-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 2px;
+}
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 8px;
+  padding: 4px 10px;
+}
+.stat-icon {
+  font-size: 14px;
+  line-height: 1;
+}
+.stat-value {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 800;
+  color: #F5F0E8;
+}
+.stat-label {
+  font-size: 9px;
+  color: rgba(255,255,255,0.35);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* ---- Rarity footer ---- */
+.rarity-footer {
+  margin-top: auto;
+  padding: 0 18px 14px;
+  position: relative;
+  z-index: 3;
+}
+.rarity-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.rarity-line {
+  flex: 1;
+  height: 1px;
+  opacity: 0.3;
+}
+.tier-common .rarity-line { background: var(--r-common); }
+.tier-uncommon .rarity-line { background: var(--r-uncommon); }
+.tier-rare .rarity-line { background: var(--r-rare); }
+.tier-epic .rarity-line { background: var(--r-epic); }
+.tier-legendary .rarity-line { background: var(--r-legendary); }
+.tier-mythic .rarity-line { background: linear-gradient(90deg, #ff9a9e, #a18cd1, #a6c1ee, #96e6a1); }
+.rarity-name {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.tier-common .rarity-name { color: var(--r-common); }
+.tier-uncommon .rarity-name { color: var(--r-uncommon); }
+.tier-rare .rarity-name { color: var(--r-rare); }
+.tier-epic .rarity-name { color: var(--r-epic); }
+.tier-legendary .rarity-name { color: var(--r-legendary); }
+.tier-mythic .rarity-name {
+  background: linear-gradient(90deg, #ff9a9e, #a18cd1, #a6c1ee, #96e6a1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ============================================================
+   BACK FACE
+   ============================================================ */
+.card-back {
+  background: var(--card-bg-light);
+  transform: rotateY(180deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid transparent;
+}
+.card-back::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: calc(var(--card-radius) + 3px);
+  z-index: -1;
+}
+.tier-common .card-back::before { background: linear-gradient(160deg, #22C55E, #16A34A); }
+.tier-uncommon .card-back::before { background: linear-gradient(160deg, #22D3EE, #06B6D4); }
+.tier-rare .card-back::before { background: linear-gradient(160deg, #60A5FA, #3B82F6); }
+.tier-epic .card-back::before { background: linear-gradient(160deg, #A78BFA, #8B5CF6); }
+.tier-legendary .card-back::before { background: linear-gradient(160deg, #FDE68A, #F59E0B); }
+.tier-mythic .card-back::before {
+  background: linear-gradient(160deg, #ff9a9e, #a18cd1, #a6c1ee, #96e6a1);
+  animation: mythicRainbow 4s linear infinite;
+}
+
+/* ---- Back pattern ---- */
+.back-pattern {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.back-mandala {
+  position: relative;
+  width: 260px; height: 260px;
+  display: flex; align-items: center; justify-content: center;
+}
+/* Concentric rings */
+.mandala-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.mandala-ring.r1 { width: 240px; height: 240px; }
+.mandala-ring.r2 { width: 200px; height: 200px; border-style: dashed; }
+.mandala-ring.r3 { width: 160px; height: 160px; border-width: 1.5px; opacity: 0.7; }
+.mandala-ring.r4 { width: 120px; height: 120px; border-style: dotted; }
+
+/* Corner gems */
+.corner-gems {
+  position: absolute;
+  inset: 20px;
+  pointer-events: none;
+}
+.cg {
+  position: absolute;
+  width: 8px; height: 8px;
+  border-radius: 2px;
+  transform: rotate(45deg);
+  opacity: 0.4;
+}
+.cg.tl { top: 0; left: 0; }
+.cg.tr { top: 0; right: 0; }
+.cg.bl { bottom: 0; left: 0; }
+.cg.br { bottom: 0; right: 0; }
+.tier-common .cg { background: var(--r-common); }
+.tier-uncommon .cg { background: var(--r-uncommon); }
+.tier-rare .cg { background: var(--r-rare); }
+.tier-epic .cg { background: var(--r-epic); }
+.tier-legendary .cg { background: var(--r-legendary); }
+.tier-mythic .cg { background: linear-gradient(135deg, #ff9a9e, #a18cd1); }
+
+/* Center logo area */
+.logo-area {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.logo-egg {
+  width: 64px; height: 76px;
+  position: relative;
+}
+.logo-egg svg {
+  width: 100%; height: 100%;
+}
+.logo-text {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 800;
+  color: rgba(255,255,255,0.7);
+  letter-spacing: 1px;
+  text-align: center;
+  line-height: 1.2;
+}
+.logo-sub {
+  font-size: 9px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.2);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+/* Decorative dots around mandala */
+.mandala-dots {
+  position: absolute;
+  width: 260px; height: 260px;
+  border-radius: 50%;
+}
+.dot-ring {
+  position: absolute;
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+}
+
+/* ============================================================
+   INTERACTIVE GENETICS LAB
+   ============================================================ */
+.genetics-lab {
+  max-width: 1100px;
+  margin: 0 auto 80px;
+  padding: 48px 40px;
+  background: rgba(255,255,255,0.02);
+  border-radius: 28px;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+.genetics-lab h2 {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 700;
+  color: #F5F0E8;
+  margin-bottom: 4px;
+}
+.genetics-lab h2 span { color: var(--golden); }
+.genetics-lab .lab-sub {
+  color: var(--muted);
+  font-size: 14px;
+  margin-bottom: 32px;
+}
+.lab-layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 36px;
+  align-items: start;
+}
+@media (max-width: 800px) { .lab-layout { grid-template-columns: 1fr; } }
+
+/* Live creature preview */
+.live-preview {
+  background: rgba(0,0,0,0.3);
+  border-radius: 20px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.live-preview svg { width: 240px; height: 240px; }
+.live-gene-hex {
+  font-family: "Cascadia Code", "Fira Code", monospace;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--golden);
+  letter-spacing: 2px;
+}
+.live-gene-label {
+  font-size: 11px;
+  color: rgba(255,255,255,0.3);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.pattern-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 999px;
+  padding: 4px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.6);
+}
+
+/* Controls panel */
+.controls-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.control-group { display: flex; flex-direction: column; gap: 4px; }
+.control-label {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.7);
+}
+.control-val {
+  font-family: "Cascadia Code", monospace;
+  font-size: 12px;
+  color: var(--golden);
+  min-width: 60px; text-align: right;
+}
+.control-slider {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 6px;
+  border-radius: 3px;
+  background: rgba(255,255,255,0.1);
+  outline: none;
+}
+.control-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--golden);
+  cursor: pointer;
+  border: 2px solid rgba(0,0,0,0.3);
+}
+.control-slider.body-hue::-webkit-slider-thumb { background: var(--r-common); }
+.control-slider.accent-hue::-webkit-slider-thumb { background: var(--coral); }
+.control-slider.pattern-hue::-webkit-slider-thumb { background: var(--r-epic); }
+.control-slider.sat-lvl::-webkit-slider-thumb { background: var(--r-uncommon); }
+.control-slider.bright-mod::-webkit-slider-thumb { background: var(--r-legendary); }
+.control-slider.pat-opac::-webkit-slider-thumb { background: var(--r-rare); }
+
+.control-select {
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  color: #F5F0E8;
+  cursor: pointer;
+  outline: none;
+}
+.control-select:focus { border-color: var(--r-rare); }
+.control-select option { background: #1a1d2e; color: #F5F0E8; }
+
+.btn-row { display: flex; gap: 10px; margin-top: 8px; flex-wrap: wrap; }
+.btn-lab {
+  padding: 10px 20px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.05);
+  color: #F5F0E8;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.btn-lab:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.25); }
+.btn-lab.primary { background: var(--golden); color: var(--ink); border-color: var(--golden); }
+.btn-lab.primary:hover { background: #FFE3A6; }
+.btn-lab.active { background: rgba(255,255,255,0.15); border-color: var(--r-rare); }
+
+/* Decoded values table */
+.decoded-table {
+  width: 100%;
+  margin-top: 4px;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.decoded-table td {
+  padding: 4px 8px;
+  color: var(--muted);
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+.decoded-table td:first-child { color: rgba(255,255,255,0.4); width: 100px; font-weight: 700; }
+.decoded-table td:last-child { font-family: "Cascadia Code", monospace; color: rgba(255,255,255,0.7); text-align: right; }
+
+/* Preset chips */
+.preset-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.preset-chip {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03);
+  color: rgba(255,255,255,0.5);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.preset-chip:hover { background: rgba(255,255,255,0.08); color: #F5F0E8; }
+.preset-chip .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
+
+/* How it works callout (kept, restyled) */
+.how-works {
+  max-width: 1100px;
+  margin: 0 auto 80px;
+  padding: 40px 40px;
+  background: rgba(255,255,255,0.02);
+  border-radius: 28px;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+.how-works h3 {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  color: #F5F0E8;
+  margin-bottom: 16px;
+}
+.how-works code-block {
+  display: block;
+  background: rgba(0,0,0,0.3);
+  border-radius: 14px;
+  padding: 20px 24px;
+  font-family: "Cascadia Code", "Fira Code", monospace;
+  font-size: 13px;
+  color: var(--r-uncommon);
+  line-height: 1.7;
+  overflow-x: auto;
+  white-space: pre;
+  margin-bottom: 16px;
+}
+.how-works p {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.7;
+}
+.how-works strong { color: rgba(255,255,255,0.7); }
+
+/* ============================================================
+   COMPARISON TABLE
+   ============================================================ */
+.comp-section {
+  max-width: 1100px;
+  margin: 0 auto 80px;
+  padding: 48px 40px;
+}
+.comp-section h2 {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 700;
+  color: #F5F0E8;
+  margin-bottom: 24px;
+}
+.comp-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.comp-table th {
+  text-align: left;
+  padding: 14px 16px;
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.comp-table td {
+  padding: 14px 16px;
+  color: rgba(255,255,255,0.7);
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  vertical-align: top;
+}
+.comp-table .tier-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  font-size: 13px;
+}
+.comp-table .tier-dot {
+  width: 10px; height: 10px;
+  border-radius: 3px;
+}
+.comp-table .tier-dot.c { background: var(--r-common); }
+.comp-table .tier-dot.u { background: var(--r-uncommon); }
+.comp-table .tier-dot.r { background: var(--r-rare); }
+.comp-table .tier-dot.e { background: var(--r-epic); }
+.comp-table .tier-dot.l { background: var(--r-legendary); }
+.comp-table .tier-dot.m { background: linear-gradient(135deg, #ff9a9e, #a18cd1, #a6c1ee, #96e6a1); }
+
+/* ---- Responsive ---- */
+@media (max-width: 700px) {
+  .hero h1 { font-size: 32px; }
+  .cards-grid { gap: 30px 20px; padding: 16px; }
+  :root { --card-w: 260px; --card-h: 376px; }
+  .art-window { height: 180px; }
+  .creature-name { font-size: 17px; }
+  .genetics-demo-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Printing */
+@media print {
+  body { background: white; }
+  .card-wrap { break-inside: avoid; }
+}
+
+/* --- Tooltip for flip instruction --- */
+.flip-hint {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  color: rgba(255,255,255,0.2);
+  letter-spacing: 1px;
+  pointer-events: none;
+  z-index: 5;
+  transition: opacity 0.3s;
+}
+.card-wrap:hover .flip-hint { opacity: 0; }
+</style>
+</head>
+<body>
+
+<!-- ====== HERO ====== -->
+<section class="hero">
+  <h1>Pocket Hatchery<br><span>NFT Card System</span></h1>
+  <p>Every creature is unique — genetic traits encoded on-chain, reflected in color and pattern. Collect, breed, trade with verifiable provenance.</p>
+</section>
+
+<!-- ====== ALL 12 SPECIES CARDS (generated by JS from species-registry data) ====== -->
+<section class="cards-grid" id="cardsGrid"></section>
+
+<!-- ====== HIDDEN SVG DEFS (logo only) ======
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+  <defs>
+    <g id="logo-mark">
+      <ellipse cx="32" cy="42" rx="24" ry="30" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+      <ellipse cx="32" cy="40" rx="18" ry="24" fill="rgba(255,255,255,0.05)"/>
+      <polygon points="32,12 35,24 47,24 37,32 41,44 32,36 23,44 27,32 17,24 29,24" fill="rgba(255,255,255,0.4)"/>
+      <polygon points="24,52 32,62 40,52" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+    </g>
+  </defs>
+</svg>
+
+
+<!-- ====== 🧬 INTERACTIVE GENETICS LAB ====== -->
+<section class="genetics-lab" id="geneticsLab">
+  <h2>🧬 <span>Interactive Genetics Lab</span></h2>
+  <p class="lab-sub">Move the sliders — watch the creature change color in real time. Every gene bit maps to a visual trait. <strong>同一体形 · 无限色彩</strong></p>
+
+  <div class="lab-layout">
+    <!-- LIVE CREATURE PREVIEW -->
+    <div class="live-preview">
+      <div class="live-gene-label">GENE HEX</div>
+      <div class="live-gene-hex" id="geneHex">0x0000_0000_0000_0000</div>
+      <svg id="liveCreature" viewBox="0 0 512 512"></svg>
+      <div class="pattern-badge" id="patternBadge">▸ Stripes</div>
+    </div>
+
+    <!-- CONTROLS -->
+    <div class="controls-panel">
+      <div class="control-group">
+        <div class="control-label"><span>🐾 Species</span><span class="control-val" id="valSpecies">Foxling</span></div>
+        <select class="control-select" id="slSpecies">
+          <option value="0">🦊 Foxling</option><option value="1">🦉 Owlet</option>
+          <option value="2">💧 Droplet</option><option value="3">🪨 Pebblit</option>
+          <option value="4">🌱 Sproutling</option><option value="5">🔥 Flicker</option>
+          <option value="6">💎 Glimmer</option><option value="7">👻 Wisp</option>
+          <option value="8">☁️ Fluffle</option><option value="9">🐚 Shellby</option>
+          <option value="10">🐉 Dracling</option><option value="11">🐝 Buzzle</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <div class="control-label"><span>🎨 Body Hue</span><span class="control-val" id="valBodyHue">163</span></div>
+        <input type="range" min="0" max="255" value="163" class="control-slider body-hue" id="slBodyHue">
+      </div>
+      <div class="control-group">
+        <div class="control-label"><span>💫 Accent Hue</span><span class="control-val" id="valAccentHue">240</span></div>
+        <input type="range" min="0" max="255" value="240" class="control-slider accent-hue" id="slAccentHue">
+      </div>
+      <div class="control-group">
+        <div class="control-label"><span>✨ Pattern Type</span><span class="control-val" id="valPatternId">Stripes</span></div>
+        <select class="control-select" id="slPatternId">
+          <option value="0">Stripes</option><option value="1">Spots</option>
+          <option value="2">Hearts</option><option value="3">Stars</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <div class="control-label"><span>🌸 Pattern Hue</span><span class="control-val" id="valPatternHue">205</span></div>
+        <input type="range" min="0" max="255" value="205" class="control-slider pattern-hue" id="slPatternHue">
+      </div>
+      <div class="control-group">
+        <div class="control-label"><span>💧 Saturation</span><span class="control-val" id="valSat">62%</span></div>
+        <input type="range" min="0" max="15" value="7" class="control-slider sat-lvl" id="slSat">
+      </div>
+      <div class="control-group">
+        <div class="control-label"><span>☀️ Brightness</span><span class="control-val" id="valBrit">+5%</span></div>
+        <input type="range" min="0" max="15" value="8" class="control-slider bright-mod" id="slBrit">
+      </div>
+      <div class="control-group">
+        <div class="control-label"><span>👁 Pattern Opacity</span><span class="control-val" id="valPatOpac">55%</span></div>
+        <input type="range" min="0" max="15" value="8" class="control-slider pat-opac" id="slPatOpac">
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-lab primary" onclick="randomizeGenes()">🎲 Random Gene</button>
+        <button class="btn-lab" onclick="copyGeneHex()">📋 Copy Gene Hex</button>
+        <button class="btn-lab" onclick="resetToDefault()">↺ Reset</button>
+      </div>
+
+      <!-- Decoded values table -->
+      <table class="decoded-table" id="decodedTable"></table>
+    </div>
+  </div>
+
+  <!-- Preset chips -->
+  <div style="margin-top:20px">
+    <span style="font-size:12px;color:rgba(255,255,255,0.3);margin-right:8px;font-weight:700;">PRESETS:</span>
+    <span class="preset-chips" id="presetChips">
+      <span class="preset-chip" onclick="loadPreset('meadow')"><span class="dot" style="background:#34D399"></span> Meadow</span>
+      <span class="preset-chip" onclick="loadPreset('lagoon')"><span class="dot" style="background:#06B6D4"></span> Lagoon</span>
+      <span class="preset-chip" onclick="loadPreset('azure')"><span class="dot" style="background:#3B82F6"></span> Azure</span>
+      <span class="preset-chip" onclick="loadPreset('mystic')"><span class="dot" style="background:#8B5CF6"></span> Mystic</span>
+      <span class="preset-chip" onclick="loadPreset('sunborn')"><span class="dot" style="background:#F59E0B"></span> Sunborn</span>
+      <span class="preset-chip" onclick="loadPreset('blossom')"><span class="dot" style="background:#F43F5E"></span> Blossom</span>
+      <span class="preset-chip" onclick="loadPreset('cocoa')"><span class="dot" style="background:#F97316"></span> Cocoa</span>
+      <span class="preset-chip" onclick="loadPreset('prima')"><span class="dot" style="background:linear-gradient(135deg,#ff9a9e,#a18cd1)"></span> Prima</span>
+    </span>
+  </div>
+</section>
+
+<!-- ====== HOW IT WORKS ====== -->
+<section class="how-works">
+  <h3>🔗 How Gene Bits → SVG Colors (The Real Pipeline)</h3>
+  <code-block>/* uint64 gene — canonical 64-bit layout (matches docs/GENE-SPEC.md) */
+bits  0-3:  species_id     (0-11 = Foxling..Buzzle, 12-15 reserved)
+bits  4-11: body_hue       (0-255 → HSL hue 0-360)
+bits 12-19: accent_hue     (0-255 → HSL hue 0-360)
+bits 20-23: pattern_type   (0-15 → Stripes/Spots/Hearts/Stars…)
+bits 24-31: pattern_hue    (0-255 → HSL hue 0-360)
+bits 32-35: sat_lvl        (0-15 → 40-85% saturation)
+bits 36-39: bright_mod     (0-15 → -15% to +15% brightness)
+bits 40-43: eye_var        (0-15 → eye color palette)
+bits 44-47: pat_opacity    (0-15 → 20-80% opacity)
+bits 48-51: trait_1        (0-15 → species-specific trait A)
+bits 52-55: trait_2        (0-15 → species-specific trait B)
+bits 56-59: trait_3        (0-15 → species-specific trait C)
+bits 60-63: mutation_flags (bit60=Shiny, bit61=Giant, bit62=Prismatic, bit63=Ethereal)
+
+/* The JavaScript decoder (live in this page!) — canonical 64-bit */
+function decodeGenetics(gene) {
+  return {
+    species_id:  Number(gene & 0xFn),
+    body_hue:    Number((gene >> 4n)  & 0xFFn),
+    accent_hue:  Number((gene >> 12n) & 0xFFn),
+    pattern_id:  Number((gene >> 20n) & 0xFn),
+    pattern_hue: Number((gene >> 24n) & 0xFFn),
+    sat_lvl:     Number((gene >> 32n) & 0xFn),
+    bright_mod:  Number((gene >> 36n) & 0xFn),
+    eye_var:     Number((gene >> 40n) & 0xFn),
+    pat_opac:    Number((gene >> 44n) & 0xFn),
+    trait_1:     Number((gene >> 48n) & 0xFn),
+    trait_2:     Number((gene >> 52n) & 0xFn),
+    trait_3:     Number((gene >> 56n) & 0xFn),
+    mutations:   Number((gene >> 60n) & 0xFn),
+  };
+}
+// Colors computed → CSS variables injected → SVG re-renders instantly</code-block>
+  <p>
+    <strong>How it actually works:</strong> Try the interactive lab above — move any slider and the creature changes color immediately. The same JavaScript decoder runs in production: the client reads <code>genetics</code> (uint64) from the contract's <code>creatures_s</code> table, decodes the bits into HSL colors, injects them as CSS custom properties into the SVG template, and the browser renders the unique creature. <strong>One SVG file. Infinite unique creatures. Zero additional storage on-chain.</strong>
+  </p>
+  <p style="margin-top:12px">
+    <strong>Breeding:</strong> When two creatures breed, the offspring's genes are a cross of both parents: body_hue = avg(parent1, parent2) ± random mutation (±12). Pattern_id is randomly chosen from either parent, with a 5% chance of a new mutation. Pattern overlay is rendered as actual SVG elements (stripes/spots/hearts/stars) — not just a different solid color. The result: every bred creature is visually unique, and rare gene combos produce striking, valuable color patterns.
+  </p>
+</section>
+
+<!-- ====== TIER COMPARISON TABLE ====== -->
+<section class="comp-section">
+  <h2>📊 Rarity Tier Comparison</h2>
+  <table class="comp-table">
+    <thead>
+      <tr><th>Tier</th><th>Color</th><th>Frame</th><th>FX</th><th>Drop Rate</th><th>Supply</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="tier-badge"><span class="tier-dot c"></span> Common</span></td>
+        <td>Emerald #22C55E</td>
+        <td>Solid 3px gradient border</td>
+        <td>—</td>
+        <td>50%</td>
+        <td>Unlimited</td>
+      </tr>
+      <tr>
+        <td><span class="tier-badge"><span class="tier-dot u"></span> Uncommon</span></td>
+        <td>Cyan #06B6D4</td>
+        <td>Double-line gradient</td>
+        <td>Subtle inner glow</td>
+        <td>25%</td>
+        <td>Unlimited</td>
+      </tr>
+      <tr>
+        <td><span class="tier-badge"><span class="tier-dot r"></span> Rare</span></td>
+        <td>Blue #3B82F6</td>
+        <td>Gradient + soft outer glow</td>
+        <td>Card-level aura</td>
+        <td>14%</td>
+        <td>Unlimited</td>
+      </tr>
+      <tr>
+        <td><span class="tier-badge"><span class="tier-dot e"></span> Epic</span></td>
+        <td>Violet #8B5CF6</td>
+        <td>Multi-layer + purple shadow</td>
+        <td>Sparkle particles</td>
+        <td>7%</td>
+        <td>Unlimited</td>
+      </tr>
+      <tr>
+        <td><span class="tier-badge"><span class="tier-dot l"></span> Legendary</span></td>
+        <td>Amber #F59E0B</td>
+        <td>Iridescent animated border</td>
+        <td>Aura pulse + particles + crystal horn</td>
+        <td>3%</td>
+        <td>10,000 max</td>
+      </tr>
+      <tr>
+        <td><span class="tier-badge"><span class="tier-dot m"></span> Mythic</span></td>
+        <td>Prismatic (rainbow)</td>
+        <td>Rainbow hue-rotate animated</td>
+        <td>Full spectral iridescence + constellations + crown</td>
+        <td>0.5%</td>
+        <td>1,000 max</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<script>
+// ============================================================
+// 12-SPECIES CARD DATA (from species-registry.js)
+// ============================================================
+const SHOWCASE_SPECIES = [
+  { id:'buzzle',   name:'Buzzle',    emoji:'🐝', element:'🌿 Nature', sciName:'Bombus rotundus',    color:'#EAB308', rarity:0, pow:5,  charm:7  },
+  { id:'dracling', name:'Dracling',  emoji:'🐉', element:'🔥 Fire',   sciName:'Draco parvus',       color:'#8B5CF6', rarity:1, pow:8,  charm:6  },
+  { id:'droplet',  name:'Droplet',   emoji:'💧', element:'💧 Water',  sciName:'Aqua vivens',        color:'#06B6D4', rarity:2, pow:3,  charm:10 },
+  { id:'flicker',  name:'Flicker',   emoji:'🔥', element:'🔥 Fire',   sciName:'Ignis animatus',     color:'#F97316', rarity:3, pow:7,  charm:5  },
+  { id:'fluffle',  name:'Fluffle',   emoji:'☁️', element:'🌬️ Air',   sciName:'Nubes mollis',       color:'#F472B6', rarity:4, pow:3,  charm:11 },
+  { id:'foxling',  name:'Foxling',   emoji:'🦊', element:'🔥 Fire',   sciName:'Vulpes magica',      color:'#10B981', rarity:5, pow:5,  charm:7  },
+  { id:'glimmer',  name:'Glimmer',   emoji:'💎', element:'✨ Crystal', sciName:'Crystallus vivens',  color:'#A855F7', rarity:0, pow:6,  charm:6  },
+  { id:'owlet',    name:'Owlet',     emoji:'🦉', element:'🌬️ Air',   sciName:'Strigis rotundus',   color:'#0EA5E9', rarity:1, pow:4,  charm:8  },
+  { id:'pebblit',  name:'Pebblit',   emoji:'🪨', element:'🏔️ Earth', sciName:'Lithos vivens',      color:'#F97316', rarity:2, pow:10, charm:3  },
+  { id:'shellby',  name:'Shellby',   emoji:'🐚', element:'💧 Water',  sciName:'Cochlea margarita',  color:'#FB7185', rarity:3, pow:8,  charm:4  },
+  { id:'sproutling',name:'Sproutling',emoji:'🌱',element:'🌿 Nature', sciName:'Herba ambulans',     color:'#22C55E', rarity:4, pow:3,  charm:9  },
+  { id:'wisp',     name:'Wisp',      emoji:'👻', element:'🌙 Shadow', sciName:'Umbra ludens',       color:'#6366F1', rarity:5, pow:2,  charm:12 },
+];
+const RCLASS = ['common','uncommon','rare','epic','legendary','mythic'];
+const RNAME  = ['Common','Uncommon','Rare','Epic','Legendary','Mythic'];
+const RICON  = ['C','U','R','E','L','M'];
+const STAGE  = ['🥚 Egg','🐣 Baby','✨ Adult','🌟 Rare','👑 Legend','🌈 Primal'];
+
+function sparklesHTML(rarity) {
+  if (rarity < 3) return '';
+  var n = rarity >= 5 ? 8 : 5;
+  var s = '<div class="sparkles">';
+  for (var i = 0; i < n; i++) {
+    s += '<span class="sparkle" style="top:'+(10+Math.random()*70)+'%;left:'+(10+Math.random()*75)+'%;animation-delay:'+(i*0.4).toFixed(1)+'s"></span>';
+  }
+  return s + '</div>';
+}
+
+function geneDotsHTML(sp) {
+  var hues = [sp.color, '#FFCB6B', '#F43F5E', '#8B5CF6', '#3B82F6', '#06B6D4'];
+  return hues.map(function(h) { return '<span class="gene-dot" style="background:'+h+'"></span>'; }).join('');
+}
+
+function buildCards() {
+  var grid = document.getElementById('cardsGrid');
+  if (!grid) return;
+  var html = '';
+  SHOWCASE_SPECIES.forEach(function(sp, i) {
+    var rc = RCLASS[sp.rarity];
+    var stage = Math.min(sp.rarity + 1, 5);
+    html += '<div class="card-wrap tier-'+rc+'" data-flip>'
+      + '<div class="card-inner">'
+      + '<div class="card-face card-front">'
+      + '<div class="card-top-bar"><div class="rarity-icon">'+RICON[sp.rarity]+'</div><div class="card-id">#'+String(i*7+1).padStart(4,'0')+'</div></div>'
+      + '<div class="art-window"><div class="art-aura"></div><div class="art-bg-pattern"></div>'+sparklesHTML(sp.rarity)
+      + '<div class="art-placeholder"><img src="../species/svg/species/'+sp.id+'.svg" style="width:100%;height:100%;filter:drop-shadow(0 8px 16px rgba(0,0,0,0.3))" alt="'+sp.name+'" onerror="this.parentElement.innerHTML=\'<span style=font-size:48px>'+sp.emoji+'</span>\'"></div></div>'
+      + '<div class="card-info"><div class="stage-badge"><span class="dot"></span> '+STAGE[stage]+'</div>'
+      + '<div class="creature-name">'+sp.emoji+' '+sp.name+'</div>'
+      + '<div class="species-label">'+sp.sciName+' — '+sp.element+'</div>'
+      + '<div class="genetics-row"><span class="genetics-label">🧬 DNA</span>'+geneDotsHTML(sp)+'</div>'
+      + '<div class="stats-row">'
+      + '<div class="stat-item"><span class="stat-icon">⚔</span><span class="stat-value">'+sp.pow+'</span><span class="stat-label">POW</span></div>'
+      + '<div class="stat-item"><span class="stat-icon">✦</span><span class="stat-value">'+sp.charm+'</span><span class="stat-label">CHARM</span></div>'
+      + '<div class="stat-item"><span class="stat-icon">🧬</span><span class="stat-value">#'+(i+1)+'</span><span class="stat-label">SP</span></div>'
+      + '</div></div>'
+      + '<div class="rarity-footer"><div class="rarity-bar"><span class="rarity-line"></span><span class="rarity-name">'+RNAME[sp.rarity]+'</span><span class="rarity-line"></span></div></div>'
+      + '<div class="flip-hint">↻ flip</div>'
+      + '</div>'
+      + '<div class="card-face card-back"><div class="back-pattern"><div class="back-mandala">'
+      + '<div class="mandala-ring r1"></div><div class="mandala-ring r2"></div><div class="mandala-ring r3"></div><div class="mandala-ring r4"></div>'
+      + '<div class="corner-gems"><span class="cg tl"></span><span class="cg tr"></span><span class="cg bl"></span><span class="cg br"></span></div>'
+      + '<div class="logo-area"><div class="logo-egg"><svg viewBox="0 0 64 76"><use href="#logo-mark"/></svg></div>'
+      + '<div class="logo-text">POCKET<br>HATCHERY</div><div class="logo-sub">Collect · Breed · Evolve</div></div>'
+      + '</div></div></div>'
+      + '</div></div>';
+  });
+  grid.innerHTML = html;
+}
+
+buildCards();
+
+// ============================================================
+// CARD FLIP (event delegation for dynamic cards)
+// ============================================================
+document.addEventListener('click', function(e) {
+  var card = e.target.closest('[data-flip]');
+  if (!card) return;
+  var inner = card.querySelector('.card-inner');
+  if (card.classList.contains('flipped')) {
+    card.classList.remove('flipped');
+    inner.style.transform = '';
+  } else {
+    card.classList.add('flipped');
+    inner.style.transform = 'rotateY(180deg)';
+  }
+});
+// GENETICS DECODER — gene bits → visual colors
+// ============================================================
+function decodeGenetics(gene) {
+  return {
+    species_id: Number(gene & 0xFn),
+    body_hue:   Number((gene >> 4n)  & 0xFFn),
+    accent_hue: Number((gene >> 12n) & 0xFFn),
+    pattern_id: Number((gene >> 20n) & 0x0Fn),
+    pattern_hue:Number((gene >> 24n) & 0xFFn),
+    sat_lvl:    Number((gene >> 32n) & 0x0Fn),
+    bright_mod: Number((gene >> 36n) & 0x0Fn),
+    eye_var:    Number((gene >> 40n) & 0x0Fn),
+    pat_opac:   Number((gene >> 44n) & 0x0Fn),
+    trait_1:    Number((gene >> 48n) & 0x0Fn),
+    trait_2:    Number((gene >> 52n) & 0x0Fn),
+    trait_3:    Number((gene >> 56n) & 0x0Fn),
+    mutations:  Number((gene >> 60n) & 0x0Fn),
+  };
+}
+
+function geneToColors(g) {
+  const sat = 40 + (g.sat_lvl / 15) * 45;           // 40–85%
+  const brit = 55 + ((g.bright_mod - 7) / 15) * 30; // ~40–70%
+  const bodyHue = Math.round(g.body_hue * 360 / 255);
+  const accentHue = Math.round(g.accent_hue * 360 / 255);
+  const patHue = Math.round(g.pattern_hue * 360 / 255);
+  return {
+    body:      `hsl(${bodyHue}, ${Math.round(sat)}%, ${Math.round(brit)}%)`,
+    bodyDark:  `hsl(${bodyHue}, ${Math.round(sat)}%, ${Math.round(brit - 16)}%)`,
+    accent:    `hsl(${accentHue}, ${Math.round(sat + 3)}%, ${Math.round(brit + 6)}%)`,
+    pattern:   `hsl(${patHue}, ${Math.round(sat + 5)}%, ${Math.round(brit + 2)}%)`,
+    patOpacity: 0.20 + (g.pat_opac / 15) * 0.60,    // 20–80%
+    patType:   (g.pattern_id >> 2) & 3,               // group (0–3): pid÷4
+    nose:      `hsl(${Math.round((bodyHue + accentHue)/2)}, 60%, 65%)`,
+  };
+}
+
+function encodeGenetics(g) {
+  let gene = 0n;
+  gene |= BigInt(g.species_id & 0xF) << 0n;
+  gene |= BigInt(g.body_hue)    << 4n;
+  gene |= BigInt(g.accent_hue)  << 12n;
+  gene |= BigInt(g.pattern_id)  << 20n;
+  gene |= BigInt(g.pattern_hue) << 24n;
+  gene |= BigInt(g.sat_lvl)     << 32n;
+  gene |= BigInt(g.bright_mod)  << 36n;
+  gene |= BigInt(g.eye_var)     << 40n;
+  gene |= BigInt(g.pat_opac)    << 44n;
+  gene |= BigInt(g.trait_1 & 0xF) << 48n;
+  gene |= BigInt(g.trait_2 & 0xF) << 52n;
+  gene |= BigInt(g.trait_3 & 0xF) << 56n;
+  gene |= BigInt(g.mutations & 0xF) << 60n;
+  return gene;
+}
+
+function geneToHex(gene) {
+  const s = gene.toString(16).toUpperCase().padStart(16, '0');
+  return '0x' + s.slice(0,4) + '_' + s.slice(4,8) + '_' + s.slice(8,12) + '_' + s.slice(12,16);
+}
+
+// ============================================================
+// PATTERN RENDERER — renders stripes/spots/hearts/stars as actual SVG
+// ============================================================
+function renderPatterns(patType, patColor, patOpacity) {
+  const NS = 'http://www.w3.org/2000/svg';
+  const g = document.createElementNS(NS, 'g');
+  g.setAttribute('class', 'pattern-layer');
+  if (patOpacity < 0.01) return g; // invisible
+
+  const clip = document.createElementNS(NS, 'clipPath');
+  clip.setAttribute('id', 'body-clip-live');
+  const clipEllipse = document.createElementNS(NS, 'ellipse');
+  clipEllipse.setAttribute('cx', '256'); clipEllipse.setAttribute('cy', '290');
+  clipEllipse.setAttribute('rx', '115'); clipEllipse.setAttribute('ry', '120');
+  clip.appendChild(clipEllipse);
+  g.appendChild(clip);
+
+  const pg = document.createElementNS(NS, 'g');
+  pg.setAttribute('clip-path', 'url(#body-clip-live)');
+  pg.setAttribute('opacity', patOpacity);
+
+  switch (patType) {
+    case 0: // Stripes — diagonal ellipses across body
+      for (let i = 0; i < 7; i++) {
+        const e = document.createElementNS(NS, 'ellipse');
+        const cx = 185 + i * 30, cy = 205 + i * 18;
+        e.setAttribute('cx', cx); e.setAttribute('cy', cy);
+        e.setAttribute('rx', '38'); e.setAttribute('ry', '11');
+        e.setAttribute('transform', `rotate(${-18 + i * 5} ${cx} ${cy})`);
+        e.setAttribute('fill', patColor);
+        pg.appendChild(e);
+      }
+      break;
+    case 1: // Spots — scattered circles
+      const spots = [[220,220,12],[280,210,14],[190,260,10],[310,260,13],[240,310,11],[280,320,9],[200,340,10],[320,340,12],[260,250,8],[170,300,11]];
+      spots.forEach(([cx,cy,r]) => {
+        const c = document.createElementNS(NS, 'circle');
+        c.setAttribute('cx', cx); c.setAttribute('cy', cy); c.setAttribute('r', r);
+        c.setAttribute('fill', patColor);
+        pg.appendChild(c);
+      });
+      break;
+    case 2: // Hearts — heart path shapes
+      const hearts = [[210,215,10],[270,225,8],[185,270,9],[310,275,10],[230,330,7],[280,340,8]];
+      hearts.forEach(([cx,cy,s]) => {
+        const p = document.createElementNS(NS, 'path');
+        const h = `M${cx},${cy+s*2} Q${cx-s*1.2},${cy} ${cx},${cy} Q${cx+s*1.2},${cy} ${cx},${cy+s*2} L${cx},${cy+s*2.8} L${cx-s*0.6},${cy+s*1.4} Z`;
+        p.setAttribute('d', h); p.setAttribute('fill', patColor);
+        pg.appendChild(p);
+      });
+      break;
+    case 3: // Stars — pentagram shapes
+      const stars = [[210,210,8],[275,215,7],[185,265,8],[315,270,7],[235,335,7],[280,340,6]];
+      stars.forEach(([cx,cy,s]) => {
+        const p = document.createElementNS(NS, 'polygon');
+        let pts = '';
+        for (let i = 0; i < 5; i++) {
+          const a1 = (i * 72 - 90) * Math.PI / 180;
+          const a2 = ((i * 72 + 36) - 90) * Math.PI / 180;
+          pts += `${cx + Math.cos(a1)*s},${cy + Math.sin(a1)*s} `;
+          pts += `${cx + Math.cos(a2)*s*0.4},${cy + Math.sin(a2)*s*0.4} `;
+        }
+        p.setAttribute('points', pts.trim()); p.setAttribute('fill', patColor);
+        pg.appendChild(p);
+      });
+      break;
+    default: break;
+  }
+  // Forehead gem (always present if pattern exists)
+  const fg = document.createElementNS(NS, 'ellipse');
+  fg.setAttribute('cx', '256'); fg.setAttribute('cy', '195');
+  fg.setAttribute('rx', '18'); fg.setAttribute('ry', '14');
+  fg.setAttribute('fill', patColor);
+  pg.appendChild(fg);
+
+  g.appendChild(pg);
+  return g;
+}
+
+// ============================================================
+// CREATURE SVG BUILDER — builds the full creature from gene colors
+// ============================================================
+function buildCreatureSVG(colors) {
+  const NS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute('viewBox', '0 0 512 512');
+
+  // Contact shadow
+  const shadow = el('ellipse', {cx:256,cy:430,rx:95,ry:16,fill:'rgba(58,58,82,0.22)'});
+
+  // Tail (accent)
+  const tail = g({class:'accent'}, [
+    el('ellipse',{cx:370,cy:330,rx:50,ry:35,transform:'rotate(-20 370 330)',fill:colors.accent}),
+    el('ellipse',{cx:385,cy:310,rx:35,ry:25,transform:'rotate(-35 385 310)',fill:colors.accent}),
+    el('circle',{cx:410,cy:300,r:14,fill:colors.accent}),
+    el('circle',{cx:398,cy:288,r:10,fill:colors.accent}),
+    el('ellipse',{cx:395,cy:355,rx:30,ry:18,transform:'rotate(-15 395 355)',fill:colors.accent}),
+    el('ellipse',{cx:380,cy:365,rx:22,ry:14,transform:'rotate(-10 380 365)',fill:colors.accent}),
+  ]);
+
+  // Ears
+  function ear(cx, cy, rot) {
+    return g({class:'ear'}, [
+      el('ellipse',{cx,cy,rx:30,ry:55,transform:`rotate(${rot} ${cx} ${cy})`,fill:colors.accent}),
+      el('ellipse',{cx:cx-(rot>0?-2:2),cy:cy+5,rx:16,ry:35,transform:`rotate(${rot} ${cx-(rot>0?-2:2)} ${cy+5})`,fill:'#F5F0E8',opacity:'0.7'}),
+    ]);
+  }
+
+  // Body
+  const body = g({class:'body'}, [
+    el('ellipse',{cx:256,cy:290,rx:115,ry:120,fill:colors.body}),
+    el('ellipse',{cx:256,cy:290,rx:115,ry:120,fill:'rgba(255,255,255,0.12)'}),
+    el('ellipse',{cx:256,cy:350,rx:90,ry:45,fill:colors.bodyDark,opacity:'0.35'}),
+  ]);
+
+  // Belly
+  const belly = el('ellipse',{cx:256,cy:315,rx:62,ry:50,fill:'#F5F0E8',opacity:'0.75'});
+
+  // Paws
+  const paws = g({}, [
+    el('ellipse',{cx:185,cy:390,rx:25,ry:16,fill:colors.body}),
+    el('ellipse',{cx:325,cy:390,rx:25,ry:16,fill:colors.body}),
+    el('circle',{cx:180,cy:388,r:4,fill:'#F5F0E8',opacity:'0.5'}),
+    el('circle',{cx:192,cy:388,r:4,fill:'#F5F0E8',opacity:'0.5'}),
+    el('circle',{cx:320,cy:388,r:4,fill:'#F5F0E8',opacity:'0.5'}),
+    el('circle',{cx:332,cy:388,r:4,fill:'#F5F0E8',opacity:'0.5'}),
+  ]);
+
+  // Eyes
+  function eye(cx, cy) {
+    return g({}, [
+      el('ellipse',{cx,cy,rx:17,ry:20,fill:'#3A3A52'}),
+      el('circle',{cx:cx-5,cy:cy-7,r:6,fill:'white'}),
+      el('circle',{cx:cx+5,cy:cy+2,r:2.5,fill:'white'}),
+    ]);
+  }
+
+  // Face
+  const face = g({}, [
+    eye(215, 260), eye(295, 260),
+    el('ellipse',{cx:256,cy:285,rx:7,ry:5,fill:colors.nose}),
+    el('path',{d:'M249,290 Q256,296 263,290',fill:'none',stroke:'#3A3A52','stroke-width':'1.8','stroke-linecap':'round',opacity:'0.5'}),
+    el('circle',{cx:195,cy:282,r:12,fill:colors.pattern,opacity:'0.2'}),
+    el('circle',{cx:315,cy:282,r:12,fill:colors.pattern,opacity:'0.2'}),
+  ]);
+
+  // Assemble
+  svg.appendChild(shadow);
+  svg.appendChild(tail);
+  svg.appendChild(ear(175, 140, -18));
+  svg.appendChild(ear(320, 135, 15));
+  svg.appendChild(body);
+  // Pattern layer (inserted here dynamically)
+  svg.appendChild(el('g',{id:'patternSlot'}));
+  svg.appendChild(belly);
+  svg.appendChild(paws);
+  svg.appendChild(face);
+
+  return svg;
+}
+
+function el(tag, attrs) {
+  const e = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (v !== undefined && v !== null) e.setAttribute(k, String(v));
+  }
+  return e;
+}
+function g(attrs, children) {
+  const e = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  for (const [k, v] of Object.entries(attrs)) {
+    if (v !== undefined && v !== null) e.setAttribute(k, String(v));
+  }
+  (children || []).forEach(c => e.appendChild(c));
+  return e;
+}
+
+// ============================================================
+// LIVE UPDATE — reads sliders, builds gene, updates creature
+// ============================================================
+let currentGene = 0x03A4F8CD4E82755n; // default 64-bit (species=3 Foxling, body=164, accent=240…)
+
+function readSliders() {
+  const speciesEl = document.getElementById('slSpecies');
+  return {
+    species_id:  speciesEl ? parseInt(speciesEl.value) : 0,
+    body_hue:    parseInt(document.getElementById('slBodyHue').value),
+    accent_hue:  parseInt(document.getElementById('slAccentHue').value),
+    pattern_id:  parseInt(document.getElementById('slPatternId').value),
+    pattern_hue: parseInt(document.getElementById('slPatternHue').value),
+    sat_lvl:     parseInt(document.getElementById('slSat').value),
+    bright_mod:  parseInt(document.getElementById('slBrit').value),
+    eye_var:     7,
+    pat_opac:    parseInt(document.getElementById('slPatOpac').value),
+    trait_1:     0,
+    trait_2:     0,
+    trait_3:     0,
+    mutations:   0,
+  };
+}
+
+function updateUI(g) {
+  const spNames = ['Foxling','Owlet','Droplet','Pebblit','Sproutling','Flicker','Glimmer','Wisp','Fluffle','Shellby','Dracling','Buzzle'];
+  const speciesEl = document.getElementById('valSpecies');
+  if (speciesEl) speciesEl.textContent = spNames[g.species_id] || '?';
+  document.getElementById('valBodyHue').textContent = g.body_hue;
+  document.getElementById('valAccentHue').textContent = g.accent_hue;
+  const patNames = ['Stripes','Spots','Hearts','Stars'];
+  document.getElementById('valPatternId').textContent = patNames[g.pattern_id & 3];
+  document.getElementById('valPatternHue').textContent = g.pattern_hue;
+  const satPct = Math.round(40 + (g.sat_lvl / 15) * 45);
+  document.getElementById('valSat').textContent = satPct + '%';
+  const britPct = Math.round(((g.bright_mod - 7) / 15) * 30);
+  document.getElementById('valBrit').textContent = (britPct >= 0 ? '+' : '') + britPct + '%';
+  const opacPct = Math.round(20 + (g.pat_opac / 15) * 60);
+  document.getElementById('valPatOpac').textContent = opacPct + '%';
+}
+
+function updateDecodedTable(g, colors) {
+  const patNames = ['Stripes','Spots','Hearts','Stars'];
+  const spNames = ['Foxling','Owlet','Droplet','Pebblit','Sproutling','Flicker','Glimmer','Wisp','Fluffle','Shellby','Dracling','Buzzle'];
+  const rows = [
+    ['species_id', g.species_id, spNames[g.species_id] || '?', ''],
+    ['body_hue', g.body_hue, `hsl(${Math.round(g.body_hue*360/255)}°, …)`, colors.body],
+    ['accent_hue', g.accent_hue, '', colors.accent],
+    ['pattern_id', g.pattern_id, patNames[g.pattern_id & 3], ''],
+    ['pattern_hue', g.pattern_hue, '', colors.pattern],
+    ['sat_lvl', g.sat_lvl, Math.round(40+(g.sat_lvl/15)*45)+'%', ''],
+    ['bright_mod', g.bright_mod, '', ''],
+    ['pat_opac', g.pat_opac, Math.round(20+(g.pat_opac/15)*60)+'%', ''],
+    ['eye_var', g.eye_var, '', ''],
+    ['mutations', g.mutations, g.mutations ? '0x'+g.mutations.toString(16) : 'none', ''],
+  ];
+  const tbody = rows.map(r => {
+    const swatch = r[3] ? `<span style="display:inline-block;width:14px;height:14px;border-radius:3px;background:${r[3]};vertical-align:middle;margin-right:6px;border:1px solid rgba(255,255,255,0.2)"></span>` : '';
+    return `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${swatch}${r[2]}</td></tr>`;
+  }).join('');
+  document.getElementById('decodedTable').innerHTML = tbody;
+}
+
+function updateCreature() {
+  const g = readSliders();
+  currentGene = encodeGenetics(g);
+  const colors = geneToColors(g);
+
+  document.getElementById('geneHex').textContent = geneToHex(currentGene);
+  document.getElementById('patternBadge').textContent =
+    '▸ ' + ['Stripes','Spots','Hearts','Stars'][g.pattern_id & 3];
+
+  // Rebuild creature
+  const container = document.getElementById('liveCreature');
+  container.innerHTML = '';
+  const svgContent = buildCreatureSVG(colors);
+  // Move all children to the liveCreature SVG
+  while (svgContent.firstChild) {
+    container.appendChild(svgContent.firstChild);
+  }
+
+  // Add pattern overlay
+  const patternSlot = container.querySelector('#patternSlot');
+  if (patternSlot) {
+    const patGroup = renderPatterns(colors.patType, colors.pattern, String(colors.patOpacity));
+    patternSlot.parentNode.replaceChild(patGroup, patternSlot);
+  }
+
+  updateUI(g);
+  updateDecodedTable(g, colors);
+}
+
+// ============================================================
+// ACTIONS
+// ============================================================
+function setSliders(g) {
+  const speciesEl = document.getElementById('slSpecies');
+  if (speciesEl) speciesEl.value = g.species_id;
+  document.getElementById('slBodyHue').value = g.body_hue;
+  document.getElementById('slAccentHue').value = g.accent_hue;
+  document.getElementById('slPatternId').value = g.pattern_id & 3;
+  document.getElementById('slPatternHue').value = g.pattern_hue;
+  document.getElementById('slSat').value = g.sat_lvl;
+  document.getElementById('slBrit').value = g.bright_mod;
+  document.getElementById('slPatOpac').value = g.pat_opac;
+}
+
+function loadPreset(name) {
+  const presets = {
+    meadow:  {species_id:0,body_hue:100,accent_hue:240,pattern_id:0,pattern_hue:205,sat_lvl:7,bright_mod:8,eye_var:7,pat_opac:8,trait_1:0,trait_2:0,trait_3:0,mutations:0},
+    lagoon:  {species_id:2,body_hue:127,accent_hue:30,pattern_id:4,pattern_hue:200,sat_lvl:8,bright_mod:7,eye_var:7,pat_opac:9,trait_1:1,trait_2:0,trait_3:0,mutations:0},
+    azure:   {species_id:1,body_hue:147,accent_hue:45,pattern_id:0,pattern_hue:220,sat_lvl:9,bright_mod:8,eye_var:7,pat_opac:7,trait_1:0,trait_2:2,trait_3:0,mutations:0},
+    mystic:  {species_id:6,body_hue:190,accent_hue:50,pattern_id:12,pattern_hue:240,sat_lvl:10,bright_mod:7,eye_var:7,pat_opac:10,trait_1:3,trait_2:1,trait_3:3,mutations:0},
+    sunborn: {species_id:10,body_hue:40,accent_hue:20,pattern_id:8,pattern_hue:50,sat_lvl:11,bright_mod:12,eye_var:7,pat_opac:11,trait_1:2,trait_2:3,trait_3:2,mutations:0},
+    blossom: {species_id:4,body_hue:245,accent_hue:230,pattern_id:5,pattern_hue:248,sat_lvl:8,bright_mod:10,eye_var:7,pat_opac:9,trait_1:1,trait_2:0,trait_3:1,mutations:0},
+    cocoa:   {species_id:3,body_hue:20,accent_hue:40,pattern_id:0,pattern_hue:15,sat_lvl:5,bright_mod:6,eye_var:7,pat_opac:7,trait_1:0,trait_2:0,trait_3:0,mutations:0},
+    prima:   {species_id:6,body_hue:200,accent_hue:160,pattern_id:13,pattern_hue:210,sat_lvl:14,bright_mod:13,eye_var:7,pat_opac:13,trait_1:3,trait_2:3,trait_3:3,mutations:1},
+  };
+  const g = presets[name] || presets.meadow;
+  setSliders(g);
+  updateCreature();
+}
+
+function randomizeGenes() {
+  const g = {
+    species_id:  Math.floor(Math.random() * 12),
+    body_hue:    Math.floor(Math.random() * 256),
+    accent_hue:  Math.floor(Math.random() * 256),
+    pattern_id:  Math.floor(Math.random() * 16),
+    pattern_hue: Math.floor(Math.random() * 256),
+    sat_lvl:     Math.floor(Math.random() * 16),
+    bright_mod:  Math.floor(Math.random() * 16),
+    eye_var:     Math.floor(Math.random() * 16),
+    pat_opac:    Math.floor(Math.random() * 16),
+    trait_1:     Math.floor(Math.random() * 4),
+    trait_2:     Math.floor(Math.random() * 4),
+    trait_3:     Math.floor(Math.random() * 4),
+    mutations:   Math.random() < 0.1 ? (1 << Math.floor(Math.random() * 4)) : 0,
+  };
+  setSliders(g);
+  updateCreature();
+}
+
+function resetToDefault() {
+  loadPreset('meadow');
+}
+
+function copyGeneHex() {
+  const hex = document.getElementById('geneHex').textContent;
+  navigator.clipboard.writeText(hex).then(() => {
+    const btn = event.target;
+    const orig = btn.textContent;
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => btn.textContent = orig, 1500);
+  }).catch(() => alert('Gene: ' + hex));
+}
+
+// ============================================================
+// INIT — wire sliders + build initial creature
+// ============================================================
+['slSpecies','slBodyHue','slAccentHue','slPatternId','slPatternHue','slSat','slBrit','slPatOpac']
+  .forEach(id => { const el = document.getElementById(id); if (el) el.addEventListener('input', updateCreature); });
+
+loadPreset('meadow');
+</script>
+
+</body>
+</html>

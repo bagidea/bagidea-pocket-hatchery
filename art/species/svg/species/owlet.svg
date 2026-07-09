@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <radialGradient id="bodyGrad" cx="50%" cy="35%"><stop offset="0%" stop-color="#C8EFF8"/><stop offset="100%" stop-color="#7EC8E0"/></radialGradient>
+    <radialGradient id="bellyGrad" cx="50%" cy="50%"><stop offset="0%" stop-color="#FAFAFA"/><stop offset="100%" stop-color="#F0E8D8"/></radialGradient>
+    <radialGradient id="eyeShine" cx="35%" cy="30%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="100%" stop-color="#FAFAFA"/></radialGradient>
+    <radialGradient id="beakGrad" cx="50%" cy="50%"><stop offset="0%" stop-color="#F59E0B"/><stop offset="100%" stop-color="#D97706"/></radialGradient>
+    <radialGradient id="auraGrad" cx="50%" cy="50%"><stop offset="0%" stop-color="#F59E0B" stop-opacity="0.3"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+    <linearGradient id="wingGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#38BDF8"/><stop offset="100%" stop-color="#6EB8D0"/></linearGradient>
+    <linearGradient id="etherWing" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#A78BFA" stop-opacity="0.5"/><stop offset="100%" stop-color="#38BDF8" stop-opacity="0.2"/></linearGradient>
+    <filter id="glow"><feGaussianBlur stdDeviation="2.5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="softGlow"><feGaussianBlur stdDeviation="5"/></filter>
+      <style>
+      .gene-tint { filter: hue-rotate(var(--gene-hue-shift, 0deg)) saturate(var(--gene-sat-mult, 1)) brightness(var(--gene-light-mult, 1)); }
+    </style>  </defs>
+
+  <g class="gene-tint">
+  <!-- ═══ BODY: Round owl (head+body = one sphere) ═══ -->
+  <g id="body">
+    <!-- Main body sphere -->
+    <circle cx="100" cy="105" r="42" fill="url(#bodyGrad)" stroke="#3B82F6" stroke-width="1"/>
+    <!-- Belly patch -->
+    <ellipse cx="100" cy="115" rx="24" ry="20" fill="url(#bellyGrad)"/>
+    <!-- Belly feather marks -->
+    <path d="M90,108 Q100,112 110,108" fill="none" stroke="#E8D5C0" stroke-width="0.8"/>
+    <path d="M88,114 Q100,118 112,114" fill="none" stroke="#E8D5C0" stroke-width="0.8"/>
+    <path d="M90,120 Q100,124 110,120" fill="none" stroke="#E8D5C0" stroke-width="0.8"/>
+    <!-- Eyes (huge, signature feature) -->
+    <circle cx="82" cy="90" r="16" fill="#FAFAFA" stroke="#7EC8E0" stroke-width="1"/>
+    <circle cx="118" cy="90" r="16" fill="#FAFAFA" stroke="#7EC8E0" stroke-width="1"/>
+    <circle cx="82" cy="91" r="9" fill="#1E1B4B"/>
+    <circle cx="118" cy="91" r="9" fill="#1E1B4B"/>
+    <circle cx="79" cy="87" r="3.5" fill="url(#eyeShine)"/>
+    <circle cx="85" cy="93" r="1.5" fill="url(#eyeShine)"/>
+    <circle cx="115" cy="87" r="3.5" fill="url(#eyeShine)"/>
+    <circle cx="121" cy="93" r="1.5" fill="url(#eyeShine)"/>
+    <!-- Beak -->
+    <polygon points="100,100 96,105 104,105" fill="url(#beakGrad)"/>
+    <!-- Feet -->
+    <ellipse cx="85" cy="148" rx="8" ry="5" fill="#F59E0B" stroke="#D97706" stroke-width="0.8"/>
+    <ellipse cx="115" cy="148" rx="8" ry="5" fill="#F59E0B" stroke="#D97706" stroke-width="0.8"/>
+  </g>
+
+  <!-- ═══ TRAIT: Eye Rings (slot-eyerings) ═══ -->
+  <g id="slot-eyerings-0"><!-- simple -->
+    <circle cx="82" cy="90" r="17" fill="none" stroke="#F59E0B" stroke-width="1.5" opacity="0.6"/>
+    <circle cx="118" cy="90" r="17" fill="none" stroke="#F59E0B" stroke-width="1.5" opacity="0.6"/>
+  </g>
+  <g id="slot-eyerings-1" style="display:none"><!-- double -->
+    <circle cx="82" cy="90" r="17" fill="none" stroke="#F59E0B" stroke-width="1.5" opacity="0.6"/>
+    <circle cx="82" cy="90" r="20" fill="none" stroke="#F59E0B" stroke-width="1" opacity="0.35"/>
+    <circle cx="118" cy="90" r="17" fill="none" stroke="#F59E0B" stroke-width="1.5" opacity="0.6"/>
+    <circle cx="118" cy="90" r="20" fill="none" stroke="#F59E0B" stroke-width="1" opacity="0.35"/>
+  </g>
+  <g id="slot-eyerings-2" style="display:none"><!-- star -->
+    <path d="M82,72 L84,80 L92,81 L85,86 L87,94 L82,90 L77,94 L79,86 L72,81 L80,80Z" fill="none" stroke="#F59E0B" stroke-width="1" opacity="0.7"/>
+    <path d="M118,72 L120,80 L128,81 L121,86 L123,94 L118,90 L113,94 L115,86 L108,81 L116,80Z" fill="none" stroke="#F59E0B" stroke-width="1" opacity="0.7"/>
+  </g>
+  <g id="slot-eyerings-3" style="display:none"><!-- crescent -->
+    <path d="M82,73 Q92,86 82,100 Q76,86 82,73Z" fill="none" stroke="#A78BFA" stroke-width="1.5" opacity="0.7"/>
+    <path d="M118,73 Q128,86 118,100 Q112,86 118,73Z" fill="none" stroke="#A78BFA" stroke-width="1.5" opacity="0.7"/>
+  </g>
+
+  <!-- ═══ TRAIT: Wing Style (slot-wings) ═══ -->
+  <g id="slot-wings-0"><!-- small -->
+    <ellipse cx="60" cy="115" rx="18" ry="12" fill="url(#wingGrad)" stroke="#3B82F6" stroke-width="0.8" transform="rotate(-15 60 115)"/>
+    <ellipse cx="140" cy="115" rx="18" ry="12" fill="url(#wingGrad)" stroke="#3B82F6" stroke-width="0.8" transform="rotate(15 140 115)"/>
+  </g>
+  <g id="slot-wings-1" style="display:none"><!-- broad -->
+    <path d="M60,105 Q35,100 40,125 Q45,135 60,130Z" fill="url(#wingGrad)" stroke="#3B82F6" stroke-width="0.8"/>
+    <path d="M140,105 Q165,100 160,125 Q155,135 140,130Z" fill="url(#wingGrad)" stroke="#3B82F6" stroke-width="0.8"/>
+  </g>
+  <g id="slot-wings-2" style="display:none"><!-- pointed -->
+    <path d="M60,108 Q35,95 32,120 L60,125Z" fill="url(#wingGrad)" stroke="#3B82F6" stroke-width="0.8"/>
+    <path d="M140,108 Q165,95 168,120 L140,125Z" fill="url(#wingGrad)" stroke="#3B82F6" stroke-width="0.8"/>
+  </g>
+  <g id="slot-wings-3" style="display:none"><!-- ethereal -->
+    <path d="M60,100 Q30,90 35,130 Q45,138 60,128Z" fill="url(#etherWing)" stroke="#A78BFA" stroke-width="0.5" filter="url(#glow)"/>
+    <path d="M140,100 Q170,90 165,130 Q155,138 140,128Z" fill="url(#etherWing)" stroke="#A78BFA" stroke-width="0.5" filter="url(#glow)"/>
+    <circle cx="40" cy="105" r="1.5" fill="#FAFAFA" opacity="0.6"/>
+    <circle cx="50" cy="115" r="1" fill="#FAFAFA" opacity="0.4"/>
+    <circle cx="160" cy="105" r="1.5" fill="#FAFAFA" opacity="0.6"/>
+    <circle cx="150" cy="115" r="1" fill="#FAFAFA" opacity="0.4"/>
+  </g>
+
+  <!-- ═══ TRAIT: Crown (slot-crown) ═══ -->
+  <g id="slot-crown-0"></g><!-- none -->
+  <g id="slot-crown-1" style="display:none"><!-- feather tuft -->
+    <path d="M88,62 Q84,48 90,52 Q86,42 92,48 Q88,40 94,48 L98,62" fill="#38BDF8" stroke="#7EC8E0" stroke-width="0.8"/>
+    <path d="M112,62 Q116,48 110,52 Q114,42 108,48 Q112,40 106,48 L102,62" fill="#38BDF8" stroke="#7EC8E0" stroke-width="0.8"/>
+  </g>
+  <g id="slot-crown-2" style="display:none"><!-- crystal -->
+    <polygon points="100,46 104,56 100,62 96,56" fill="#A78BFA" opacity="0.8" filter="url(#glow)"/>
+    <circle cx="100" cy="52" r="2" fill="#FAFAFA" opacity="0.7"/>
+  </g>
+  <g id="slot-crown-3" style="display:none"><!-- star -->
+    <path d="M100,44 L102,50 L108,52 L102,54 L100,60 L98,54 L92,52 L98,50Z" fill="#F59E0B" opacity="0.8" filter="url(#glow)"/>
+  </g>
+
+  <!-- ═══ RARITY OVERLAYS ═══ -->
+  <g id="rare-iridescent" style="display:none">
+    <circle cx="100" cy="105" r="48" fill="none" stroke="#A78BFA" stroke-width="1.5" opacity="0.4" stroke-dasharray="8,4"/>
+  </g>
+  <g id="legendary-aura" style="display:none">
+    <circle cx="100" cy="105" r="55" fill="url(#auraGrad)" opacity="0.35"/>
+    <circle cx="70" cy="80" r="2.5" fill="#F59E0B" opacity="0.5"><animate attributeName="opacity" values="0.5;0.15;0.5" dur="2s" repeatCount="indefinite"/></circle>
+    <circle cx="130" cy="75" r="2" fill="#F59E0B" opacity="0.4"><animate attributeName="opacity" values="0.4;0.1;0.4" dur="1.7s" repeatCount="indefinite"/></circle>
+  </g>
+
+  <!-- ═══ MUTATIONS ═══ -->
+  <g id="mut-shiny" style="display:none">
+    <circle cx="100" cy="105" r="50" fill="none" stroke="#F59E0B" stroke-width="1" opacity="0.35" stroke-dasharray="5,5"/>
+  </g>
+  <g id="mut-prismatic" style="display:none">
+    <circle cx="100" cy="105" r="48" fill="none" stroke="#A78BFA" stroke-width="1.5" opacity="0.4" filter="url(#glow)"/>
+  </g>
+  <g id="mut-ethereal" style="display:none">
+    <circle cx="100" cy="105" r="50" fill="#A78BFA" opacity="0.06" filter="url(#softGlow)"/>
+  </g>
+  </g>
+</svg>

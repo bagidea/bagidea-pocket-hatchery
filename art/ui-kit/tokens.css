@@ -1,0 +1,141 @@
+/* ============================================================
+   Pocket Hatchery — Design Tokens (CSS custom properties)
+   v0.1.0 · Monanisa (Designer)
+   Derived from ART.md §3–§7 (North Star: "Cozy-premium creature collector")
+   Import once at the app root:  @import "./tokens.css";
+   Every value here is the single source of truth — mirror of tokens.json.
+   ============================================================ */
+
+:root {
+  /* ---- Brand palette (ART.md §3 Core/Brand) ---- */
+  --ph-color-cream:    #FAFAFA;
+  --ph-color-sky:      #38BDF8;
+  --ph-color-mint:     #34D399;
+  --ph-color-meadow:   #22C55E;
+  --ph-color-golden:       #F59E0B;
+  --ph-color-golden-light: #FDE68A;
+  --ph-color-golden-65:    rgba(245, 158, 11, 0.65);
+  --ph-color-coral:        #F43F5E;
+  --ph-color-lavender: #A78BFA;
+  --ph-color-earth:    #F97316;
+  --ph-color-ink:      #1E1B4B;
+
+  /* ---- Surfaces ---- */
+  --ph-surface-canvas: #FAFAFA;
+  --ph-surface-raised: #FFFFFF;
+  --ph-surface-sunken: #F0E8D8;
+  --ph-scrim:          rgba(30, 27, 75, 0.50);
+
+  /* ---- Text ---- */
+  --ph-text-primary:   #1E1B4B;
+  --ph-text-muted:     #94A3B8;
+  --ph-text-on-golden: #1E1B4B;
+  --ph-text-on-dark:   #FAFAFA;
+  --ph-text-disabled:  #A9A6C4;
+
+  /* ---- Borders / focus ---- */
+  --ph-border-soft:  #E8D5B8;
+  --ph-border-focus: #3B82F6;
+
+  /* ---- Semantic state ---- */
+  --ph-success: #22C55E;
+  --ph-warning: #FB923C;
+  --ph-danger:  #F43F5E;
+  --ph-info:    #3B82F6;
+
+  /* ---- Rarity tiers (ART.md §3 — frame / aura / badge) ---- */
+  --ph-rarity-common:    #22C55E;
+  --ph-rarity-rare:      #3B82F6;
+  --ph-rarity-epic:      #8B5CF6;
+  --ph-rarity-legendary: #F59E0B;
+  --ph-rarity-common-aura:    rgba(34, 197, 94, 0.45);
+  --ph-rarity-rare-aura:      rgba(59, 130, 246, 0.50);
+  --ph-rarity-epic-aura:      rgba(139, 92, 246, 0.55);
+  --ph-rarity-legendary-aura: rgba(245, 158, 11, 0.60);
+
+  /* ---- Spacing (4px grid) ---- */
+  --ph-space-0: 0px;
+  --ph-space-1: 4px;
+  --ph-space-2: 8px;
+  --ph-space-3: 12px;
+  --ph-space-4: 16px;
+  --ph-space-5: 24px;
+  --ph-space-6: 32px;
+  --ph-space-7: 48px;
+  --ph-space-8: 64px;
+
+  /* ---- Radius ---- */
+  --ph-radius-sm:   12px;
+  --ph-radius-md:   16px;
+  --ph-radius-lg:   20px;
+  --ph-radius-xl:   24px;
+  --ph-radius-2xl:  28px;
+  --ph-radius-pill: 999px;
+
+  /* ---- Typography ---- */
+  --ph-font-display: "Baloo 2", "Fredoka", "M PLUS Rounded 1c", system-ui, sans-serif;
+  --ph-font-body:    "Nunito", "Mali", system-ui, sans-serif;
+  --ph-font-numeric: "Nunito", "M PLUS Rounded 1c", ui-monospace, system-ui;
+  --ph-font-thai:    "Mali", "Fahkwang", "Nunito", sans-serif;
+
+  --ph-weight-regular: 600;
+  --ph-weight-bold:    700;
+  --ph-weight-heavy:   800;
+
+  --ph-text-display: 40px/48px var(--ph-font-display);
+  --ph-text-h1:      32px/40px var(--ph-font-display);
+  --ph-text-h2:      24px/32px var(--ph-font-display);
+  --ph-text-h3:      20px/28px var(--ph-font-body);
+  --ph-text-body:    16px/24px var(--ph-font-body);
+  --ph-text-label:   15px/20px var(--ph-font-body);
+  --ph-text-caption: 13px/18px var(--ph-font-body);
+  --ph-text-numeric: 16px/20px var(--ph-font-numeric);
+
+  /* ---- Elevation / shadow ---- */
+  --ph-elev-1: 0 2px 6px rgba(212, 165, 116, 0.18);
+  --ph-elev-2: 0 8px 20px rgba(212, 165, 116, 0.22);
+  --ph-elev-3: 0 14px 32px rgba(30, 27, 75, 0.18);
+  --ph-glow-golden:    0 0 24px rgba(245, 158, 11, 0.65);
+  --ph-glow-legendary: 0 0 28px rgba(251, 191, 36, 0.70);
+
+  /* ---- Motion ---- */
+  --ph-dur-instant: 80ms;
+  --ph-dur-fast:    140ms;
+  --ph-dur-base:    220ms;
+  --ph-dur-slow:    360ms;
+  --ph-dur-evolve:  900ms;
+  --ph-ease-standard:   cubic-bezier(0.4, 0.0, 0.2, 1);
+  --ph-ease-decelerate: cubic-bezier(0.0, 0.0, 0.2, 1);
+  --ph-ease-pop:        cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ph-ease-spring:     cubic-bezier(0.22, 1.2, 0.36, 1);
+
+  /* ---- Component shorthands ---- */
+  --ph-touch-min: 44px;            /* min touch target (ART.md §4) */
+}
+
+/* ============================================================
+   Office signature: slim blue-glass scrollbar
+   Apply globally + on every scroll surface (app/plugin/web).
+   ============================================================ */
+* {
+  scrollbar-width: thin;                                  /* Firefox */
+  scrollbar-color: rgba(59, 130, 246, 0.55) transparent;  /* thumb track */
+}
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background: rgba(59, 130, 246, 0.55);
+  border-radius: var(--ph-radius-pill);
+  backdrop-filter: blur(2px);
+}
+*::-webkit-scrollbar-thumb:hover { background: rgba(59, 130, 246, 0.8); }
+
+/* ============================================================
+   Reduced-motion: honor the OS setting (accessibility)
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --ph-dur-instant: 0ms; --ph-dur-fast: 0ms; --ph-dur-base: 0ms;
+    --ph-dur-slow: 0ms; --ph-dur-evolve: 0ms;
+  }
+}

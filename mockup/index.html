@@ -1,0 +1,712 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Pocket Hatchery · UI Direction Mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+<style>
+/* ───────────────────────────────────────────────────────────────
+   Pocket Hatchery · UI DIRECTION MOCKUP  (Flamingo · 2026-07-03)
+   Standalone. Not wired to the real app. Shows DIRECTION only.
+   Tokens mirror src/styles/tokens.css (single source of truth).
+   Scope = screen-level + EFFECTS SHELL. NFT card CONTENT = Monanisa.
+   ─────────────────────────────────────────────────────────────── */
+:root{
+  /* Brand */
+  --cream:#FFF6E9; --sky:#A8DCF0; --mint:#8FD694; --meadow:#5BB572;
+  --golden:#FFCB6B; --golden-light:#FFE3A6; --coral:#FF9EB5;
+  --lavender:#C9A8FF; --earth:#C49A6C; --ink:#3A3A52;
+  /* Text */
+  --t-primary:#3A3A52; --t-muted:#7C7A92; --t-disabled:#B7B3C2;
+  /* Rarity */
+  --r-common:#8FD694; --r-rare:#5FB8E8; --r-epic:#B07BE8; --r-legendary:#FFD86B;
+  --r-common-aura:rgba(143,214,148,.45); --r-rare-aura:rgba(95,184,232,.5);
+  --r-epic-aura:rgba(176,123,232,.55); --r-legendary-aura:rgba(255,216,107,.6);
+  /* Motion */
+  --ease-pop:cubic-bezier(.34,1.56,.64,1);
+  /* Fonts */
+  --f-display:'Baloo 2','Fredoka',system-ui,sans-serif;
+  --f-body:'Nunito','Mali',system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; font:400 16px/1.55 var(--f-body); color:var(--t-primary);
+  background:
+    radial-gradient(1100px 700px at 12% -8%, rgba(168,220,240,.55) 0%, transparent 60%),
+    radial-gradient(1000px 700px at 92% 6%, rgba(201,168,255,.40) 0%, transparent 58%),
+    radial-gradient(900px 700px at 50% 108%, rgba(255,203,107,.32) 0%, transparent 60%),
+    linear-gradient(175deg,#dceffb 0%,#eaf5ec 22%,#fef9ed 48%,#fdf2e0 72%,#f6ead8 100%);
+  background-attachment:fixed; min-height:100vh; -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,p{margin:0}
+/* fine grain → premium feel, kills the "flat plain" look */
+body::after{
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:1; opacity:.5; mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
+}
+/* office-signature slim blue-glass scrollbar */
+*{scrollbar-width:thin; scrollbar-color:rgba(95,184,232,.55) transparent}
+*::-webkit-scrollbar{width:8px;height:8px}
+*::-webkit-scrollbar-track{background:transparent}
+*::-webkit-scrollbar-thumb{background:rgba(95,184,232,.55); border-radius:999px; backdrop-filter:blur(2px)}
+*::-webkit-scrollbar-thumb:hover{background:rgba(95,184,232,.85)}
+
+.wrap{position:relative; z-index:2; max-width:1160px; margin:0 auto; padding:0 24px 96px}
+
+/* ── Mockup banner ─────────────────────────────────────────────── */
+.banner{
+  margin:0 0 8px; padding:14px 18px; border-radius:16px;
+  background:linear-gradient(135deg,rgba(58,58,82,.92),rgba(124,92,191,.92));
+  color:#FFF6E9; font-size:13px; line-height:1.45;
+  display:flex; gap:12px; align-items:center; flex-wrap:wrap;
+  box-shadow:0 10px 28px rgba(58,58,82,.22);
+}
+.banner b{font-family:var(--f-display); font-weight:800; letter-spacing:.2px}
+.banner .tag{background:rgba(255,255,255,.16); padding:3px 10px; border-radius:999px; font-weight:700; font-size:11px; letter-spacing:.4px; text-transform:uppercase}
+.banner small{opacity:.78}
+
+/* ── Section label ─────────────────────────────────────────────── */
+.sec-label{
+  display:flex; align-items:baseline; gap:10px; margin:46px 4px 18px;
+}
+.sec-label .num{
+  font-family:var(--f-display); font-weight:800; font-size:13px; color:#fff;
+  background:linear-gradient(135deg,var(--golden),#FF9F45); padding:3px 10px; border-radius:8px;
+  box-shadow:0 4px 10px rgba(255,159,69,.35);
+}
+.sec-label h2{font-family:var(--f-display); font-weight:800; font-size:22px; color:var(--ink)}
+.sec-label .hint{font-size:12.5px; color:var(--t-muted); font-weight:600}
+
+/* ── Header (modernized) ───────────────────────────────────────── */
+.header{
+  position:sticky; top:0; z-index:50; display:flex; align-items:center; justify-content:space-between;
+  gap:16px; flex-wrap:wrap; padding:14px 22px; margin:18px 0 0;
+  background:rgba(255,255,255,.62); backdrop-filter:blur(22px) saturate(1.4); -webkit-backdrop-filter:blur(22px) saturate(1.4);
+  border-radius:0 0 22px 22px; border:1px solid rgba(255,255,255,.65); border-top:none;
+  box-shadow:0 10px 30px rgba(58,58,82,.10), inset 0 1px 0 rgba(255,255,255,.9);
+}
+.brand{display:flex; align-items:center; gap:12px}
+.brand .mark{
+  width:42px; height:42px; border-radius:14px; display:grid; place-items:center; font-size:22px;
+  background:radial-gradient(circle at 35% 30%,#FFE3A6,#FFCB6B 60%,#FF9F45);
+  box-shadow:0 6px 16px rgba(255,159,69,.4), inset 0 2px 0 rgba(255,255,255,.7);
+}
+.brand h1{
+  font-family:var(--f-display); font-weight:800; font-size:23px; letter-spacing:.2px;
+  background:linear-gradient(120deg,#3A3A52 0%,#7C5CBF 55%,#FF9F45 120%);
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+}
+.brand .sub{display:block; font-size:11px; font-weight:700; letter-spacing:1.4px; text-transform:uppercase; color:var(--t-muted); margin-top:-2px}
+.h-right{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+.pill{
+  display:inline-flex; align-items:center; gap:8px; padding:7px 14px; font-size:12.5px; font-weight:700;
+  background:rgba(255,255,255,.7); border:1px solid rgba(255,255,255,.6); border-radius:999px;
+  box-shadow:0 4px 12px rgba(58,58,82,.07);
+}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--meadow);box-shadow:0 0 8px var(--meadow); animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.pill .acct{font-family:var(--f-body); font-weight:800}
+.btn-disconnect{border:none; background:rgba(58,58,82,.08); color:var(--t-muted); font:700 11px/1 var(--f-body); padding:7px 12px; border-radius:999px; cursor:pointer; margin-left:4px}
+.btn-disconnect:hover{background:rgba(242,114,140,.18); color:#d4606f}
+
+/* ── Resource chips (modernized depth) ────────────────────────── */
+.res-row{display:flex; gap:14px; flex-wrap:wrap; justify-content:center; margin-top:24px}
+.chip{
+  position:relative; display:flex; align-items:center; gap:12px; padding:10px 20px 10px 12px;
+  background:rgba(255,255,255,.74); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+  border-radius:18px; border:1px solid rgba(255,255,255,.6);
+  box-shadow:0 6px 14px rgba(58,58,82,.07), inset 0 1px 0 rgba(255,255,255,.85);
+  transition:transform .2s var(--ease-pop);
+}
+.chip:hover{transform:translateY(-2px)}
+.chip-ico{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-size:18px;flex-shrink:0;
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.6)}
+.ico-egg{background:linear-gradient(135deg,#FFE3A6,#FFCB6B); box-shadow:0 0 16px rgba(255,203,107,.45), inset 0 2px 0 rgba(255,255,255,.6)}
+.ico-en{background:linear-gradient(135deg,#A8DCF0,#5FB8E8); box-shadow:0 0 14px rgba(95,184,232,.4), inset 0 2px 0 rgba(255,255,255,.6)}
+.ico-hatch{background:linear-gradient(135deg,#C9A8FF,#B07BE8); box-shadow:0 0 14px rgba(176,123,232,.4), inset 0 2px 0 rgba(255,255,255,.6)}
+.chip .lbl{font-size:10px; font-weight:800; letter-spacing:.8px; text-transform:uppercase; color:var(--t-muted); line-height:1}
+.chip .val{font-family:var(--f-display); font-weight:800; font-size:19px; color:var(--ink); line-height:1.15; margin-top:2px}
+.chip .max{font-size:12px; color:var(--t-muted); font-weight:700}
+
+/* ── Hero (aurora + depth + gold CTA) ─────────────────────────── */
+.hero{
+  position:relative; overflow:hidden; margin-top:24px; padding:40px 44px;
+  border-radius:28px; border:1px solid rgba(255,255,255,.55);
+  background:
+    radial-gradient(420px 320px at 16% 30%, rgba(255,203,107,.22), transparent 60%),
+    radial-gradient(420px 320px at 84% 70%, rgba(201,168,255,.20), transparent 60%),
+    rgba(255,255,255,.5);
+  backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+  box-shadow:0 14px 40px rgba(196,154,108,.16), inset 0 1px 0 rgba(255,255,255,.8);
+  display:flex; align-items:center; gap:40px; min-height:230px;
+}
+/* drifting aurora blobs behind hero */
+.hero::before,.hero::after{content:''; position:absolute; border-radius:50%; filter:blur(40px); opacity:.55; pointer-events:none; z-index:0}
+.hero::before{width:260px;height:260px; background:radial-gradient(circle,#FFCB6B,transparent 70%); top:-70px; left:-40px; animation:drift 9s ease-in-out infinite}
+.hero::after{width:300px;height:300px; background:radial-gradient(circle,#C9A8FF,transparent 70%); bottom:-100px; right:-60px; animation:drift 11s ease-in-out infinite reverse}
+@keyframes drift{0%,100%{transform:translate(0,0)}50%{transform:translate(24px,-18px)}}
+.hero-art{position:relative; z-index:1; width:170px; height:170px; flex-shrink:0; display:grid; place-items:center;
+  filter:drop-shadow(0 14px 30px rgba(58,58,82,.18)); animation:bob 4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-2deg)}30%{transform:translateY(-10px) rotate(1deg)}60%{transform:translateY(-4px) rotate(-1deg)}85%{transform:translateY(-12px)}}
+.hero-art .egg{
+  width:150px;height:170px; border-radius:50% 50% 48% 48%/58% 58% 42% 42%;
+  background:radial-gradient(circle at 38% 32%,#FFF4D8,#FFE3A6 35%,#FFCB6B 68%,#F0A93F);
+  box-shadow:inset -14px -16px 26px rgba(196,120,40,.35), inset 10px 10px 20px rgba(255,255,255,.7), 0 0 50px rgba(255,203,107,.5);
+  position:relative;
+}
+.hero-art .egg::after{content:''; position:absolute; left:50%; top:18%; transform:translateX(-50%); width:46px; height:60px;
+  background:radial-gradient(ellipse,rgba(255,255,255,.85),transparent 70%); border-radius:50%}
+.hero-txt{position:relative; z-index:1; display:flex; flex-direction:column; gap:18px; max-width:520px}
+.hero-txt h2{font-family:var(--f-display); font-weight:800; font-size:31px; line-height:1.2; color:var(--ink)}
+.hero-txt .accent{background:linear-gradient(120deg,#FF9F45,#FFCB6B,#FFE3A6); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent}
+.cta{
+  position:relative; align-self:flex-start; display:inline-flex; align-items:center; gap:10px; padding:15px 32px; border:none; cursor:pointer;
+  border-radius:16px; font:800 18px/1.3 var(--f-display); color:#3A2A12;
+  background:linear-gradient(135deg,#FFE08A 0%,#FFCB6B 45%,#FF9F45 100%);
+  box-shadow:0 6px 0 #E68A1F, 0 14px 30px rgba(255,159,69,.45), inset 0 2px 0 rgba(255,255,255,.7), 0 0 60px rgba(255,203,107,.25);
+  transition:transform .15s var(--ease-pop); overflow:hidden;
+}
+.cta::after{content:''; position:absolute; inset:0; background:linear-gradient(180deg,rgba(255,255,255,.35),transparent 55%); border-radius:16px}
+.cta:hover{transform:translateY(-2px)}
+.cta .cost{font-size:13px; opacity:.7; font-weight:700}
+
+/* ── Grid section head ────────────────────────────────────────── */
+.sec-head{display:flex; align-items:baseline; gap:12px; margin:34px 4px 16px}
+.sec-head h2{font-family:var(--f-display); font-weight:800; font-size:21px; color:var(--ink)}
+.sec-head .count{font-size:13px; color:var(--t-muted); font-weight:700}
+
+/* ════════════════════════════════════════════════════════════════
+   SECTION 2 — EFFECTS FRAMEWORK
+   The RARITY GLOW FRAME is an EFFECT SHELL that wraps Monanisa's
+   card (overlay layer). Slot content here is PLACEHOLDER only.
+   ════════════════════════════════════════════════════════════════ */
+.tier-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:22px; margin-top:8px}
+@media (max-width:760px){.tier-grid{grid-template-columns:repeat(2,1fr)}}
+
+.slot{
+  position:relative; border-radius:22px; padding:3px; /* the glow frame */
+  display:flex; flex-direction:column;
+}
+.slot .inner{
+  position:relative; border-radius:19px; overflow:hidden;
+  background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(255,246,233,.92));
+  box-shadow:0 10px 26px rgba(196,154,108,.18), inset 0 1px 0 rgba(255,255,255,.9);
+  display:flex; flex-direction:column;
+}
+.slot .art{
+  position:relative; aspect-ratio:4/3; display:grid; place-items:center;
+  background:radial-gradient(ellipse at 50% 40%,var(--aura,transparent) 0%,transparent 62%);
+}
+.slot .art .glyph{font-size:64px; filter:drop-shadow(0 6px 14px rgba(58,58,82,.2)); animation:bob 3.6s ease-in-out infinite}
+.slot .badge{
+  position:absolute; top:10px; left:10px; font:800 10px/1 var(--f-body); letter-spacing:.6px; text-transform:uppercase;
+  padding:4px 10px; border-radius:999px; color:#fff;
+  background:var(--badge-bg); box-shadow:0 3px 8px rgba(0,0,0,.12);
+}
+.slot .info{padding:12px 14px 14px; text-align:center}
+.slot .name{font-family:var(--f-display); font-weight:800; font-size:16px; color:var(--ink)}
+.slot .tier{font-size:11.5px; font-weight:700; color:var(--t-muted); margin-top:1px}
+
+/* tier glow frame definitions */
+.t-common{--aura:var(--r-common-aura); --badge-bg:linear-gradient(135deg,#8FD694,#5BB572);
+  background:linear-gradient(160deg,#E4F5E6,var(--r-common)); box-shadow:0 0 0 1px rgba(143,214,148,.4), 0 8px 20px rgba(143,214,148,.18)}
+.t-rare{--aura:var(--r-rare-aura); --badge-bg:linear-gradient(135deg,#5FB8E8,#3D8EC9);
+  background:linear-gradient(160deg,#E2F2FB,var(--r-rare)); box-shadow:0 0 0 1px rgba(95,184,232,.5), 0 8px 22px rgba(95,184,232,.22)}
+.t-epic{--aura:var(--r-epic-aura); --badge-bg:linear-gradient(135deg,#B07BE8,#7C3AED);
+  background:linear-gradient(160deg,#EFE5FB,var(--r-epic)); box-shadow:0 0 0 1px rgba(176,123,232,.55), 0 8px 24px rgba(176,123,232,.28)}
+.t-epic .art::after{content:''; position:absolute; inset:-2px; border-radius:14px; box-shadow:0 0 26px var(--r-epic-aura); pointer-events:none; animation:aura 2.4s ease-in-out infinite}
+/* legendary: iridescent moving frame + particles + aura */
+.t-legend{--aura:var(--r-legendary-aura); --badge-bg:linear-gradient(135deg,#FFD86B,#FF9F45);
+  background:linear-gradient(120deg,#FFE3A6,#FFD86B,#FFF6E9,#C9A8FF,#FFD86B);
+  background-size:300% 300%; animation:iridescent 5s linear infinite;
+  box-shadow:0 0 0 1px rgba(255,216,107,.7), 0 0 30px var(--r-legendary-aura), 0 12px 30px rgba(255,159,69,.3)}
+.t-legend .art::after{content:''; position:absolute; inset:-2px; border-radius:14px; box-shadow:0 0 34px var(--r-legendary-aura); pointer-events:none; animation:aura 2s ease-in-out infinite}
+.t-legend .p{position:absolute; width:6px;height:6px;border-radius:50%; background:#FFE3A6; box-shadow:0 0 8px #FFD86B; opacity:0; animation:spark 2.6s ease-in-out infinite}
+.t-legend .p1{top:24%;left:18%; animation-delay:.1s}
+.t-legend .p2{top:40%;right:16%; animation-delay:.9s}
+.t-legend .p3{bottom:26%;left:30%; animation-delay:1.6s}
+.t-legend .p4{top:30%;left:62%; animation-delay:2.1s}
+@keyframes iridescent{0%{background-position:0% 50%}100%{background-position:300% 50%}}
+@keyframes aura{0%,100%{opacity:.5}50%{opacity:1}}
+@keyframes spark{0%,100%{opacity:0;transform:scale(.4)}40%{opacity:1;transform:scale(1.2)}}
+
+/* ── 2B: Hatch → Evolve MOMENT (flash + particle + glow) ───────── */
+.moment{
+  position:relative; overflow:hidden; margin-top:22px; border-radius:28px; min-height:330px;
+  display:flex; align-items:center; justify-content:center; gap:60px; flex-wrap:wrap; padding:40px;
+  background:radial-gradient(circle at 50% 45%, rgba(255,255,255,.85), rgba(255,246,233,.6) 60%),
+    linear-gradient(160deg,#1f1b34,#2a2348 60%,#3a2a52);
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow:0 18px 50px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.18);
+  color:#FFF6E9;
+}
+.moment .stage{position:relative; display:flex; flex-direction:column; align-items:center; gap:14px; z-index:2}
+.moment .stage .ring{
+  position:relative; width:150px;height:150px; border-radius:50%; display:grid; place-items:center;
+  background:radial-gradient(circle,rgba(255,203,107,.35),transparent 70%);
+}
+.moment .stage .ring::before{content:''; position:absolute; inset:6px; border-radius:50%; border:2px dashed rgba(255,216,107,.5); animation:spin 14s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.moment .lbl{font-family:var(--f-display); font-weight:800; font-size:13px; letter-spacing:1px; text-transform:uppercase; opacity:.8}
+/* egg about to burst */
+.egg-burst{
+  width:96px;height:108px; border-radius:50% 50% 48% 48%/58% 58% 42% 42%; position:relative;
+  background:radial-gradient(circle at 38% 30%,#FFF4D8,#FFE3A6 35%,#FFCB6B 70%,#F0A93F);
+  box-shadow:0 0 50px rgba(255,203,107,.8), inset 0 0 20px rgba(255,255,255,.6);
+  animation:shake .5s ease-in-out infinite;
+}
+@keyframes shake{0%,100%{transform:rotate(0)}25%{transform:rotate(-12deg)}75%{transform:rotate(12deg)}}
+/* burst flash ring */
+.flash{position:absolute; inset:50%; width:0;height:0; border-radius:50%;
+  border:4px solid rgba(255,233,160,.9); box-shadow:0 0 40px rgba(255,203,107,.9);
+  animation:flash 1.4s ease-out infinite}
+@keyframes flash{0%{inset:50%; opacity:1}100%{inset:-2%; opacity:0; border-width:1px}}
+/* radiating particles */
+.burst-p{position:absolute; width:8px;height:8px;border-radius:50%; left:50%;top:50%; background:#FFE3A6; box-shadow:0 0 10px #FFD86B; opacity:0; animation:fly 1.4s ease-out infinite}
+.burst-p.a{--x:120px;--y:-70px;animation-delay:0s}
+.burst-p.b{--x:90px;--y:90px;animation-delay:.12s}
+.burst-p.c{--x:-110px;--y:40px;animation-delay:.24s}
+.burst-p.d{--x:-70px;--y:-100px;animation-delay:.36s}
+.burst-p.e{--x:130px;--y:70px;animation-delay:.48s}
+.burst-p.f{--x:-90px;--y:-60px;background:#C9A8FF;box-shadow:0 0 10px #B07BE8;animation-delay:.6s}
+@keyframes fly{0%{transform:translate(-50%,-50%) scale(.6);opacity:0}25%{opacity:1}100%{transform:translate(calc(-50% + var(--x)),calc(-50% + var(--y))) scale(.2);opacity:0}}
+/* arrow */
+.arrow{font-family:var(--f-display); font-weight:800; font-size:30px; color:var(--golden); text-shadow:0 0 18px rgba(255,203,107,.7); animation:bob 2.4s ease-in-out infinite}
+/* baby emerged + glow */
+.baby-glow{width:110px;height:110px;border-radius:50%; display:grid;place-items:center; font-size:78px;
+  background:radial-gradient(circle,rgba(201,168,255,.45),transparent 70%);
+  filter:drop-shadow(0 0 26px rgba(201,168,255,.7)); animation:bob 3s ease-in-out infinite}
+.moment .caption{position:absolute; bottom:18px; left:0; right:0; text-align:center; font-size:12.5px; opacity:.72; font-weight:700}
+
+/* ── 2C: Asset SLOT FORMAT (empty, waiting for real art) ──────── */
+.slot-format{display:grid; grid-template-columns:repeat(4,1fr); gap:22px; margin-top:8px}
+@media (max-width:760px){.slot-format{grid-template-columns:repeat(2,1fr)}}
+.aslot{
+  position:relative; aspect-ratio:4/5; border-radius:20px; display:grid; place-items:center; text-align:center;
+  background:
+    repeating-linear-gradient(135deg,rgba(196,154,108,.05) 0 14px,rgba(196,154,108,.10) 14px 28px),
+    rgba(255,255,255,.55);
+  border:2px dashed rgba(196,154,108,.45);
+  box-shadow:inset 0 2px 10px rgba(196,154,108,.1), 0 8px 20px rgba(196,154,108,.08);
+}
+.aslot .ph{display:flex; flex-direction:column; align-items:center; gap:8px; padding:18px; color:var(--t-muted)}
+.aslot .ph .plus{width:46px;height:46px;border-radius:14px; display:grid;place-items:center; font-size:24px; font-weight:800;
+  background:rgba(255,255,255,.7); border:1px solid rgba(196,154,108,.3); color:#C49A6C;
+  box-shadow:0 4px 10px rgba(196,154,108,.12)}
+.aslot .ph .t{font-family:var(--f-display); font-weight:800; font-size:13px; color:var(--ink)}
+.aslot .ph .d{font-size:11px; line-height:1.4; max-width:140px; font-weight:600}
+.aslot .fmt{position:absolute; top:10px; right:10px; font:800 9px/1 var(--f-body); letter-spacing:.5px;
+  padding:4px 8px; border-radius:999px; background:rgba(58,58,82,.85); color:#FFF6E9}
+
+/* ── legend / footer note ─────────────────────────────────────── */
+.legend{
+  margin-top:30px; padding:18px 20px; border-radius:18px; font-size:12.5px; line-height:1.6; color:var(--t-muted);
+  background:rgba(255,255,255,.6); border:1px solid rgba(255,255,255,.6);
+  box-shadow:0 6px 16px rgba(58,58,82,.06);
+}
+.legend b{color:var(--ink)}
+.legend code{background:rgba(124,92,191,.12); color:#6b4fae; padding:1px 6px; border-radius:6px; font-size:11.5px}
+.kbd{display:inline-flex; gap:6px; flex-wrap:wrap; margin-top:8px}
+.kbd span{display:inline-flex;align-items:center;gap:5px; padding:4px 10px; border-radius:999px; background:rgba(255,255,255,.7); font-size:11px; font-weight:700; border:1px solid rgba(196,154,108,.2)}
+.swatch{width:10px;height:10px;border-radius:3px;display:inline-block}
+
+/* ════════════════════════════════════════════════════════════════
+   SECTION 05 — SLOT ENGINE  (gene uint64 → live creature)  · Flamingo
+   Ratio-agnostic. Default art window = 1:1 (matches SVG viewBox 512²).
+   Reuses the .slot glow frame; engine writes every --critter-* each render.
+   ════════════════════════════════════════════════════════════════ */
+.engine-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:22px; margin-top:8px}
+.engine-grid.dense{grid-template-columns:repeat(8,1fr); gap:14px}
+@media (max-width:880px){.engine-grid{grid-template-columns:repeat(2,1fr)} .engine-grid.dense{grid-template-columns:repeat(4,1fr)}}
+/* creature art window — 1:1 (least crop on a 512² viewBox); doesn't touch Monanisa's 7:10 card */
+.slot .art.creature{aspect-ratio:1/1; padding:4px}
+.slot .art.creature .critter{width:100%; height:100%; display:block}
+/* inline creature consumes --critter-* inherited from .slot */
+.critter .body-shape{fill:var(--critter-base)}
+.critter .body-shadow{fill:var(--critter-base-dark)}
+.critter .accent-part{fill:var(--critter-accent)}
+.critter .belly-part{fill:var(--critter-belly)}
+.critter .pattern-part{fill:var(--critter-pattern); opacity:var(--critter-pattern-opacity)}
+.critter .eye{fill:var(--critter-eye)}
+/* PATTERN TOGGLE — genuinely driven by data-pat on the host (the working
+   version; creature-template.svg:22 hardcodes stripes and ignores --critter-pat-idx) */
+.critter .pat-stripes,.critter .pat-spots,.critter .pat-hearts,.critter .pat-stars{display:none; transform:rotate(var(--pat-rot,0deg)); transform-origin:256px 290px; transition:transform .3s var(--ease-pop)}
+.critter-host[data-pat="0"] .pat-stripes{display:inline}
+.critter-host[data-pat="1"] .pat-spots{display:inline}
+.critter-host[data-pat="2"] .pat-hearts{display:inline}
+.critter-host[data-pat="3"] .pat-stars{display:inline}
+/* tier-driven frame intensity: common subtle → legendary strong (padding = frame width) */
+.slot.engine{padding:var(--frame-w,3px)}
+.slot.engine.t-common{--frame-w:3px}
+.slot.engine.t-rare{--frame-w:4px}
+.slot.engine.t-epic{--frame-w:5px}
+.slot.engine.t-legend{--frame-w:6px}
+.slot .meta{position:absolute; bottom:5px; left:6px; right:6px; text-align:center; font:700 8px/1.15 var(--f-body); color:#5a5870; letter-spacing:.2px; background:rgba(255,255,255,.55); border-radius:5px; padding:2px 3px; pointer-events:none}
+.engine-ctrl{display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-top:16px}
+.btn-g{font:800 13px/1 var(--f-display); padding:11px 20px; border:none; border-radius:13px; cursor:pointer; color:#3A2A12; background:linear-gradient(135deg,#FFE3A6,#FFCB6B 55%,#FF9F45); box-shadow:0 5px 0 #E68A1F,0 10px 22px rgba(255,159,69,.3); transition:transform .14s var(--ease-pop)}
+.btn-g:hover{transform:translateY(-2px)}
+.btn-g:active{transform:translateY(2px); box-shadow:0 2px 0 #E68A1F}
+.engine-ctrl .note{font:600 12px/1.4 var(--f-body); color:var(--t-muted); max-width:560px}
+.engine-ctrl code{background:rgba(124,92,191,.12); color:#6b4fae; padding:1px 5px; border-radius:5px; font-size:11px}
+
+.foot{margin-top:34px; text-align:center; font-size:11.5px; color:var(--t-muted); font-weight:600; opacity:.85}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Direction banner -->
+  <div class="banner">
+    <span class="tag">Mockup · v1</span>
+    <b>Pocket Hatchery — UI Direction</b>
+    <small>โชว์ทิศทาง “modern + depth + juicy effects” ก่อนลงโค้ดจริง · โดย Flamingo · ไม่ใช่ของ final</small>
+  </div>
+
+  <!-- ═══ SECTION 1 — MODERNIZED DASHBOARD ═══ -->
+  <div class="sec-label">
+    <span class="num">01</span>
+    <h2>Modernized Dashboard</h2>
+    <span class="hint">depth · glass · spacing · typography · color hierarchy · slim scrollbar</span>
+  </div>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="brand">
+      <div class="mark">🥚</div>
+      <div>
+        <h1>Pocket Hatchery</h1>
+        <span class="sub">Cozy-premium creature collector</span>
+      </div>
+    </div>
+    <div class="h-right">
+      <div class="pill"><span class="dot"></span> WAX Testnet</div>
+      <div class="pill"><span>🪙</span> <span class="acct">bagideasuper</span> <button class="btn-disconnect">Disconnect</button></div>
+    </div>
+  </header>
+
+  <!-- Resource chips -->
+  <div class="res-row">
+    <div class="chip"><div class="chip-ico ico-egg">🥚</div><div><div class="lbl">EGG</div><div class="val">12,480</div></div></div>
+    <div class="chip"><div class="chip-ico ico-en">⚡</div><div><div class="lbl">Energy</div><div class="val">86<span class="max">/100</span></div></div></div>
+    <div class="chip"><div class="chip-ico ico-hatch">💎</div><div><div class="lbl">$HATCH</div><div class="val">1,204</div></div></div>
+  </div>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-art"><div class="egg"></div></div>
+    <div class="hero-txt">
+      <h2>Hatch your <span class="accent">magical</span> creature</h2>
+      <button class="cta">🥚 Hatch Egg <span class="cost">(60 EGG)</span></button>
+    </div>
+  </section>
+
+  <!-- ═══ SECTION 2A — RARITY GLOW FRAME (effect shell) ═══ -->
+  <div class="sec-label">
+    <span class="num">02</span>
+    <h2>Effects Framework — Rarity Glow Frame</h2>
+    <span class="hint">overlay layer ที่หุ้มการ์ดของ Monanisa · ตาม tier · ไม่แตะเนื้อการ์ด</span>
+  </div>
+  <div class="sec-head"><h2>Your Creatures</h2><span class="count">4 collected · effect shell shown</span></div>
+
+  <div class="tier-grid">
+    <div class="slot t-common"><div class="inner">
+      <div class="art"><span class="badge">Common</span><span class="glyph">🦊</span></div>
+      <div class="info"><div class="name">Leafy</div><div class="tier">Forest Kit · common</div></div>
+    </div></div>
+
+    <div class="slot t-rare"><div class="inner">
+      <div class="art"><span class="badge">Rare</span><span class="glyph">🐧</span></div>
+      <div class="info"><div class="name">Frost</div><div class="tier">Tundra Cub · rare</div></div>
+    </div></div>
+
+    <div class="slot t-epic"><div class="inner">
+      <div class="art"><span class="badge">Epic</span><span class="glyph">🦄</span></div>
+      <div class="info"><div class="name">Lumen</div><div class="tier">Star Maned · epic</div></div>
+    </div></div>
+
+    <div class="slot t-legend"><div class="inner">
+      <div class="art">
+        <span class="badge">Legendary</span>
+        <span class="glyph">🐉</span>
+        <span class="p p1"></span><span class="p p2"></span><span class="p p3"></span><span class="p p4"></span>
+      </div>
+      <div class="info"><div class="name">Solaris</div><div class="tier">Iridescent Drake · legendary</div></div>
+    </div></div>
+  </div>
+
+  <!-- ═══ SECTION 2B — HATCH → EVOLVE MOMENT ═══ -->
+  <div class="sec-label">
+    <span class="num">03</span>
+    <h2>Effects Framework — Hatch &amp; Evolve Moment</h2>
+    <span class="hint">flash + particle + glow · “ความ juicy คือสิ่งที่แยกเกมสวยจากธรรมดา” (ART.md)</span>
+  </div>
+
+  <div class="moment">
+    <div class="stage">
+      <div class="ring">
+        <div class="egg-burst"></div>
+      </div>
+      <div class="lbl">Hatching</div>
+    </div>
+
+    <div class="arrow">✦ ✦ ✦</div>
+
+    <div class="stage">
+      <div class="ring">
+        <div class="baby-glow">🦊</div>
+        <span class="flash"></span>
+        <span class="burst-p a"></span><span class="burst-p b"></span><span class="burst-p c"></span>
+        <span class="burst-p d"></span><span class="burst-p e"></span><span class="burst-p f"></span>
+      </div>
+      <div class="lbl">Foxling is born!</div>
+    </div>
+
+    <div class="caption">ทิศทาง: ไข่สั่น → flash ring ขยาย + อนุภาคกระจาย (gold + lavender) → baby เด้งเข้ามาพร้อม aura glow · reusable กับ evolve ด้วย</div>
+  </div>
+
+  <!-- ═══ SECTION 2C — ASSET SLOT FORMAT ═══ -->
+  <div class="sec-label">
+    <span class="num">04</span>
+    <h2>Asset Slot Format — รอ game assets</h2>
+    <span class="hint">framed slot พร้อมรับ PNG / SVG / spine ที่บอสจะหามา · เป็น overlay แยก</span>
+  </div>
+
+  <div class="slot-format">
+    <div class="aslot"><span class="fmt">PNG</span><div class="ph"><div class="plus">＋</div><div class="t">Creature Art</div><div class="d">transparent BG · 4:3 · idle pose</div></div></div>
+    <div class="aslot"><span class="fmt">SVG</span><div class="ph"><div class="plus">＋</div><div class="t">Icon / Badge</div><div class="d">stage + rarity mark</div></div></div>
+    <div class="aslot"><span class="fmt">SPINE</span><div class="ph"><div class="plus">＋</div><div class="t">Idle / Evolve</div><div class="d">spritesheet หรือ Spine/Lottie · FPS + frame กำกับ</div></div></div>
+    <div class="aslot"><span class="fmt">FX</span><div class="ph"><div class="plus">＋</div><div class="t">Particle Pack</div><div class="d">sparkle / aura / burst · แยก layer</div></div></div>
+  </div>
+
+  <!-- ═══ SECTION 05 — SLOT ENGINE (gene → live creature) ═══ -->
+  <div class="sec-label">
+    <span class="num">05</span>
+    <h2>Slot Engine — Gene → Live Creature</h2>
+    <span class="hint">decode gene uint64 → เขียน <code style="background:rgba(124,92,191,.12);color:#6b4fae;padding:1px 5px;border-radius:5px;font-size:11px">--critter-*</code> ครบ → inline SVG · default 1:1 · pattern toggle ทำงานจริง · map ครบ 16</span>
+  </div>
+
+  <div class="sec-head"><h2>All 16 pattern_ids</h2><span class="count">ตัวตัว/สีเดียวกันหมด — ต่างกันแค่ pattern_id (bits 16–19) → พิสูจน์ group = pid ÷ 4, variant = pid % 4</span></div>
+  <div class="engine-grid dense" id="eng16"></div>
+
+  <div class="engine-ctrl">
+    <button class="btn-g" id="rng">🎲 Randomize colors</button>
+    <span class="note">แต่ละใบ decode <code>pattern_id</code> จริง → <code>patIdx = pid≫2 &amp; 3</code> (กลุ่ม Stripes/Spots/Hearts/Stars) + <code>variant = pid &amp; 3</code> (หมุน subtle 0/9/18/27°) · สีตัว/หู/ลาย/ตา ดึงจาก gene ครบทุก token ทุก render</span>
+  </div>
+
+  <div class="sec-head" style="margin-top:30px"><h2>Presets × Tier (glow frame)</h2><span class="count">เช็ค: Lagoon pid4=Spots · Mystic pid12=Stars · Sunborn pid8=Hearts · Prima pid13=Stars — ถูกต้อง (lab เดิมออกผิดเพราะ <code style="background:rgba(124,92,191,.12);color:#6b4fae;padding:0 4px;border-radius:4px;font-size:10.5px">&amp; 0x3</code>)</span></div>
+  <div class="engine-grid" id="engPresets"></div>
+
+  <!-- legend -->
+  <div class="legend">
+    <b>ทำไมถึงดู “ไม่ธรรมดา” ขึ้น:</b>
+    fine-grain texture บนพื้นหลัง + aurora blobs ลอยเบลอ + เงานุ่นุ่ม 2 ชั้น (tight + ambient) + ขอบกระจกมีแสงขอบบน +
+    ปุ่มทองมี glow halo + gradient text หัวเรื่อง. ทุกอย่างดึงจาก <code>tokens.css</code> เดิม (rarity / motion / elevation)
+    จึงเข้าได้กับงาน Monanisa โดยไม่ชน.<br>
+    <b>Rarity tier (ART.md §3):</b>
+    <span class="kbd">
+      <span><i class="swatch" style="background:#8FD694"></i> common</span>
+      <span><i class="swatch" style="background:#5FB8E8"></i> rare</span>
+      <span><i class="swatch" style="background:#B07BE8"></i> epic</span>
+      <span><i class="swatch" style="background:#FFD86B"></i> legendary (+iridescent aura)</span>
+    </span>
+  </div>
+
+  <div class="foot">Pocket Hatchery · UI Direction Mockup v1 — Flamingo · scope = screen-level + effects shell · NFT card content ของ Monanisa</div>
+
+</div>
+<script>
+/* ════════════════════════════════════════════════════════════════
+   SLOT ENGINE — gene uint64 → live creature   (Flamingo · 2026-07-03)
+   Ratio-agnostic. Default art = 1:1. Writes EVERY --critter-* per render.
+   patIdx = (pattern_id >> 2) & 3   ← GROUP  (the fix; showcase.html uses
+   `pattern_id & 0x3`, which is the within-group variant, not the group —
+   so lagoon/mystic/sunborn presets render the wrong pattern there).
+   ════════════════════════════════════════════════════════════════ */
+const SLOT_EYE_PALETTE = [     // eye_variant bits 36–39 → 16-entry palette (idx 0 = spec default)
+  '#3A3A52', 'hsl(0 55% 32%)','hsl(24 60% 33%)','hsl(48 62% 32%)',
+  'hsl(72 52% 30%)','hsl(96 55% 30%)','hsl(120 52% 28%)','hsl(150 55% 30%)',
+  'hsl(174 60% 28%)','hsl(198 65% 31%)','hsl(222 60% 33%)','hsl(246 55% 33%)',
+  'hsl(270 55% 33%)','hsl(294 55% 33%)','hsl(318 60% 33%)','hsl(342 60% 33%)'
+];
+const SLOT_AURA = {common:'rgba(143,214,148,.35)',rare:'rgba(95,184,232,.42)',epic:'rgba(176,123,232,.48)',legend:'rgba(255,216,107,.58)'};
+const PAT_NAME = ['Stripes','Spots','Hearts','Stars'];
+
+function decodeGene(gene){
+  gene = BigInt(gene);
+  return {
+    body_hue:   Number((gene >> 0n)  & 0xFFn),
+    accent_hue: Number((gene >> 8n)  & 0xFFn),
+    pattern_id: Number((gene >> 16n) & 0x0Fn),
+    pattern_hue:Number((gene >> 20n) & 0xFFn),
+    sat_lvl:    Number((gene >> 28n) & 0x0Fn),
+    bright_mod: Number((gene >> 32n) & 0x0Fn),
+    eye_var:    Number((gene >> 36n) & 0x0Fn),
+    pat_opac:   Number((gene >> 40n) & 0x0Fn)
+  };
+}
+function encodeGene(g){
+  let gene = 0n;
+  gene |= BigInt(g.body_hue    & 0xFF) << 0n;
+  gene |= BigInt(g.accent_hue  & 0xFF) << 8n;
+  gene |= BigInt(g.pattern_id  & 0x0F) << 16n;
+  gene |= BigInt(g.pattern_hue & 0xFF) << 20n;
+  gene |= BigInt(g.sat_lvl     & 0x0F) << 28n;
+  gene |= BigInt(g.bright_mod  & 0x0F) << 32n;
+  gene |= BigInt(g.eye_var     & 0x0F) << 36n;
+  gene |= BigInt(g.pat_opac    & 0x0F) << 40n;
+  return gene;
+}
+function geneToVars(g){
+  const sat  = 40 + (g.sat_lvl/15)*45;          // 40–85%
+  const brit = 55 + ((g.bright_mod-7)/15)*30;   // ~40–70%
+  const bh = Math.round(g.body_hue*360/255), ah = Math.round(g.accent_hue*360/255), ph = Math.round(g.pattern_hue*360/255);
+  return {
+    base:            `hsl(${bh} ${Math.round(sat)}% ${Math.round(brit)}%)`,
+    baseDark:        `hsl(${bh} ${Math.round(sat)}% ${Math.round(brit-16)}%)`,
+    accent:          `hsl(${ah} ${Math.round(sat+3)}% ${Math.round(brit+6)}%)`,
+    belly:           '#F5F0E8',
+    pattern:         `hsl(${ph} ${Math.round(sat+5)}% ${Math.round(brit+2)}%)`,
+    patternOpacity:  (0.20 + (g.pat_opac/15)*0.60).toFixed(2),
+    patIdx:          (g.pattern_id >> 2) & 3,    // ← GROUP (stripes/spots/hearts/stars)
+    patVariant:      g.pattern_id & 3,            // within-group 0–3
+    patRot:          (g.pattern_id & 3) * 9,      // subtle rotation so all 16 differ
+    eye:             SLOT_EYE_PALETTE[g.eye_var & 15]
+  };
+}
+function geneHex(gene){ const s = BigInt(gene).toString(16).toUpperCase().padStart(12,'0'); return '0x'+s.slice(0,4)+'_'+s.slice(4,8)+'_'+s.slice(8,12); }
+const cap = s => s.charAt(0).toUpperCase()+s.slice(1);
+
+/* Inline creature SVG — Monanisa's exact shapes (creature-template.svg);
+   eyes wired to --critter-eye; 4 pattern groups keep her art, toggled by [data-pat]. */
+function creatureSVG(){
+  return `<svg class="critter" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="bG" cx="40%" cy="35%" r="60%">
+      <stop offset="0%" stop-color="rgba(255,255,255,.25)"/><stop offset="45%" stop-color="rgba(255,255,255,.05)"/>
+      <stop offset="80%" stop-color="rgba(0,0,0,.05)"/><stop offset="100%" stop-color="rgba(0,0,0,.18)"/></radialGradient>
+    <clipPath id="bC"><ellipse cx="256" cy="280" rx="110" ry="115"/></clipPath>
+  </defs>
+  <ellipse cx="256" cy="430" rx="95" ry="16" fill="rgba(58,58,82,.22)"/>
+  <g class="accent-part">
+    <ellipse cx="370" cy="330" rx="50" ry="35" transform="rotate(-20 370 330)"/>
+    <ellipse cx="385" cy="310" rx="35" ry="25" transform="rotate(-35 385 310)"/>
+    <circle cx="410" cy="300" r="14"/><circle cx="398" cy="288" r="10"/></g>
+  <g class="accent-part">
+    <ellipse cx="175" cy="140" rx="30" ry="55" transform="rotate(-18 175 140)"/>
+    <ellipse class="belly-part" cx="173" cy="145" rx="16" ry="35" transform="rotate(-18 173 145)"/></g>
+  <g class="accent-part">
+    <ellipse cx="320" cy="135" rx="30" ry="58" transform="rotate(15 320 135)"/>
+    <ellipse class="belly-part" cx="318" cy="140" rx="16" ry="38" transform="rotate(15 318 140)"/></g>
+  <ellipse class="body-shape" cx="256" cy="290" rx="115" ry="120"/>
+  <ellipse cx="256" cy="290" rx="115" ry="120" fill="url(#bG)"/>
+  <ellipse class="body-shadow" cx="256" cy="350" rx="90" ry="45" opacity=".35"/>
+  <g clip-path="url(#bC)">
+    <g class="pat-stripes">
+      <ellipse class="pattern-part" cx="200" cy="220" rx="38" ry="10" transform="rotate(-18 200 220)"/>
+      <ellipse class="pattern-part" cx="225" cy="238" rx="40" ry="10" transform="rotate(-12 225 238)"/>
+      <ellipse class="pattern-part" cx="252" cy="256" rx="42" ry="10" transform="rotate(-6 252 256)"/>
+      <ellipse class="pattern-part" cx="278" cy="242" rx="40" ry="10" transform="rotate(2 278 242)"/>
+      <ellipse class="pattern-part" cx="305" cy="228" rx="38" ry="10" transform="rotate(8 305 228)"/>
+      <ellipse class="pattern-part" cx="330" cy="215" rx="35" ry="10" transform="rotate(14 330 215)"/>
+      <ellipse class="pattern-part" cx="256" cy="195" rx="18" ry="14"/></g>
+    <g class="pat-spots">
+      <circle class="pattern-part" cx="210" cy="215" r="12"/><circle class="pattern-part" cx="270" cy="205" r="14"/>
+      <circle class="pattern-part" cx="185" cy="260" r="10"/><circle class="pattern-part" cx="305" cy="255" r="13"/>
+      <circle class="pattern-part" cx="230" cy="305" r="11"/><circle class="pattern-part" cx="280" cy="315" r="9"/>
+      <circle class="pattern-part" cx="200" cy="340" r="11"/><circle class="pattern-part" cx="315" cy="340" r="10"/>
+      <ellipse class="pattern-part" cx="256" cy="195" rx="18" ry="14"/></g>
+    <g class="pat-hearts">
+      <path class="pattern-part" d="M208,215 Q202,208 208,202 Q214,208 208,215Z" transform="scale(1.3) translate(-60,-50)"/>
+      <path class="pattern-part" d="M270,220 Q264,213 270,207 Q276,213 270,220Z" transform="scale(1.1) translate(-25,-35)"/>
+      <path class="pattern-part" d="M190,265 Q184,258 190,252 Q196,258 190,265Z" transform="scale(1) translate(-5,-5)"/>
+      <path class="pattern-part" d="M310,270 Q304,263 310,257 Q316,263 310,270Z" transform="scale(1.1) translate(-30,-10)"/>
+      <path class="pattern-part" d="M240,320 Q234,313 240,307 Q246,313 240,320Z" transform="scale(.9) translate(25,35)"/>
+      <path class="pattern-part" d="M290,325 Q284,318 290,312 Q296,318 290,325Z" transform="scale(.9) translate(35,35)"/>
+      <ellipse class="pattern-part" cx="256" cy="195" rx="18" ry="14"/></g>
+    <g class="pat-stars">
+      <polygon class="pattern-part" points="210,202 213,212 224,212 215,218 219,228 210,222 201,228 205,218 196,212 207,212"/>
+      <polygon class="pattern-part" points="275,195 277,203 285,203 278,208 281,216 275,211 269,216 272,208 265,203 273,203"/>
+      <polygon class="pattern-part" points="188,260 190,267 197,267 191,272 194,279 188,274 182,279 185,272 179,267 186,267"/>
+      <polygon class="pattern-part" points="315,258 317,265 324,265 318,270 321,277 315,272 309,277 312,270 306,265 313,265"/>
+      <polygon class="pattern-part" points="240,315 242,322 249,322 243,327 246,334 240,329 234,334 237,327 231,322 238,322"/>
+      <polygon class="pattern-part" points="295,320 297,327 304,327 298,332 301,339 295,334 289,339 292,332 286,327 293,327"/>
+      <ellipse class="pattern-part" cx="256" cy="195" rx="18" ry="14"/></g>
+  </g>
+  <ellipse class="belly-part" cx="256" cy="320" rx="65" ry="55" opacity=".85"/>
+  <ellipse class="body-shape" cx="190" cy="395" rx="28" ry="18"/>
+  <ellipse class="body-shape" cx="322" cy="395" rx="28" ry="18"/>
+  <circle class="belly-part" cx="184" cy="392" r="5" opacity=".6"/><circle class="belly-part" cx="196" cy="392" r="5" opacity=".6"/>
+  <circle class="belly-part" cx="316" cy="392" r="5" opacity=".6"/><circle class="belly-part" cx="328" cy="392" r="5" opacity=".6"/>
+  <ellipse class="eye" cx="222" cy="265" rx="18" ry="22"/><circle cx="216" cy="258" r="7" fill="#fff"/><circle cx="227" cy="268" r="3" fill="#fff"/>
+  <ellipse class="eye" cx="290" cy="265" rx="18" ry="22"/><circle cx="284" cy="258" r="7" fill="#fff"/><circle cx="295" cy="268" r="3" fill="#fff"/>
+  <ellipse cx="256" cy="290" rx="8" ry="5" fill="#FF9EB5" opacity=".5"/>
+  <path d="M250,296 Q256,302 262,296" fill="none" stroke="#3A3A52" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+  <circle class="pattern-part" cx="200" cy="288" r="14" opacity=".25"/><circle class="pattern-part" cx="312" cy="288" r="14" opacity=".25"/>
+</svg>`;
+}
+
+/* The engine: one call writes every --critter-*, sets the glow-frame tier,
+   injects the inline SVG, and drives the working pattern toggle via data-pat. */
+function applySlot(slot, gene, opts){
+  opts = opts || {};
+  const g = decodeGene(gene), v = geneToVars(g), tier = opts.tier || 'common';
+  slot.className = 'slot engine t-'+tier;
+  const s = slot.style;
+  s.setProperty('--critter-base', v.base);
+  s.setProperty('--critter-base-dark', v.baseDark);
+  s.setProperty('--critter-accent', v.accent);
+  s.setProperty('--critter-belly', v.belly);
+  s.setProperty('--critter-pattern', v.pattern);
+  s.setProperty('--critter-pattern-opacity', v.patternOpacity);
+  s.setProperty('--critter-pat-idx', v.patIdx);
+  s.setProperty('--critter-pat-variant', v.patVariant);
+  s.setProperty('--critter-eye', v.eye);
+  s.setProperty('--aura', SLOT_AURA[tier]);
+  const particles = tier === 'legend' ? '<span class="p p1"></span><span class="p p2"></span><span class="p p3"></span><span class="p p4"></span>' : '';
+  const meta = opts.meta === false ? '' : `<div class="meta">pid ${g.pattern_id} · ${PAT_NAME[v.patIdx]} · v${v.patVariant}</div>`;
+  const info = opts.info === false ? '' : `<div class="info"><div class="name">${opts.name || geneHex(gene)}</div><div class="tier">${opts.species || (PAT_NAME[v.patIdx]+' · '+tier)}</div></div>`;
+  slot.innerHTML = `<div class="inner"><div class="art creature critter-host" data-pat="${v.patIdx}" style="--pat-rot:${v.patRot}deg"><span class="badge">${cap(tier)}</span>${particles}${creatureSVG()}${meta}</div>${info}</div>`;
+  return {g, v};
+}
+
+/* ── gallery: 16 pattern_ids (body identical → only pattern differs) ── */
+const BASE_G = {body_hue:96, accent_hue:35, pattern_hue:330, sat_lvl:9, bright_mod:8, eye_var:11, pat_opac:10};
+const PRESETS = [
+  {name:'Meadow',  species:'Forest Kit',  tier:'common', g:{body_hue:100,accent_hue:240,pattern_id:0, pattern_hue:205,sat_lvl:7, bright_mod:8, eye_var:7, pat_opac:8}},
+  {name:'Lagoon',  species:'Tide Pup',    tier:'rare',   g:{body_hue:127,accent_hue:30, pattern_id:4, pattern_hue:200,sat_lvl:8, bright_mod:7, eye_var:9, pat_opac:9}},
+  {name:'Azure',   species:'Sky Cub',     tier:'rare',   g:{body_hue:147,accent_hue:45, pattern_id:1, pattern_hue:220,sat_lvl:9, bright_mod:8, eye_var:10,pat_opac:7}},
+  {name:'Mystic',  species:'Star Maned',  tier:'epic',   g:{body_hue:190,accent_hue:50, pattern_id:12,pattern_hue:240,sat_lvl:10,bright_mod:7, eye_var:12,pat_opac:10}},
+  {name:'Sunborn', species:'Solar Drake', tier:'legend', g:{body_hue:40, accent_hue:20, pattern_id:8, pattern_hue:50, sat_lvl:11,bright_mod:12,eye_var:3, pat_opac:11}},
+  {name:'Blossom', species:'Petal Kit',   tier:'rare',   g:{body_hue:245,accent_hue:230,pattern_id:5, pattern_hue:248,sat_lvl:8, bright_mod:10,eye_var:14,pat_opac:9}},
+  {name:'Cocoa',   species:'Earth Mole',  tier:'common', g:{body_hue:20, accent_hue:40, pattern_id:2, pattern_hue:15, sat_lvl:5, bright_mod:6, eye_var:1, pat_opac:7}},
+  {name:'Prima',   species:'Prism Drake', tier:'legend', g:{body_hue:200,accent_hue:160,pattern_id:13,pattern_hue:210,sat_lvl:14,bright_mod:13,eye_var:8, pat_opac:13}}
+];
+const rnd = n => Math.floor(Math.random()*n);
+
+function render16(){
+  const host = document.getElementById('eng16'); host.innerHTML = '';
+  for(let pid=0; pid<16; pid++){
+    const slot = document.createElement('div');
+    applySlot(slot, encodeGene({...BASE_G, pattern_id:pid}), {tier:'common', info:false});
+    host.appendChild(slot);
+  }
+}
+function renderPresets(){
+  const host = document.getElementById('engPresets'); host.innerHTML = '';
+  PRESETS.forEach(p => { const slot = document.createElement('div'); applySlot(slot, encodeGene(p.g), {tier:p.tier, name:p.name, species:p.species, meta:false}); host.appendChild(slot); });
+}
+function randomize(){
+  BASE_G.body_hue=rnd(256); BASE_G.accent_hue=rnd(256); BASE_G.pattern_hue=rnd(256);
+  BASE_G.sat_lvl=rnd(16); BASE_G.bright_mod=rnd(16); BASE_G.eye_var=rnd(16); BASE_G.pat_opac=rnd(16);
+  PRESETS.forEach(p => { p.g.body_hue=rnd(256); p.g.accent_hue=rnd(256); p.g.pattern_hue=rnd(256); p.g.sat_lvl=rnd(16); p.g.bright_mod=rnd(16); p.g.eye_var=rnd(16); p.g.pat_opac=rnd(16); });
+  render16(); renderPresets();
+}
+render16(); renderPresets();
+document.getElementById('rng').addEventListener('click', randomize);
+</script>
+</body>
+</html>

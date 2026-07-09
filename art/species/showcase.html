@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pocket Hatchery — Species Roster (12 species)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#070b16; color:#F5F0E8; font-family:'Nunito',system-ui,sans-serif; min-height:100vh; }
+::-webkit-scrollbar { width:8px; } ::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:rgba(95,184,232,.55); border-radius:999px; }
+
+.hero {
+  text-align:center; padding:64px 24px 48px; position:relative; overflow:hidden;
+}
+.hero::before {
+  content:''; position:absolute; top:-150px; left:50%; transform:translateX(-50%);
+  width:700px; height:400px; background:radial-gradient(ellipse,rgba(201,168,255,.10) 0%,transparent 70%); pointer-events:none;
+}
+.hero h1 { font-family:'Baloo 2',system-ui,sans-serif; font-size:44px; font-weight:800; letter-spacing:-0.5px; }
+.hero h1 span { color:#FFCB6B; }
+.hero p { color:#7C7A92; font-size:16px; margin-top:12px; max-width:650px; margin-left:auto; margin-right:auto; }
+
+.species-grid {
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(360px,1fr));
+  gap:28px; padding:24px 36px 80px; max-width:1300px; margin:0 auto;
+}
+
+.species-card {
+  background:rgba(255,255,255,0.025); border-radius:22px; border:1px solid rgba(255,255,255,0.06);
+  overflow:hidden; transition:transform .25s,border-color .25s,box-shadow .25s;
+}
+.species-card:hover { transform:translateY(-6px); border-color:rgba(255,255,255,0.15); box-shadow:0 20px 50px rgba(0,0,0,0.3); }
+
+.card-header {
+  padding:20px 22px 14px; display:flex; align-items:center; gap:14px;
+}
+.card-emoji { font-size:40px; line-height:1; }
+.card-title { flex:1; }
+.card-title h3 { font-family:'Baloo 2',system-ui,sans-serif; font-size:20px; font-weight:700; }
+.card-title .sci { font-size:11px; color:#7C7A92; font-style:italic; margin-top:2px; }
+.card-element {
+  font-size:11px; font-weight:700; padding:4px 12px; border-radius:999px;
+  letter-spacing:1px; text-transform:uppercase;
+}
+.el-fire { background:rgba(255,203,107,0.15); color:#FFCB6B; }
+.el-water { background:rgba(91,192,190,0.15); color:#5BC0BE; }
+.el-earth { background:rgba(196,154,108,0.15); color:#C49A6C; }
+.el-air { background:rgba(168,220,240,0.15); color:#A8DCF0; }
+.el-nature { background:rgba(143,214,148,0.15); color:#8FD694; }
+.el-crystal { background:rgba(176,123,232,0.15); color:#B07BE8; }
+.el-shadow { background:rgba(58,58,82,0.3); color:#C9A8FF; }
+
+.card-art {
+  height:220px; display:flex; align-items:center; justify-content:center;
+  background:rgba(0,0,0,0.2); position:relative; overflow:hidden;
+}
+.card-art img { max-width:90%; max-height:90%; object-fit:contain; filter:drop-shadow(0 8px 16px rgba(0,0,0,0.3)); }
+.art-placeholder {
+  width:140px; height:140px; display:flex; align-items:center; justify-content:center;
+  font-size:80px; opacity:.25;
+}
+
+.card-body { padding:16px 22px 20px; }
+.card-desc { font-size:13px; color:rgba(255,255,255,0.55); line-height:1.6; margin-bottom:14px; }
+
+.trait-list { display:flex; flex-direction:column; gap:6px; margin-bottom:14px; }
+.trait-row { display:flex; justify-content:space-between; align-items:center; font-size:12px; }
+.trait-name { color:rgba(255,255,255,0.4); font-weight:700; }
+.trait-vals { display:flex; gap:5px; }
+.trait-chip {
+  font-size:10px; font-weight:700; padding:2px 8px; border-radius:999px;
+  background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.45);
+}
+
+.stats-row { display:flex; gap:8px; margin-bottom:14px; }
+.stat {
+  flex:1; background:rgba(255,255,255,0.03); border-radius:10px;
+  padding:8px 12px; text-align:center;
+}
+.stat-val { font-family:'Nunito',system-ui,sans-serif; font-size:18px; font-weight:800; color:#FFCB6B; }
+.stat-label { font-size:9px; color:rgba(255,255,255,0.3); font-weight:700; letter-spacing:1px; text-transform:uppercase; margin-top:1px; }
+
+.egg-preview {
+  display:flex; align-items:center; gap:10px; padding:10px 14px;
+  background:rgba(0,0,0,0.2); border-radius:12px;
+}
+.egg-icon { font-size:28px; }
+.egg-desc { font-size:11px; color:rgba(255,255,255,0.4); }
+.egg-desc strong { color:rgba(255,255,255,0.6); }
+
+@media (max-width:800px) {
+  .species-grid { grid-template-columns:1fr; padding:16px; }
+}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>Pocket Hatchery <span>Species Roster</span></h1>
+  <p>12 species · 6 elements · 4 evolution stages · infinite genetic combinations. Click any card below — every creature has unique silhouette, element, traits, and egg design.</p>
+</div>
+
+<div class="species-grid">
+
+  <!-- 1. FOXLING -->
+  <div class="species-card">
+    <div class="card-header">
+      <div class="card-emoji">🦊</div>
+      <div class="card-title"><h3>Foxling</h3><div class="sci">Vulpes magica</div></div>
+      <div class="card-element el-fire">🔥 Fire</div>
+    </div>
+    <div class="card-art">
+      <img src="concept-foxling.png" alt="Foxling" onerror="this.style.display='none';this.parentElement.querySelector('.art-placeholder').style.display='flex';">
+      <div class="art-placeholder" style="display:none">🦊</div>
+    </div>
+    <div class="card-body">
+      <div class="card-desc">The <strong>mascot species</strong>. A magical fox with mint-green fluffy fur, coral-tipped ears, and a bushy tail that grows iridescent in rare forms. The most balanced and versatile species — a perfect starter.</div>
+      <div class="trait-list">
+        <div class="trait-row"><span class="trait-name">Ear style</span><span class="trait-vals"><span class="trait-chip">pointed</span><span class="trait-chip">floppy</span><span class="trait-chip">tufted</span><span class="trait-chip">folded</span></span></div>
+        <div class="trait-row"><span class="trait-name">Tail plume</span><span class="trait-vals"><span class="trait-chip">standard</span><span class="trait-chip">fluffy</span><span class="trait-chip">forked</span><span class="trait-chip">crystal</span></span></div>
+        <div class="trait-row"><span class="trait-name">Forehead</span><span class="trait-vals"><span class="trait-chip">none</span><span class="trait-chip">diamond</span><span class="trait-chip">star</span><span class="trait-chip">crescent</span></span></div>
+      </div>
+      <div class="stats-row">
+        <div class="stat"><div class="stat-val">5–38</div><div class="stat-label">⚔ Power</div></div>
+        <div class="stat"><div class="stat-val">7–44</div><div class="stat-label">◆ Charm</div></div>
+      </div>
+      <div class="egg-preview"><span class="egg-icon">🥚</span><span class="egg-desc"><strong>Mint egg</strong> with cream dots + golden zigzag crack</span></div>
+    </div>
+  </div>
+
+  <!-- 2. OWLET -->
+  <div class="species-card">
+    <div class="card-header">
+      <div class="card-emoji">🦉</div>
+      <div class="card-title"><h3>Owlet</h3><div class="sci">Strigis rotundus</div></div>
+      <div class="card-element el-air">🌬️ Air</div>
+    </div>
+    <div class="card-art">
+      <img src="concept-owlet.png" alt="Owlet" onerror="this.style.display='none';this.parentElement.querySelector('.art-placeholder').style.display='flex';">
+      <div class="art-placeholder" style="display:none">🦉</div>
+    </div>
+    <div class="card-body">
+      <div class="card-desc">A <strong>round owl with no neck</strong> — head and body are one perfect sphere. Sky-blue feathers, enormous soulful eyes, and tiny wings. Highest CHARM-to-POW ratio among non-shadow species. Sits on the Ancient Tree watching everything.</div>
+      <div class="trait-list">
+        <div class="trait-row"><span class="trait-name">Eye rings</span><span class="trait-vals"><span class="trait-chip">simple</span><span class="trait-chip">double</span><span class="trait-chip">star</span><span class="trait-chip">crescent</span></span></div>
+        <div class="trait-row"><span class="trait-name">Wing style</span><span class="trait-vals"><span class="trait-chip">small</span><span class="trait-chip">broad</span><span class="trait-chip">pointed</span><span class="trait-chip">ethereal</span></span></div>
+        <div class="trait-row"><span class="trait-name">Crown</span><span class="trait-vals"><span class="trait-chip">none</span><span class="trait-chip">feather</span><span class="trait-chip">crystal</span><span class="trait-chip">star</span></span></div>
+      </div>
+      <div class="stats-row">
+        <div class="stat"><div class="stat-val">4–36</div><div class="stat-label">⚔ Power</div></div>
+        <div class="stat"><div class="stat-val">8–52</div><div class="stat-label">◆ Charm</div></div>
+      </div>
+      <div class="egg-preview"><span class="egg-icon">🥚</span><span class="egg-desc"><strong>Concentric blue egg</strong> with golden center dot + blue star crack</span></div>
+    </div>
+  </div>
+
+  <!-- 3. DROPLET -->
+  <div class="species-card">
+    <div class="card-header">
+      <div class="card-emoji">💧</div>
+      <div class="card-title"><h3>Droplet</h3><div class="sci">Aqua vivens</div></div>
+      <div class="card-element el-water">💧 Water</div>
+    </div>
+    <div class="card-art">
+      <img src="concept-droplet.png" alt="Droplet" onerror="this.style.display='none';this.parentElement.querySelector('.art-placeholder').style.display='flex';">
+      <div class="art-placeholder" style="display:none">💧</div>
+    </div>
+    <div class="card-body">
+      <div class="card-desc">A <strong>translucent teardrop of living water</strong> — its inner core glows visibly through the body. Only species where you can literally see its heart. Flowing fins and ripple patterns make every Droplet hypnotic to watch.</div>
+      <div class="trait-list">
+        <div class="trait-row"><span class="trait-name">Core shape</span><span class="trait-vals"><span class="trait-chip">circle</span><span class="trait-chip">heart</span><span class="trait-chip">star</span><span class="trait-chip">diamond</span></span></div>
+        <div class="trait-row"><span class="trait-name">Fin style</span><span class="trait-vals"><span class="trait-chip">simple</span><span class="trait-chip">flowing</span><span class="trait-chip">wing</span><span class="trait-chip">crystal</span></span></div>
+        <div class="trait-row"><span class="trait-name">Clarity</span><span class="trait-vals"><span class="trait-chip">clear</span><span class="trait-chip">misty</span><span class="trait-chip">shimmer</span><span class="trait-chip">prism</span></span></div>
+      </div>
+      <div class="stats-row">
+        <div class="stat"><div class="stat-val">3–32</div><div class="stat-label">⚔ Power</div></div>
+        <div class="stat"><div class="stat-val">10–56</div><div class="stat-label">◆ Charm</div></div>
+      </div>
+      <div class="egg-preview"><span class="egg-icon">🥚</span><span class="egg-desc"><strong>Teardrop egg</strong> with ripple wave pattern + white pearl crack</span></div>
+    </div>
+  </div>
+
+  <!-- 4. PEBBLIT -->
+  <div class="species-card">
+    <div class="card-header">
+      <div class="card-emoji">🪨</div>
+      <div class="card-title"><h3>Pebblit</h3><div class="sci">Lithos vivens</div></div>
+      <div class="card-element el-earth">🏔️ Earth</div>
+    </div>
+    <div class="card-art">
+      <img src="concept-pebblit.png" alt="Pebblit" onerror="this.style.display='none';this.parentElement.querySelector('.art-placeholder').style.display='flex';">
+      <div class="art-placeholder" style="display:none">🪨</div>
+    </div>
+    <div class="card-body">
+      <div class="card-desc">A <strong>living rock with four stubby legs</strong>. Covered in soft moss and tiny crystal growths. The tank of the roster — highest base POW and toughest to beat. Slow, steady, and impossibly cute for a rock.</div>
+      <div class="trait-list">
+        <div class="trait-row"><span class="trait-name">Stone type</span><span class="trait-vals"><span class="trait-chip">granite</span><span class="trait-chip">obsidian</span><span class="trait-chip">marble</span><span class="trait-chip">geode</span></span></div>
+        <div class="trait-row"><span class="trait-name">Moss cover</span><span class="trait-vals"><span class="trait-chip">minimal</span><span class="trait-chip">patchy</span><span class="trait-chip">full</span><span class="trait-chip">flowering</span></span></div>
+        <div class="trait-row"><span class="trait-name">Crystals</span><span class="trait-vals"><span class="trait-chip">none</span><span class="trait-chip">small</span><span class="trait-chip">cluster</span><span class="trait-chip">crown</span></span></div>
+      </div>
+      <div class="stats-row">
+        <div class="stat"><div class="stat-val">10–60</div><div class="stat-label">⚔ Power</div></div>
+        <div class="stat"><div class="stat-val">3–24</div><div class="stat-label">◆ Charm</div></div>
+      </div>
+      <div class="egg-preview"><span class="egg-icon">🥚</span><span class="egg-desc"><strong>Stone-textured egg</strong> with moss spots + green sprout crack</span></div>
+    </div>
+  </div>
+
+  <!-- 5. SPROUTLING -->
+  <div class="species-card">
+    <div class="card-header">
+      <div class="card-emoji">🌱</div>
+      <div class="card-title"><h3>Sproutling</h3><div class="sci">Herba ambulans</div></div>
+      <div class="card-element el-nature">🌿 Nature</div>
+    </div>
+    <div class="card-art">
+      <img src="concept-sproutling.png" alt="Sproutling" onerror="this.style.display='none';this.parentElement.querySelector('.art-placeholder').style.display='flex';">
+      <div class="art-placeholder" style="display:none">🌱</div>
+    </div>
+    <div class="card-body">
+      <div class="card-desc">A <strong>walking plant</strong> with a leafy head and root-legs. The only species whose appearance <strong>changes with seasons</strong> — spring green, summer gold, autumn red, winter white. Its head leaf grows flowers or fruit depending on traits.</div>
+      <div class="trait-list">
+        <div class="trait-row"><span class="trait-name">Head plant</span><span class="trait-vals"><span class="trait-chip">leaf</span><span class="trait-chip">flower</span><span class="trait-chip">fruit</span><span class="trait-chip">vine</span></span></div>
+        <div class="trait-row"><span class="trait-name">Root style</span><span class="trait-vals"><span class="trait-chip">simple</span><span class="trait-chip">spread</span><span class="trait-chip">curly</span><span class="trait-chip">glowing</span></span></div>
+        <div class="trait-row"><span class="trait-name">Season</span><span class="trait-vals"><span class="trait-chip">spring</span><span class="trait-chip">summer</span><span class="trait-chip">autumn</span><span class="trait-chip">winter</span></span></div>
+      </div>
+      <div class="stats-row">
+        <div class="stat"><div class="stat-val">3–28</div><div class="stat-label">⚔ Power</div></div>
+        <div class="stat"><div class="stat-val">9–54</div><div class="stat-label">◆ Charm</div></div>
+      </div>
+      <div class="egg-preview"><span class="egg-icon">🥚</span><span class="egg-desc"><strong>Leaf-pattern egg</strong> with vine swirl + pink flower crack</span></div>
+    </div>
+  </div>
+
+  <!-- 6. FLICKER -->
+  <div class="species-card">
+    <div class="card-header">
+      <div class="card-emoji">🔥</div>
+      <div class="card-title"><h3>Flicker</h3><div class="sci">Ignis animatus</div></div>
+      <div class="card-element el-fire">🔥 Fire</div>
+    </div>
+    <div class="card-art">
+      <img src="concept-flicker.png" alt="Flicker" onerror="this.style.display='none';this.parentElement.querySelector('.art-placeholder').style.display='flex';">
+      <div class="art-placeholder" style="display:none">🔥</div>
+    </div>
+    <div class="card-body">
+      <div class="card-desc">A <strong>living flame</strong> — its body is pure fire with a white-hot core. The only species whose <strong>shape shifts with mood</strong> (bright and tall when happy, dim and small when sad). Blue-flame variants are the most sought-after.</div>
+      <div class="trait-list">
+        <div class="trait-row"><span class="trait-name">Flame color</span><span class="trait-vals"><span class="trait-chip">orange</span><span class="trait-chip">golden</span><span class="trait-chip">blue</span><span class="trait-chip">purple</span></span></div>
+        <div class="trait-row"><span class="trait-name">Flame shape</span><span class="trait-vals"><span class="trait-chip">teardrop</span><span class="trait-chip">candle</span><span class="trait-chip">torch</span><span class="trait-chip">spiral</span></span></div>
+        <div class="trait-row"><span class="trait-name">Sparks</span><span class="trait-vals"><span class="trait-chip">minimal</span><span class="trait-chip">moderate</span><span class="trait-chip">intense</span><span class="trait-chip">stars</span></span></div>
+      </div>
+      <div class="stats-row">
+        <div class="stat"><div class="stat-val">7–50</div><div class="stat-label">⚔ Power</div></div>
+        <div class="stat"><div class="stat-val">5–34</div><div class="stat-label">◆ Charm</div></div>
+      </div>
+      <div class="egg-preview"><span class="egg-icon">🥚</span><span class="egg-desc"><strong>Obsidian egg</strong> with golden flame pattern + flame crack</span></div>
+    </div>
+  </div>
+
+  <!-- 7. GLIMMER -->
+  <div class="species-card">
+    <div class="card-header">
+      <div class="card-emoji">💎</div>
+      <div class="card-title"><h3>Glimmer</h3><div class="sci">Crystallus vivens</div></div>
+      <div class="card-element el-crystal">✨ Crystal</div>
+    </div>
+    <div class="card-art">
+      <img src="concept-glimmer.png" alt="Glimmer" onerror="this.style.display='none';this.parentElement.querySelector('.art-placeholder').style.display='flex';">
+      <div class="art-placeholder" style="display:none">💎</div>
+    </div>
+    <div class="card-body">
+      <div class="card-desc">A <strong>hexagonal crystal being</strong> — the only species with geometric, non-organic form. Perfectly balanced stats (POW always equals CHARM). Refracts light into rainbows. The rarest base appearance rate of all species.</div>
+      <div class="trait-list">
+        <div class="trait-row"><span class="trait-name">Shape</span><span class="trait-vals"><span class="trait-chip">hexagon</span><span class="trait-chip">diamond</span><span class="trait-chip">obelisk</span><span class="trait-chip">cluster</span></span></div>
+        <div class="trait-row"><span class="trait-name">Inner core</span><span class="trait-vals"><span class="trait-chip">solid</span><span class="trait-chip">hollow</span><span class="trait-chip">swirl</span><span class="trait-chip">nebula</span></span></div>
+        <div class="trait-row"><span class="trait-name">Refraction</span><span class="trait-vals"><span class="trait-chip">clear</span><span class="trait-chip">rainbow</span><span class="trait-chip">aurora</span><span class="trait-chip">prism</span></span></div>
+      </div>
+      <div class="stats-row">
+        <div class="stat"><div class="stat-val">6–42</div><div class="stat-label">⚔ Power</div></div>
+        <div class="stat"><div class="stat-val">6–42</div><div class="stat-label">◆ Charm</div></div>
+      </div>
+      <div class="egg-preview"><span class="egg-icon">🥚</span><span class="egg-desc"><strong>Faceted gem egg</strong> with hexagonal lines + prism crack</span></div>
+    </div>
+  </div>
+
+  <!-- 8. WISP -->
+  <div class="species-card">
+    <div class="card-header">
+      <div class="card-emoji">👻</div>
+      <div class="card-title"><h3>Wisp</h3><div class="sci">Umbra ludens</div></div>
+      <div class="card-element el-shadow">🌙 Shadow</div>
+    </div>
+    <div class="card-art">
+      <img src="concept-wisp.png" alt="Wisp" onerror="this.style.display='none';this.parentElement.querySelector('.art-placeholder').style.display='flex';">
+      <div class="art-placeholder" style="display:none">👻</div>
+    </div>
+    <div class="card-body">
+      <div class="card-desc">A <strong>floating ghost with a smoke tail</strong> — the only species that <strong>has no legs</strong> and hovers. Eyes glow in the dark. Highest CHARM in the entire roster but the lowest POW. Leaves a faint starry trail when it moves.</div>
+      <div class="trait-list">
+        <div class="trait-row"><span class="trait-name">Tail style</span><span class="trait-vals"><span class="trait-chip">short</span><span class="trait-chip">long</span><span class="trait-chip">split</span><span class="trait-chip">nebula</span></span></div>
+        <div class="trait-row"><span class="trait-name">Glow color</span><span class="trait-vals"><span class="trait-chip">lavender</span><span class="trait-chip">cyan</span><span class="trait-chip">gold</span><span class="trait-chip">rainbow</span></span></div>
+        <div class="trait-row"><span class="trait-name">Opacity</span><span class="trait-vals"><span class="trait-chip">opaque</span><span class="trait-chip">semi</span><span class="trait-chip">ghostly</span><span class="trait-chip">prism</span></span></div>
+      </div>
+      <div class="stats-row">
+        <div class="stat"><div class="stat-val">2–24</div><div class="stat-label">⚔ Power</div></div>
+        <div class="stat"><div class="stat-val">12–64</div><div class="stat-label">◆ Charm</div></div>
+      </div>
+      <div class="egg-preview"><span class="egg-icon">🥚</span><span class="egg-desc"><strong>Dark purple egg</strong> with smoke swirl + star dots + mist crack</span></div>
+    </div>
+  </div>
+
+  <!-- 9. FLUFFLE -->
+  <div class="species-card">
+    <div class="card-header">
+      <div class="card-emoji">☁️</div>
+      <div class="card-title"><h3>Fluffle</h3><div class="sci">Nubes mollis</div></div>
+      <div class="card-element el-air">🌬️ Air</div>
+    </div>
+    <div class="card-art">
+      <img src="concept-fluffle.png" alt="Fluffle" onerror="this.style.display='none';this.parentElement.querySelector('.art-placeholder').style.display='flex';">
+      <div class="art-placeholder" style="display:none">☁️</div>
+    </div>
+    <div class="card-body">
+      <div class="card-desc">The <strong>fluffiest creature in existence</strong> — a living cloud with droopy ears. So soft its silhouette is slightly blurred. The template species for the NFT card design system. Maximum huggability.</div>
+      <div class="trait-list">
+        <div class="trait-row"><span class="trait-name">Fluff level</span><span class="trait-vals"><span class="trait-chip">smooth</span><span class="trait-chip">fluffy</span><span class="trait-chip">extra</span><span class="trait-chip">cloud</span></span></div>
+        <div class="trait-row"><span class="trait-name">Ear length</span><span class="trait-vals"><span class="trait-chip">short</span><span class="trait-chip">medium</span><span class="trait-chip">long</span><span class="trait-chip">curled</span></span></div>
+        <div class="trait-row"><span class="trait-name">Ear style</span><span class="trait-vals"><span class="trait-chip">straight</span><span class="trait-chip">floppy</span><span class="trait-chip">curled</span><span class="trait-chip">ribbon</span></span></div>
+      </div>
+      <div class="stats-row">
+        <div class="stat"><div class="stat-val">3–26</div><div class="stat-label">⚔ Power</div></div>
+        <div class="stat"><div class="stat-val">11–60</div><div class="stat-label">◆ Charm</div></div>
+      </div>
+      <div class="egg-preview"><span class="egg-icon">🥚</span><span class="egg-desc"><strong>Cream swirl egg</strong> with soft fur pattern + gentle puff crack</span></div>
+    </div>
+  </div>
+
+  <!-- 10. SHELLBY -->
+  <div class="species-card">
+    <div class="card-header">
+      <div class="card-emoji">🐚</div>
+      <div class="card-title"><h3>Shellby</h3><div class="sci">Cochlea margarita</div></div>
+      <div class="card-element el-water">💧 Water</div>
+    </div>
+    <div class="card-art">
+      <img src="concept-shellby.png" alt="Shellby" onerror="this.style.display='none';this.parentElement.querySelector('.art-placeholder').style.display='flex';">
+      <div class="art-placeholder" style="display:none">🐚</div>
+    </div>
+    <div class="card-body">
+      <div class="card-desc">A <strong>sea snail carrying a pearl shell home</strong>. The shell grows a new spiral each evolution stage. Black pearl variants are the holy grail. Antennae have eyes on the tips — watching you with gentle curiosity.</div>
+      <div class="trait-list">
+        <div class="trait-row"><span class="trait-name">Shell type</span><span class="trait-vals"><span class="trait-chip">spiral</span><span class="trait-chip">conch</span><span class="trait-chip">nautilus</span><span class="trait-chip">crown</span></span></div>
+        <div class="trait-row"><span class="trait-name">Shell color</span><span class="trait-vals"><span class="trait-chip">pearl</span><span class="trait-chip">coral</span><span class="trait-chip">abalone</span><span class="trait-chip">black</span></span></div>
+        <div class="trait-row"><span class="trait-name">Antennae</span><span class="trait-vals"><span class="trait-chip">short</span><span class="trait-chip">feather</span><span class="trait-chip">star</span><span class="trait-chip">glowing</span></span></div>
+      </div>
+      <div class="stats-row">
+        <div class="stat"><div class="stat-val">8–52</div><div class="stat-label">⚔ Power</div></div>
+        <div class="stat"><div class="stat-val">4–28</div><div class="stat-label">◆ Charm</div></div>
+      </div>
+      <div class="egg-preview"><span class="egg-icon">🥚</span><span class="egg-desc"><strong>Pearl spiral egg</strong> with shell whorl + spiral crack</span></div>
+    </div>
+  </div>
+
+  <!-- 11. DRACLING -->
+  <div class="species-card">
+    <div class="card-header">
+      <div class="card-emoji">🐉</div>
+      <div class="card-title"><h3>Dracling</h3><div class="sci">Draco parvus</div></div>
+      <div class="card-element el-fire">🔥 Fire</div>
+    </div>
+    <div class="card-art">
+      <img src="concept-dracling.png" alt="Dracling" onerror="this.style.display='none';this.parentElement.querySelector('.art-placeholder').style.display='flex';">
+      <div class="art-placeholder" style="display:none">🐉</div>
+    </div>
+    <div class="card-body">
+      <div class="card-desc">A <strong>baby dragon too chubby to fly</strong> — wings are comically small, so it runs flapping them instead. Lavender scales with golden belly. Highest Legendary drop rate (7%). The most coveted species by serious collectors.</div>
+      <div class="trait-list">
+        <div class="trait-row"><span class="trait-name">Horn style</span><span class="trait-vals"><span class="trait-chip">nub</span><span class="trait-chip">straight</span><span class="trait-chip">curved</span><span class="trait-chip">crystal</span></span></div>
+        <div class="trait-row"><span class="trait-name">Wing size</span><span class="trait-vals"><span class="trait-chip">tiny</span><span class="trait-chip">small</span><span class="trait-chip">medium</span><span class="trait-chip">majestic</span></span></div>
+        <div class="trait-row"><span class="trait-name">Breath</span><span class="trait-vals"><span class="trait-chip">none</span><span class="trait-chip">spark</span><span class="trait-chip">flame</span><span class="trait-chip">star</span></span></div>
+      </div>
+      <div class="stats-row">
+        <div class="stat"><div class="stat-val">8–58</div><div class="stat-label">⚔ Power</div></div>
+        <div class="stat"><div class="stat-val">6–38</div><div class="stat-label">◆ Charm</div></div>
+      </div>
+      <div class="egg-preview"><span class="egg-icon">🥚</span><span class="egg-desc"><strong>Dragonscale egg</strong> with scale pattern + golden claw crack</span></div>
+    </div>
+  </div>
+
+  <!-- 12. BUZZLE -->
+  <div class="species-card">
+    <div class="card-header">
+      <div class="card-emoji">🐝</div>
+      <div class="card-title"><h3>Buzzle</h3><div class="sci">Bombus rotundus</div></div>
+      <div class="card-element el-nature">🌿 Nature</div>
+    </div>
+    <div class="card-art">
+      <img src="concept-buzzle.png" alt="Buzzle" onerror="this.style.display='none';this.parentElement.querySelector('.art-placeholder').style.display='flex';">
+      <div class="art-placeholder" style="display:none">🐝</div>
+    </div>
+    <div class="card-body">
+      <div class="card-desc">A <strong>chubby bumblebee too round to fly well</strong>. Golden-brown stripes, fluffy white collar, and transparent iridescent wings. The hard-working pollinator of the meadow — always buzzing between flowers with tiny happy sounds.</div>
+      <div class="trait-list">
+        <div class="trait-row"><span class="trait-name">Stripes</span><span class="trait-vals"><span class="trait-chip">2-stripe</span><span class="trait-chip">3-stripe</span><span class="trait-chip">wavy</span><span class="trait-chip">diamond</span></span></div>
+        <div class="trait-row"><span class="trait-name">Wing style</span><span class="trait-vals"><span class="trait-chip">round</span><span class="trait-chip">pointed</span><span class="trait-chip">butterfly</span><span class="trait-chip">iridescent</span></span></div>
+        <div class="trait-row"><span class="trait-name">Collar</span><span class="trait-vals"><span class="trait-chip">none</span><span class="trait-chip">small</span><span class="trait-chip">fluffy</span><span class="trait-chip">regal</span></span></div>
+      </div>
+      <div class="stats-row">
+        <div class="stat"><div class="stat-val">5–40</div><div class="stat-label">⚔ Power</div></div>
+        <div class="stat"><div class="stat-val">7–48</div><div class="stat-label">◆ Charm</div></div>
+      </div>
+      <div class="egg-preview"><span class="egg-icon">🥚</span><span class="egg-desc"><strong>Honeycomb hex egg</strong> with golden hexagons + honey drip crack</span></div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

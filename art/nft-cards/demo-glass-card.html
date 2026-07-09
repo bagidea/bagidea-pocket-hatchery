@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1200">
+<title>CreatureCard — Glass Theme (matching web)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ═══ WEB THEME (matches index.css exactly) ═══ */
+*{margin:0;padding:0;box-sizing:border-box}
+body {
+  font: 400 16px/1.5 'Nunito','Mali',system-ui,sans-serif;
+  color: #1E1B4B;
+  background: linear-gradient(175deg,
+    #BAE6FD 0%, #D1FAE5 20%, #FFF7ED 45%, #FEF3C7 70%, #FDE6D0 100%
+  );
+  background-attachment: fixed;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ═══ HEADER (matches web header) ═══ */
+.header {
+  display: flex; align-items: center; gap: 16px;
+  padding: 14px 24px;
+  background: rgba(255,255,255,0.75);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255,255,255,0.5);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  position: sticky; top: 0; z-index: 50;
+  margin-bottom: 24px;
+}
+.header .brand {
+  font: 700 20px/1.2 'Baloo 2','Fredoka',system-ui,sans-serif;
+  background: linear-gradient(135deg, #1E1B4B 0%, #7C3AED 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ═══ PAGE CONTENT ═══ */
+.page {
+  max-width: 1120px; margin: 0 auto; padding: 0 24px 48px;
+  display: flex; flex-direction: column; gap: 24px;
+}
+
+.page h2 {
+  font: 700 20px/1.3 'Baloo 2','Fredoka',system-ui,sans-serif;
+  color: #1E1B4B;
+}
+
+/* ═══ RESOURCE CHIPS (matching web) ═══ */
+.resourceRow {
+  display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+}
+.chip {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 18px;
+  background: rgba(255,255,255,0.8);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border-radius: 99px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.04), 0 1px 0 rgba(255,255,255,0.8) inset;
+  border: 1px solid rgba(255,255,255,0.4);
+}
+
+/* ═══ CARD GRID ═══ */
+.grid {
+  display: flex; gap: 20px; flex-wrap: wrap; justify-content: center;
+}
+
+/* ═══ CREATURE CARD (glass v3.1 — matches updated .module.css) ═══ */
+.wrap { perspective: 900px; width: 270px; }
+
+.card {
+  position: relative; display: flex; flex-direction: column;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-radius: 24px; overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  background-clip: padding-box;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04), 0 10px 24px rgba(0,0,0,0.06);
+  width: 100%;
+  transition: transform 0.18s cubic-bezier(0.2,0.8,0.2,1), box-shadow 0.18s ease;
+}
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06), 0 16px 36px rgba(0,0,0,0.10);
+  border-color: rgba(255,255,255,0.7);
+}
+
+/* rarity border */
+.card::before {
+  content: ''; position: absolute; inset: -3px; border-radius: 27px;
+  z-index: -1; pointer-events: none;
+}
+.card::after {
+  content: ''; position: absolute; inset: 7px; border-radius: 17px;
+  border: 1px solid rgba(255,255,255,0.30);
+  pointer-events: none; z-index: 2;
+}
+
+.epic::before    { background: linear-gradient(160deg,#A78BFA,#8B5CF6,#7C3AED); }
+.legendary::before {
+  background: linear-gradient(160deg,#FDE68A,#F59E0B,#D97706,#F59E0B);
+  box-shadow: 0 0 22px rgba(245,158,11,0.35),0 0 48px rgba(245,158,11,0.14);
+  animation: legendaryBorder 3s ease-in-out infinite;
+}
+@keyframes legendaryBorder {
+  0%,100%{box-shadow:0 0 22px rgba(245,158,11,0.35),0 0 48px rgba(245,158,11,0.14)}
+  50%{box-shadow:0 0 34px rgba(245,158,11,0.50),0 0 66px rgba(245,158,11,0.24)}
+}
+.mythic::before {
+  background: linear-gradient(160deg,#ff9a9e 0%,#fad0c4 16%,#a18cd1 33%,#fbc2eb 50%,#a6c1ee 66%,#96e6a1 83%,#ff9a9e 100%);
+  box-shadow: 0 0 26px rgba(240,224,255,0.45),0 0 60px rgba(255,255,255,0.18);
+  animation: mythicRainbow 4s linear infinite;
+}
+@keyframes mythicRainbow { 0%{filter:hue-rotate(0deg)} 100%{filter:hue-rotate(360deg)} }
+
+/* top bar */
+.topBar { display:flex; justify-content:space-between; align-items:center; padding:14px 18px 8px; z-index:3; position:relative; }
+.rarityIcon {
+  width:28px; height:28px; border-radius:7px; display:flex;
+  align-items:center; justify-content:center; font-size:14px;
+  font-weight:800; color:#FFF; font-family:'Nunito',system-ui,sans-serif;
+  box-shadow:0 1px 3px rgba(0,0,0,0.12);
+}
+.epic .rarityIcon       { background: linear-gradient(135deg,#8B5CF6,#7C3AED); }
+.legendary .rarityIcon  { background: linear-gradient(135deg,#F59E0B,#D97706); }
+.mythic .rarityIcon     { background: linear-gradient(135deg,#ff9a9e,#a18cd1,#a6c1ee,#96e6a1); animation:mythicRainbow 4s linear infinite; }
+
+.cardId {
+  font-family:'Nunito',system-ui; font-size:11px; font-weight:700;
+  color: #5B6B7D; letter-spacing:1px; font-variant-numeric:tabular-nums;
+}
+
+/* art window — glass */
+.artWrap {
+  position:relative; margin:0 16px; height:210px; border-radius:18px;
+  overflow:hidden; display:grid; place-items:center; z-index:1;
+  background: rgba(255,255,255,0.30);
+  backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+  border: 1px solid rgba(255,255,255,0.40);
+}
+.artAura { position:absolute; inset:0; border-radius:18px; pointer-events:none; }
+.epic .artAura       { background: radial-gradient(ellipse at 50% 45%,rgba(139,92,246,0.22) 0%,transparent 65%); }
+.legendary .artAura  { background: radial-gradient(ellipse at 50% 45%,rgba(245,158,11,0.28) 0%,transparent 65%); animation: auraPulse 2.5s ease-in-out infinite; }
+.mythic .artAura {
+  background: radial-gradient(ellipse at 40% 40%,rgba(255,255,255,0.12) 0%,transparent 50%),
+              radial-gradient(ellipse at 50% 45%,rgba(255,154,158,0.12) 0%,transparent 50%),
+              radial-gradient(ellipse at 60% 50%,rgba(166,193,238,0.12) 0%,transparent 50%);
+}
+@keyframes auraPulse { 0%,100%{opacity:0.7} 50%{opacity:1} }
+
+.svgWrap { width:90%; height:90%; z-index:1; display:grid; place-items:center; }
+.svgWrap svg { width:100%; height:100%; display:block; filter:drop-shadow(0 4px 12px rgba(30,27,75,0.14)) brightness(1.05); }
+
+/* sparkles */
+.sparkles { position:absolute; inset:8px; pointer-events:none; z-index:2; overflow:hidden; border-radius:14px; }
+.sparkle {
+  position:absolute; width:5px; height:5px; border-radius:1px;
+  transform:rotate(45deg); opacity:0;
+  animation: sparkleTwinkle 3s ease-in-out infinite;
+  box-shadow:0 0 4px 1px currentColor;
+}
+.sparkle:nth-child(1){top:12%;left:18%;animation-delay:0.0s}
+.sparkle:nth-child(2){top:22%;left:75%;animation-delay:0.6s}
+.sparkle:nth-child(3){top:60%;left:14%;animation-delay:1.2s}
+.sparkle:nth-child(4){top:68%;left:80%;animation-delay:1.8s}
+.sparkle:nth-child(5){top:36%;left:85%;animation-delay:2.4s}
+.sparkle:nth-child(6){top:48%;left:10%;animation-delay:1.0s}
+.sparkle:nth-child(7){top:78%;left:40%;animation-delay:0.4s}
+.sparkle:nth-child(8){top:30%;left:50%;animation-delay:1.6s}
+@keyframes sparkleTwinkle {
+  0%,100%{opacity:0.15;transform:rotate(45deg)scale(0.4)}
+  50%{opacity:0.85;transform:rotate(45deg)scale(1.2)}
+}
+
+.stageBadge {
+  position:absolute; top:10px; right:10px;
+  padding:3px 12px;
+  background:rgba(255,255,255,0.70);
+  border:1px solid rgba(255,255,255,0.55);
+  border-radius:999px;
+  font-size:10px; font-weight:700;
+  color:#5B6B7D; letter-spacing:1px;
+  text-transform:uppercase; z-index:3;
+  backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+  box-shadow:0 1px 3px rgba(0,0,0,0.04);
+}
+
+/* info */
+.info { display:flex; flex-direction:column; gap:5px; padding:6px 18px 6px; z-index:3; position:relative; }
+.name { font:700 20px/1.2 'Baloo 2','Fredoka',system-ui; color:#1E1B4B; letter-spacing:-0.3px; }
+.speciesLabel { font-size:11px; color:#5B6B7D; font-weight:600; margin-top:-2px; }
+.geneRow { display:flex; align-items:center; gap:5px; margin:2px 0; }
+.geneLabel { font-size:8px; font-weight:700; color:#5B6B7D; letter-spacing:1px; text-transform:uppercase; }
+.geneDot { width:8px; height:8px; border-radius:50%; border:1px solid rgba(30,27,75,0.10); flex-shrink:0; box-shadow:inset 0 1px 2px rgba(255,255,255,0.5); }
+.statsRow { display:flex; gap:10px; margin-top:3px; }
+.statItem {
+  display:flex; align-items:center; gap:5px;
+  background:rgba(255,255,255,0.55);
+  border:1px solid rgba(255,255,255,0.50);
+  border-radius:8px; padding:4px 10px;
+}
+.statIcon { font-size:13px; line-height:1; }
+.statValue { font:800 13px/1 'Nunito',system-ui,sans-serif; color:#1E1B4B; }
+.statLabel { font-size:8px; color:#5B6B7D; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; }
+
+/* rarity footer */
+.rarityFooter { display:flex; align-items:center; gap:10px; padding:0 18px 6px; z-index:3; position:relative; }
+.rarityLine { flex:1; height:1px; opacity:0.40; }
+.epic .rarityLine       { background:#8B5CF6; }
+.legendary .rarityLine  { background:#F59E0B; }
+.mythic .rarityLine     { background:linear-gradient(90deg,#ff9a9e,#a18cd1,#a6c1ee,#96e6a1); }
+.rarityName { font:800 11px 'Nunito',system-ui; letter-spacing:2px; text-transform:uppercase; }
+.epic .rarityName       { color:#7C3AED; }
+.legendary .rarityName  { color:#D97706; }
+.mythic .rarityName {
+  background:linear-gradient(90deg,#c08497,#8B5CF6,#5FB8E8,#34D399);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+
+/* progress */
+.progressSection { padding:0 18px 10px; z-index:3; position:relative; display:flex; flex-direction:column; gap:4px; }
+.progressTrack { height:8px; background:rgba(255,255,255,0.45); border-radius:999px; overflow:hidden; box-shadow:inset 0 1px 2px rgba(0,0,0,0.05); }
+.progressFill { height:100%; border-radius:999px; }
+.progressLabel { font-size:10px; text-align:center; color:#5B6B7D; font-weight:600; font-variant-numeric:tabular-nums; }
+
+/* buttons */
+.actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; padding:0 18px 16px; z-index:3; position:relative; }
+.btn { display:inline-flex; align-items:center; justify-content:center; gap:5px; padding:10px 0; border:none; border-radius:999px; font:700 13px 'Nunito',system-ui; letter-spacing:0.2px; }
+.feedBtn { background:linear-gradient(135deg,#22C55E,#16A34A); color:#FFF; box-shadow:0 2px 10px rgba(34,197,94,0.25); }
+.evolveBtn { background:linear-gradient(135deg,#8B5CF6,#7C3AED); color:#FFF; box-shadow:0 2px 10px rgba(139,92,246,0.25); }
+
+/* ═══ COMPARE: OLD SOLID CARD ═══ */
+.compare-section { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; justify-content: center; }
+
+.old-card .card {
+  background: linear-gradient(180deg, #FFFFFF 0%, #FFFAF5 100%) !important;
+  backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
+  border: 1.5px solid rgba(232,213,184,0.55) !important;
+  box-shadow: 0 2px 6px rgba(212,165,116,0.12), 0 10px 24px rgba(212,165,116,0.16) !important;
+}
+.old-card .artWrap { background: linear-gradient(180deg, rgba(255,250,245,0.7) 0%, rgba(240,232,216,0.30) 100%) !important; border: none !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+.old-card .statItem { background: rgba(232,213,184,0.16) !important; border: 1px solid rgba(232,213,184,0.35) !important; }
+
+.label {
+  text-align: center; font: 700 15px 'Baloo 2','Fredoka',system-ui; margin-bottom: 12px;
+  padding: 4px 14px; border-radius: 999px; display: inline-block; width: 100%;
+}
+.label.old { background: rgba(212,165,116,0.15); color: #B45309; }
+.label.new { background: rgba(255,255,255,0.6); color: #1E1B4B; border: 1px solid rgba(255,255,255,0.5); }
+
+.column { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+</style>
+</head>
+<body>
+
+<!-- ═══ HEADER (matching web) ═══ -->
+<div class="header">
+  <span class="brand">🧬 Pocket Hatchery</span>
+  <span style="font-size:12px;color:#5B6B7D;margin-left:auto;">WAX Testnet · Connected</span>
+</div>
+
+<div class="page">
+  <h2>🐣 My Creatures</h2>
+
+  <!-- ═══ RESOURCE CHIPS (matching web) ═══ -->
+  <div class="resourceRow">
+    <div class="chip"><span style="font-size:16px">🥚</span> <span style="font:700 17px 'Baloo 2'">3</span><span style="font-size:10px;color:#5B6B7D;text-transform:uppercase">EGGS</span></div>
+    <div class="chip"><span style="font-size:16px">⚡</span> <span style="font:700 17px 'Baloo 2'">98</span><span style="font-size:10px;color:#5B6B7D;text-transform:uppercase">ENERGY</span></div>
+    <div class="chip"><span style="font-size:16px">🪙</span> <span style="font:700 17px 'Baloo 2'">1,240</span><span style="font-size:10px;color:#5B6B7D;text-transform:uppercase">HATCH</span></div>
+  </div>
+
+  <!-- ═══ BEFORE vs AFTER ═══ -->
+  <div class="compare-section">
+    <!-- OLD: solid white/cream card -->
+    <div class="column">
+      <span class="label old">🔴 BEFORE — ทึบ #FFF→#FFFAF5 (ลอยไม่ blend)</span>
+      <div class="wrap epic old-card">
+        <div class="card">
+          <div class="topBar"><div class="rarityIcon">E</div><div class="cardId">#0042</div></div>
+          <div class="artWrap">
+            <div class="artAura"></div>
+            <div class="svgWrap">
+              <svg viewBox="0 0 200 200"><circle cx="100" cy="90" r="55" fill="#FBBF24" opacity="0.9"/><ellipse cx="100" cy="110" rx="45" ry="30" fill="#F59E0B" opacity="0.7"/><circle cx="80" cy="70" r="10" fill="#1E1B4B"/><circle cx="120" cy="70" r="10" fill="#1E1B4B"/><circle cx="80" cy="70" r="4" fill="#FFF"/><circle cx="120" cy="70" r="4" fill="#FFF"/></svg>
+            </div>
+            <span class="stageBadge">✨ Adult</span>
+          </div>
+          <div class="info">
+            <div class="name">Emberflare</div>
+            <div class="speciesLabel">Ignis animatus · Epic</div>
+            <div class="geneRow"><span class="geneLabel">🧬 DNA</span><span class="geneDot" style="background:hsl(40,65%,55%)"></span><span class="geneDot" style="background:hsl(10,65%,55%)"></span><span class="geneDot" style="background:hsl(270,65%,55%)"></span></div>
+            <div class="statsRow"><div class="statItem"><span class="statIcon">⚔</span><span class="statValue">8</span><span class="statLabel">POW</span></div><div class="statItem"><span class="statIcon">✦</span><span class="statValue">6</span><span class="statLabel">CHARM</span></div></div>
+          </div>
+          <div class="rarityFooter"><span class="rarityLine"></span><span class="rarityName">epic</span><span class="rarityLine"></span></div>
+          <div class="progressSection"><div class="progressTrack"><div class="progressFill" style="width:67%;background:linear-gradient(135deg,#8B5CF6,#7C3AED)"></div></div><span class="progressLabel">1,230 / 1,840</span></div>
+          <div class="actions"><div class="btn feedBtn">🍎 Feed</div><div class="btn evolveBtn">✨ Evolve</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NEW: glass card (blends with web) -->
+    <div class="column">
+      <span class="label new">🟢 AFTER — Glass blur (blend เข้ากับเว็บ)</span>
+      <div class="wrap epic">
+        <div class="card">
+          <div class="topBar"><div class="rarityIcon">E</div><div class="cardId">#0042</div></div>
+          <div class="artWrap">
+            <div class="artAura"></div>
+            <div class="svgWrap">
+              <svg viewBox="0 0 200 200"><circle cx="100" cy="90" r="55" fill="#FBBF24" opacity="0.9"/><ellipse cx="100" cy="110" rx="45" ry="30" fill="#F59E0B" opacity="0.7"/><circle cx="80" cy="70" r="10" fill="#1E1B4B"/><circle cx="120" cy="70" r="10" fill="#1E1B4B"/><circle cx="80" cy="70" r="4" fill="#FFF"/><circle cx="120" cy="70" r="4" fill="#FFF"/></svg>
+            </div>
+            <div class="sparkles">
+              <span class="sparkle" style="color:#B07BE8"></span><span class="sparkle" style="color:#B07BE8"></span><span class="sparkle" style="color:#B07BE8"></span><span class="sparkle" style="color:#B07BE8"></span><span class="sparkle" style="color:#B07BE8"></span>
+            </div>
+            <span class="stageBadge">✨ Adult</span>
+          </div>
+          <div class="info">
+            <div class="name">Emberflare</div>
+            <div class="speciesLabel">Ignis animatus · Epic</div>
+            <div class="geneRow"><span class="geneLabel">🧬 DNA</span><span class="geneDot" style="background:hsl(40,65%,55%)"></span><span class="geneDot" style="background:hsl(10,65%,55%)"></span><span class="geneDot" style="background:hsl(270,65%,55%)"></span></div>
+            <div class="statsRow"><div class="statItem"><span class="statIcon">⚔</span><span class="statValue">8</span><span class="statLabel">POW</span></div><div class="statItem"><span class="statIcon">✦</span><span class="statValue">6</span><span class="statLabel">CHARM</span></div></div>
+          </div>
+          <div class="rarityFooter"><span class="rarityLine"></span><span class="rarityName">epic</span><span class="rarityLine"></span></div>
+          <div class="progressSection"><div class="progressTrack"><div class="progressFill" style="width:67%;background:linear-gradient(135deg,#8B5CF6,#7C3AED)"></div></div><span class="progressLabel">1,230 / 1,840</span></div>
+          <div class="actions"><div class="btn feedBtn">🍎 Feed</div><div class="btn evolveBtn">✨ Evolve</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Legendary glass card -->
+    <div class="column">
+      <span class="label new" style="visibility:hidden">.</span>
+      <div class="wrap legendary">
+        <div class="card">
+          <div class="topBar"><div class="rarityIcon">L</div><div class="cardId">#0007</div></div>
+          <div class="artWrap">
+            <div class="artAura"></div>
+            <div class="svgWrap">
+              <svg viewBox="0 0 200 200"><ellipse cx="100" cy="95" rx="50" ry="55" fill="#FDE68A"/><ellipse cx="100" cy="110" rx="40" ry="28" fill="#F59E0B" opacity="0.6"/><circle cx="78" cy="72" r="9" fill="#1E1B4B"/><circle cx="122" cy="72" r="9" fill="#1E1B4B"/><circle cx="78" cy="72" r="3.5" fill="#FFF"/><circle cx="122" cy="72" r="3.5" fill="#FFF"/><path d="M88 35 L95 55 L100 35 L105 55 L112 35" fill="none" stroke="#F59E0B" stroke-width="2" opacity="0.8"/></svg>
+            </div>
+            <div class="sparkles">
+              <span class="sparkle" style="color:#F59E0B"></span><span class="sparkle" style="color:#F59E0B"></span><span class="sparkle" style="color:#F59E0B"></span><span class="sparkle" style="color:#F59E0B"></span><span class="sparkle" style="color:#F59E0B"></span><span class="sparkle" style="color:#F59E0B"></span>
+            </div>
+            <span class="stageBadge">⭐ Rare</span>
+          </div>
+          <div class="info">
+            <div class="name">Aurorath</div>
+            <div class="speciesLabel">Draco parvus · Legendary</div>
+            <div class="geneRow"><span class="geneLabel">🧬 DNA</span><span class="geneDot" style="background:hsl(50,65%,55%)"></span><span class="geneDot" style="background:hsl(20,65%,55%)"></span><span class="geneDot" style="background:hsl(0,65%,55%)"></span></div>
+            <div class="statsRow"><div class="statItem"><span class="statIcon">⚔</span><span class="statValue">10</span><span class="statLabel">POW</span></div><div class="statItem"><span class="statIcon">✦</span><span class="statValue">8</span><span class="statLabel">CHARM</span></div></div>
+          </div>
+          <div class="rarityFooter"><span class="rarityLine"></span><span class="rarityName">legendary</span><span class="rarityLine"></span></div>
+          <div class="progressSection"><div class="progressTrack"><div class="progressFill" style="width:42%;background:linear-gradient(135deg,#F59E0B,#D97706)"></div></div><span class="progressLabel">850 / 2,000</span></div>
+          <div class="actions"><div class="btn feedBtn">🍎 Feed</div><div class="btn evolveBtn">✨ Evolve</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mythic glass card -->
+    <div class="column">
+      <span class="label new" style="visibility:hidden">.</span>
+      <div class="wrap mythic">
+        <div class="card">
+          <div class="topBar"><div class="rarityIcon">M</div><div class="cardId">#0001</div></div>
+          <div class="artWrap">
+            <div class="artAura"></div>
+            <div class="svgWrap">
+              <svg viewBox="0 0 200 200"><circle cx="100" cy="85" r="50" fill="#F0E0FF" opacity="0.9"/><ellipse cx="100" cy="115" rx="42" ry="25" fill="#E0C8FF" opacity="0.5"/><circle cx="78" cy="68" r="9" fill="#1E1B4B"/><circle cx="122" cy="68" r="9" fill="#1E1B4B"/><circle cx="78" cy="68" r="3.5" fill="#FFF"/><circle cx="122" cy="68" r="3.5" fill="#FFF"/></svg>
+            </div>
+            <div class="sparkles">
+              <span class="sparkle" style="color:#F0E0FF"></span><span class="sparkle" style="color:#F0E0FF"></span><span class="sparkle" style="color:#F0E0FF"></span><span class="sparkle" style="color:#F0E0FF"></span><span class="sparkle" style="color:#F0E0FF"></span><span class="sparkle" style="color:#F0E0FF"></span><span class="sparkle" style="color:#F0E0FF"></span><span class="sparkle" style="color:#F0E0FF"></span>
+            </div>
+            <span class="stageBadge">💫 Mythic</span>
+          </div>
+          <div class="info">
+            <div class="name">Stellara</div>
+            <div class="speciesLabel">Crystallus vivens · Mythic</div>
+            <div class="geneRow"><span class="geneLabel">🧬 DNA</span><span class="geneDot" style="background:hsl(280,65%,55%)"></span><span class="geneDot" style="background:hsl(320,65%,55%)"></span><span class="geneDot" style="background:hsl(200,65%,55%)"></span></div>
+            <div class="statsRow"><div class="statItem"><span class="statIcon">⚔</span><span class="statValue">12</span><span class="statLabel">POW</span></div><div class="statItem"><span class="statIcon">✦</span><span class="statValue">14</span><span class="statLabel">CHARM</span></div></div>
+          </div>
+          <div class="rarityFooter"><span class="rarityLine"></span><span class="rarityName">mythic</span><span class="rarityLine"></span></div>
+          <div class="progressSection"><div class="progressTrack"><div class="progressFill" style="width:85%;background:linear-gradient(135deg,#fbc2eb,#a6c1ee)"></div></div><span class="progressLabel">4,200 / 5,000</span></div>
+          <div class="actions"><div class="btn feedBtn">🍎 Feed</div><div class="btn evolveBtn">✨ Evolve</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

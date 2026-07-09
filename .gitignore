@@ -1,0 +1,27 @@
+# ─── Secrets — NEVER commit. On-disk only, under .secrets/ ──────────────
+.secrets/
+
+# ─── Build artifacts ────────────────────────────────────────────────────
+contract/pockethatch/build/*.wasm
+contract/pockethatch/build/*.abi
+contract/pockethatch/build/*.json
+!contract/pockethatch/build/DEPLOY.md
+
+# ─── Web build output ───────────────────────────────────────────────────
+web/dist/
+web/node_modules/
+web/.vite/
+
+# ─── Deploy tools (node_modules) ────────────────────────────────────────
+deploy/nodejs/node_modules/
+
+# ─── Temp / debug files ─────────────────────────────────────────────────
+tmp/
+_bak/
+*.bak
+_deployed_abi.bin
+_live_abi.json
+
+# ─── Editor / OS ────────────────────────────────────────────────────────
+.DS_Store
+*.log

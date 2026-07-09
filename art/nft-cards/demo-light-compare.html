@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1600">
+<title>CreatureCard — Dark v2.0 vs Light v3.0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ═══ WEB THEME (matches index.css + tokens.css) ═══ */
+:root {
+  --ph-font-display: "Baloo 2","Fredoka",system-ui,sans-serif;
+  --ph-font-body: "Nunito","Mali",system-ui,sans-serif;
+  --ph-text-primary: #1E1B4B;
+  --ph-text-muted: #94A3B8;
+  --ph-border-soft: #E8D5B8;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body {
+  background: linear-gradient(175deg,
+    #BAE6FD 0%, #D1FAE5 20%, #FFF7ED 45%, #FEF3C7 70%, #FDE6D0 100%
+  );
+  background-attachment: fixed;
+  font-family: var(--ph-font-body);
+  min-height: 100vh;
+  padding: 20px;
+}
+
+h2.section-title {
+  font-family: var(--ph-font-display);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ph-text-primary);
+  text-align: center;
+  margin: 10px 0 16px;
+}
+h2.section-title span {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ph-text-muted);
+}
+
+.cards-row {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 40px;
+}
+
+.column-label {
+  text-align: center;
+  font-family: var(--ph-font-display);
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 14px;
+  color: var(--ph-text-primary);
+  opacity: 0.7;
+}
+
+/* ═══════════════════════════════════════════════════
+   DARK v2.0 CARD
+   ═══════════════════════════════════════════════════ */
+.dark .wrap {
+  perspective: 900px;
+  width: 280px;
+}
+.dark .card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: #0F1119;
+  border-radius: 24px;
+  overflow: hidden;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+  width: 100%;
+}
+.dark .card::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 27px;
+  z-index: -1;
+  pointer-events: none;
+}
+.dark .card::after {
+  content: '';
+  position: absolute;
+  inset: 7px;
+  border-radius: 17px;
+  border: 1px solid rgba(255,255,255,0.06);
+  pointer-events: none;
+  z-index: 2;
+}
+.dark .common::before { background:linear-gradient(160deg,#22C55E,#16A34A,#15803D) }
+.dark .uncommon::before { background:linear-gradient(160deg,#22D3EE,#06B6D4,#0891B2) }
+.dark .rare::before { background:linear-gradient(160deg,#60A5FA,#3B82F6,#2563EB); box-shadow:0 0 28px rgba(59,130,246,.25) }
+.dark .epic::before { background:linear-gradient(160deg,#A78BFA,#8B5CF6,#7C3AED); box-shadow:0 0 34px rgba(139,92,246,.30) }
+.dark .legendary::before { background:linear-gradient(160deg,#FDE68A,#F59E0B,#D97706,#F59E0B); box-shadow:0 0 44px rgba(245,158,11,.35); animation:darkShimmer 3s ease-in-out infinite }
+.dark .mythic::before { background:linear-gradient(160deg,#ff9a9e,#fad0c4,#a18cd1,#fbc2eb,#a6c1ee,#96e6a1,#ff9a9e); box-shadow:0 0 52px rgba(240,224,255,.40); animation:darkRainbow 4s linear infinite }
+@keyframes darkShimmer { 0%,100%{box-shadow:0 0 44px rgba(245,158,11,.35)} 50%{box-shadow:0 0 64px rgba(245,158,11,.55)} }
+@keyframes darkRainbow { 0%{filter:hue-rotate(0deg)} 100%{filter:hue-rotate(360deg)} }
+
+.dark .topBar { display:flex; justify-content:space-between; align-items:center; padding:14px 18px 8px; position:relative; z-index:3 }
+.dark .rarityIcon { width:28px; height:28px; border-radius:7px; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:800; color:#0F1119; font-family:var(--ph-font-body) }
+.dark .common .rarityIcon{background:#22C55E} .dark .uncommon .rarityIcon{background:#06B6D4} .dark .rare .rarityIcon{background:#3B82F6} .dark .epic .rarityIcon{background:#8B5CF6} .dark .legendary .rarityIcon{background:#F59E0B} .dark .mythic .rarityIcon{background:linear-gradient(135deg,#ff9a9e,#a18cd1,#a6c1ee,#96e6a1);animation:darkRainbow 4s linear infinite}
+.dark .cardId { font-size:11px; font-weight:700; color:rgba(255,255,255,.28); letter-spacing:1px }
+.dark .artWrap { position:relative; margin:0 16px; height:210px; border-radius:18px; overflow:hidden; display:grid; place-items:center; z-index:1; background:rgba(0,0,0,.18) }
+.dark .artAura { position:absolute; inset:0; border-radius:18px; pointer-events:none }
+.dark .common .artAura{ background:radial-gradient(ellipse at 50% 45%,rgba(34,197,94,.22) 0%,transparent 65%) }
+.dark .uncommon .artAura{ background:radial-gradient(ellipse at 50% 45%,rgba(6,182,212,.26) 0%,transparent 65%) }
+.dark .rare .artAura{ background:radial-gradient(ellipse at 50% 45%,rgba(59,130,246,.28) 0%,transparent 65%) }
+.dark .epic .artAura{ background:radial-gradient(ellipse at 50% 45%,rgba(139,92,246,.30) 0%,transparent 65%) }
+.dark .legendary .artAura{ background:radial-gradient(ellipse at 50% 45%,rgba(245,158,11,.36) 0%,transparent 65%); animation:darkAura 2.5s ease-in-out infinite }
+.dark .mythic .artAura{ background:radial-gradient(ellipse at 40% 40%,rgba(255,255,255,.10) 0%,transparent 50%),radial-gradient(ellipse at 50% 45%,rgba(255,154,158,.16) 0%,transparent 50%),radial-gradient(ellipse at 60% 50%,rgba(166,193,238,.16) 0%,transparent 50%) }
+@keyframes darkAura { 0%,100%{opacity:.8} 50%{opacity:1} }
+
+.dark .spriteWrap { width:90%; height:90%; z-index:1; display:grid; place-items:center; animation:darkFloat 3.5s cubic-bezier(.45,0,.55,1) infinite }
+.dark .spriteWrap svg { width:100%; height:100%; display:block; filter:drop-shadow(0 8px 18px rgba(0,0,0,.45)) brightness(1.12) }
+@keyframes darkFloat { 0%,100%{transform:translateY(0) scale(1)} 50%{transform:translateY(-6px) scale(1.03)} }
+.dark .stageBadge { position:absolute; top:10px; right:10px; padding:3px 12px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.10); border-radius:999px; font-size:10px; font-weight:700; color:rgba(255,255,255,.45); letter-spacing:1px; text-transform:uppercase; z-index:2; backdrop-filter:blur(6px) }
+
+.dark .info { display:flex; flex-direction:column; gap:5px; padding:6px 18px; position:relative; z-index:3 }
+.dark .name { font-family:var(--ph-font-display); font-size:20px; font-weight:700; color:#F5F0E8; letter-spacing:-0.3px }
+.dark .speciesLabel { font-size:11px; color:var(--ph-text-muted); font-weight:600 }
+.dark .geneRow { display:flex; align-items:center; gap:5px; margin:2px 0 }
+.dark .geneLabel { font-size:8px; font-weight:700; color:rgba(255,255,255,.22); letter-spacing:1px; text-transform:uppercase }
+.dark .geneDot { width:8px; height:8px; border-radius:50%; border:1px solid rgba(255,255,255,.14) }
+.dark .statsRow { display:flex; gap:10px; margin-top:3px }
+.dark .statItem { display:flex; align-items:center; gap:5px; background:rgba(255,255,255,.04); border-radius:8px; padding:4px 10px }
+.dark .statValue { font-size:13px; font-weight:800; color:#F5F0E8 }
+.dark .statLabel { font-size:8px; color:rgba(255,255,255,.30); font-weight:700; letter-spacing:.5px; text-transform:uppercase }
+.dark .rarityFooter { display:flex; align-items:center; gap:10px; padding:0 18px 6px; position:relative; z-index:3 }
+.dark .rarityLine { flex:1; height:1px; opacity:.28 }
+.dark .common .rarityLine{background:#22C55E} .dark .uncommon .rarityLine{background:#06B6D4} .dark .rare .rarityLine{background:#3B82F6} .dark .epic .rarityLine{background:#8B5CF6} .dark .legendary .rarityLine{background:#F59E0B} .dark .mythic .rarityLine{background:linear-gradient(90deg,#ff9a9e,#a18cd1,#a6c1ee,#96e6a1)}
+.dark .rarityName { font-size:11px; font-weight:800; letter-spacing:2px; text-transform:uppercase }
+.dark .common .rarityName{color:#22C55E} .dark .uncommon .rarityName{color:#06B6D4} .dark .rare .rarityName{color:#3B82F6} .dark .epic .rarityName{color:#8B5CF6} .dark .legendary .rarityName{color:#F59E0B} .dark .mythic .rarityName{background:linear-gradient(90deg,#ff9a9e,#a18cd1,#a6c1ee,#96e6a1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+.dark .progressSection { padding:0 18px 10px; z-index:3; display:flex; flex-direction:column; gap:4px }
+.dark .progressTrack { height:8px; background:rgba(255,255,255,.06); border-radius:999px; overflow:hidden; box-shadow:inset 0 1px 2px rgba(0,0,0,.3) }
+.dark .progressFill { height:100%; border-radius:999px; transition:width .5s cubic-bezier(0,0,.2,1); box-shadow:0 1px 0 rgba(255,255,255,.25) inset }
+.dark .progressLabel { font-size:10px; text-align:center; color:rgba(255,255,255,.30); font-weight:600 }
+.dark .actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; padding:0 18px 16px; z-index:3 }
+.dark .btn { display:inline-flex; align-items:center; justify-content:center; gap:5px; padding:10px 0; border:none; border-radius:999px; font-size:13px; font-weight:700; font-family:var(--ph-font-body); cursor:pointer }
+.dark .feedBtn { background:#22C55E; color:#052E16; box-shadow:0 2px 10px rgba(34,197,94,.30) }
+.dark .evolveBtn { background:#8B5CF6; color:#F5F0E8; box-shadow:0 2px 10px rgba(139,92,246,.30) }
+
+/* ═══════════════════════════════════════════════════
+   LIGHT v3.0 CARD
+   ═══════════════════════════════════════════════════ */
+.light .wrap {
+  perspective: 900px;
+  width: 280px;
+}
+.light .card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, #FFFFFF 0%, #FFFAF5 100%);
+  border-radius: 24px;
+  overflow: hidden;
+  border: 1.5px solid rgba(232,213,184,.55);
+  background-clip: padding-box;
+  box-shadow: 0 2px 6px rgba(212,165,116,.12), 0 10px 24px rgba(212,165,116,.16);
+  width: 100%;
+}
+.light .card::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 27px;
+  z-index: -1;
+  pointer-events: none;
+}
+.light .card::after {
+  content: '';
+  position: absolute;
+  inset: 7px;
+  border-radius: 17px;
+  border: 1px solid rgba(30,27,75,0.06);
+  pointer-events: none;
+  z-index: 2;
+}
+.light .common::before { background:linear-gradient(160deg,#22C55E,#16A34A,#15803D) }
+.light .uncommon::before { background:linear-gradient(160deg,#22D3EE,#06B6D4,#0891B2) }
+.light .rare::before { background:linear-gradient(160deg,#60A5FA,#3B82F6,#2563EB) }
+.light .epic::before { background:linear-gradient(160deg,#A78BFA,#8B5CF6,#7C3AED) }
+.light .legendary::before { background:linear-gradient(160deg,#FDE68A,#F59E0B,#D97706,#F59E0B); box-shadow:0 0 22px rgba(245,158,11,.35),0 0 48px rgba(245,158,11,.14); animation:lightShimmer 3s ease-in-out infinite }
+.light .mythic::before { background:linear-gradient(160deg,#ff9a9e,#fad0c4,#a18cd1,#fbc2eb,#a6c1ee,#96e6a1,#ff9a9e); box-shadow:0 0 26px rgba(240,224,255,.45),0 0 60px rgba(255,255,255,.18); animation:lightRainbow 4s linear infinite }
+@keyframes lightShimmer { 0%,100%{box-shadow:0 0 22px rgba(245,158,11,.35),0 0 48px rgba(245,158,11,.14)} 50%{box-shadow:0 0 34px rgba(245,158,11,.50),0 0 66px rgba(245,158,11,.24)} }
+@keyframes lightRainbow { 0%{filter:hue-rotate(0deg)} 100%{filter:hue-rotate(360deg)} }
+
+.light .topBar { display:flex; justify-content:space-between; align-items:center; padding:14px 18px 8px; position:relative; z-index:3 }
+.light .rarityIcon { width:28px; height:28px; border-radius:7px; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:800; color:#FFFFFF; font-family:var(--ph-font-body); box-shadow:0 1px 3px rgba(0,0,0,.12) }
+.light .common .rarityIcon{background:linear-gradient(135deg,#22C55E,#16A34A)} .light .uncommon .rarityIcon{background:linear-gradient(135deg,#06B6D4,#0891B2)} .light .rare .rarityIcon{background:linear-gradient(135deg,#3B82F6,#2563EB)} .light .epic .rarityIcon{background:linear-gradient(135deg,#8B5CF6,#7C3AED)} .light .legendary .rarityIcon{background:linear-gradient(135deg,#F59E0B,#D97706)} .light .mythic .rarityIcon{background:linear-gradient(135deg,#ff9a9e,#a18cd1,#a6c1ee,#96e6a1);animation:lightRainbow 4s linear infinite}
+.light .cardId { font-size:11px; font-weight:700; color:var(--ph-text-muted); letter-spacing:1px }
+.light .artWrap { position:relative; margin:0 16px; height:210px; border-radius:18px; overflow:hidden; display:grid; place-items:center; z-index:1; background:linear-gradient(180deg,rgba(255,250,245,.7) 0%,rgba(240,232,216,.30) 100%) }
+.light .artAura { position:absolute; inset:0; border-radius:18px; pointer-events:none }
+.light .common .artAura{ background:radial-gradient(ellipse at 50% 45%,rgba(34,197,94,.16) 0%,transparent 65%) }
+.light .uncommon .artAura{ background:radial-gradient(ellipse at 50% 45%,rgba(6,182,212,.18) 0%,transparent 65%) }
+.light .rare .artAura{ background:radial-gradient(ellipse at 50% 45%,rgba(59,130,246,.20) 0%,transparent 65%) }
+.light .epic .artAura{ background:radial-gradient(ellipse at 50% 45%,rgba(139,92,246,.22) 0%,transparent 65%) }
+.light .legendary .artAura{ background:radial-gradient(ellipse at 50% 45%,rgba(245,158,11,.28) 0%,transparent 65%); animation:lightAura 2.5s ease-in-out infinite }
+.light .mythic .artAura{ background:radial-gradient(ellipse at 40% 40%,rgba(255,255,255,.12) 0%,transparent 50%),radial-gradient(ellipse at 50% 45%,rgba(255,154,158,.12) 0%,transparent 50%),radial-gradient(ellipse at 60% 50%,rgba(166,193,238,.12) 0%,transparent 50%) }
+@keyframes lightAura { 0%,100%{opacity:.7} 50%{opacity:1} }
+
+.light .spriteWrap { width:90%; height:90%; z-index:1; display:grid; place-items:center; animation:lightFloat 3.5s cubic-bezier(.45,0,.55,1) infinite }
+.light .spriteWrap svg { width:100%; height:100%; display:block; filter:drop-shadow(0 4px 12px rgba(30,27,75,.14)) brightness(1.00) }
+@keyframes lightFloat { 0%,100%{transform:translateY(0) scale(1)} 50%{transform:translateY(-6px) scale(1.03)} }
+.light .stageBadge { position:absolute; top:10px; right:10px; padding:3px 12px; background:rgba(255,255,255,.78); border:1px solid rgba(232,213,184,.50); border-radius:999px; font-size:10px; font-weight:700; color:var(--ph-text-muted); letter-spacing:1px; text-transform:uppercase; z-index:2; backdrop-filter:blur(8px); box-shadow:0 1px 3px rgba(0,0,0,.04) }
+
+.light .info { display:flex; flex-direction:column; gap:5px; padding:6px 18px; position:relative; z-index:3 }
+.light .name { font-family:var(--ph-font-display); font-size:20px; font-weight:700; color:var(--ph-text-primary); letter-spacing:-0.3px }
+.light .speciesLabel { font-size:11px; color:var(--ph-text-muted); font-weight:600 }
+.light .geneRow { display:flex; align-items:center; gap:5px; margin:2px 0 }
+.light .geneLabel { font-size:8px; font-weight:700; color:var(--ph-text-muted); letter-spacing:1px; text-transform:uppercase }
+.light .geneDot { width:8px; height:8px; border-radius:50%; border:1px solid rgba(30,27,75,.10); box-shadow:inset 0 1px 2px rgba(255,255,255,.5) }
+.light .statsRow { display:flex; gap:10px; margin-top:3px }
+.light .statItem { display:flex; align-items:center; gap:5px; background:rgba(232,213,184,.16); border:1px solid rgba(232,213,184,.35); border-radius:8px; padding:4px 10px }
+.light .statValue { font-size:13px; font-weight:800; color:var(--ph-text-primary) }
+.light .statLabel { font-size:8px; color:var(--ph-text-muted); font-weight:700; letter-spacing:.5px; text-transform:uppercase }
+.light .rarityFooter { display:flex; align-items:center; gap:10px; padding:0 18px 6px; position:relative; z-index:3 }
+.light .rarityLine { flex:1; height:1px; opacity:.40 }
+.light .common .rarityLine{background:#22C55E} .light .uncommon .rarityLine{background:#06B6D4} .light .rare .rarityLine{background:#3B82F6} .light .epic .rarityLine{background:#8B5CF6} .light .legendary .rarityLine{background:#F59E0B} .light .mythic .rarityLine{background:linear-gradient(90deg,#ff9a9e,#a18cd1,#a6c1ee,#96e6a1)}
+.light .rarityName { font-size:11px; font-weight:800; letter-spacing:2px; text-transform:uppercase }
+.light .common .rarityName{color:#16A34A} .light .uncommon .rarityName{color:#0891B2} .light .rare .rarityName{color:#2563EB} .light .epic .rarityName{color:#7C3AED} .light .legendary .rarityName{color:#D97706} .light .mythic .rarityName{background:linear-gradient(90deg,#c08497,#8B5CF6,#5FB8E8,#34D399);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+.light .progressSection { padding:0 18px 10px; z-index:3; display:flex; flex-direction:column; gap:4px }
+.light .progressTrack { height:8px; background:rgba(232,213,184,.30); border-radius:999px; overflow:hidden; box-shadow:inset 0 1px 2px rgba(0,0,0,.06) }
+.light .progressFill { height:100%; border-radius:999px; transition:width .5s cubic-bezier(0,0,.2,1); box-shadow:0 1px 0 rgba(255,255,255,.35) inset }
+.light .progressLabel { font-size:10px; text-align:center; color:var(--ph-text-muted); font-weight:600 }
+.light .actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; padding:0 18px 16px; z-index:3 }
+.light .btn { display:inline-flex; align-items:center; justify-content:center; gap:5px; padding:10px 0; border:none; border-radius:999px; font-size:13px; font-weight:700; font-family:var(--ph-font-body); cursor:pointer }
+.light .feedBtn { background:linear-gradient(135deg,#22C55E,#16A34A); color:#FFFFFF; box-shadow:0 2px 10px rgba(34,197,94,.25) }
+.light .evolveBtn { background:linear-gradient(135deg,#8B5CF6,#7C3AED); color:#FFFFFF; box-shadow:0 2px 10px rgba(139,92,246,.25) }
+
+/* SVG inline */
+.spriteWrap svg { max-width:100%; max-height:100% }
+.statIcon { font-size:13px; line-height:1 }
+</style>
+</head>
+<body>
+
+<h2 class="section-title">Dark v2.0 <span>— #0F1119 background, light text, dark glow</span></h2>
+<div class="cards-row dark" id="dark-row"></div>
+
+<h2 class="section-title">Light v3.0 <span>— #FFFFFF surface, warm shadow, dark text</span></h2>
+<div class="cards-row light" id="light-row"></div>
+
+<script>
+// ═══ Card data — one per rarity tier ═══
+const TIERS = ['common','uncommon','rare','epic','legendary','mythic'];
+const RARITY_LABEL = { common:'Common', uncommon:'Uncommon', rare:'Rare', epic:'Epic', legendary:'Legendary', mythic:'Mythic' };
+const RARITY_ICON = { common:'C', uncommon:'U', rare:'R', epic:'E', legendary:'L', mythic:'M' };
+const RARITY_GRAD = {
+  common: 'linear-gradient(135deg,#22C55E,#16A34A)',
+  uncommon: 'linear-gradient(135deg,#06B6D4,#0891B2)',
+  rare: 'linear-gradient(135deg,#3B82F6,#2563EB)',
+  epic: 'linear-gradient(135deg,#8B5CF6,#7C3AED)',
+  legendary: 'linear-gradient(135deg,#F59E0B,#D97706)',
+  mythic: 'linear-gradient(135deg,#ff9a9e,#a18cd1,#a6c1ee,#96e6a1)'
+};
+
+const SPECIES = [
+  { id:'foxling', sci:'Vulpes magica', name:'Foxling', pow:5, charm:7 },
+  { id:'owlet', sci:'Strigis rotundus', name:'Owlet', pow:4, charm:8 },
+  { id:'droplet', sci:'Aqua vivens', name:'Droplet', pow:3, charm:10 },
+  { id:'pebblit', sci:'Lithos vivens', name:'Pebblit', pow:10, charm:3 },
+  { id:'sproutling', sci:'Herba ambulans', name:'Sproutling', pow:3, charm:9 },
+  { id:'flicker', sci:'Ignis animatus', name:'Flicker', pow:7, charm:5 },
+];
+
+const GENE_COLORS = [
+  ['#F59E0B','#F43F5E','#8B5CF6'],
+  ['#22C55E','#06B6D4','#F59E0B'],
+  ['#3B82F6','#8B5CF6','#F43F5E'],
+  ['#8B5CF6','#F59E0B','#22C55E'],
+  ['#F59E0B','#EA580C','#FDE68A'],
+  ['#ff9a9e','#a18cd1','#96e6a1'],
+];
+
+function cardHtml(tier, i, species) {
+  const pct = (i+1)/6*100;
+  return `
+  <div class="wrap">
+    <div class="card ${tier}">
+      <div class="topBar">
+        <div class="rarityIcon">${RARITY_ICON[tier]}</div>
+        <div class="cardId">#${String(1000+i).slice(-4)}</div>
+      </div>
+      <div class="artWrap">
+        <div class="artAura"></div>
+        <div class="spriteWrap"><object data="../../species/svg/species/${species.id}.svg" type="image/svg+xml" style="width:100%;height:100%">?</object></div>
+        <span class="stageBadge">✨ Adult</span>
+      </div>
+      <div class="info">
+        <div class="name">${species.name}</div>
+        <div class="speciesLabel">${species.sci} · ${RARITY_LABEL[tier]}</div>
+        <div class="geneRow">
+          <span class="geneLabel">🧬 DNA</span>
+          ${GENE_COLORS[i].map(c => `<span class="geneDot" style="background:${c}"></span>`).join('')}
+        </div>
+        <div class="statsRow">
+          <div class="statItem">
+            <span class="statIcon">⚔</span><span class="statValue">${species.pow}</span><span class="statLabel">POW</span>
+          </div>
+          <div class="statItem">
+            <span class="statIcon">✦</span><span class="statValue">${species.charm}</span><span class="statLabel">CHARM</span>
+          </div>
+        </div>
+      </div>
+      <div class="rarityFooter">
+        <span class="rarityLine"></span><span class="rarityName">${RARITY_LABEL[tier]}</span><span class="rarityLine"></span>
+      </div>
+      <div class="progressSection">
+        <div class="progressTrack">
+          <div class="progressFill" style="width:${pct}%;background:${RARITY_GRAD[tier]}"></div>
+        </div>
+        <span class="progressLabel">${Math.round(pct*3)} / 300</span>
+      </div>
+      <div class="actions">
+        <button class="btn feedBtn">🍎 Feed</button>
+        <button class="btn evolveBtn">✨ Evolve</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+(function() {
+  function renderCards(container) {
+    container.innerHTML = TIERS.map((tier, i) => cardHtml(tier, i, SPECIES[i])).join('');
+  }
+  renderCards(document.getElementById('dark-row'));
+  renderCards(document.getElementById('light-row'));
+})();
+</script>
+
+</body>
+</html>

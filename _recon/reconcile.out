@@ -1,0 +1,31 @@
+{
+  "rpc": "https://waxtestnet.greymass.com",
+  "aa": "https://test.wax.api.atomicassets.io",
+  "contract": "phgamecreatr",
+  "total_rows": 24,
+  "aa_missing": 0,
+  "desynced": 3,
+  "mismatches": [
+    {
+      "asset_id": "1099603751699",
+      "table_owner": "officewax123",
+      "aa_owner": "waxwingsuper",
+      "stage": 0,
+      "burned": false
+    },
+    {
+      "asset_id": "1099603751700",
+      "table_owner": "waxwingsuper",
+      "aa_owner": "officewax123",
+      "stage": 0,
+      "burned": false
+    },
+    {
+      "asset_id": "1099603751707",
+      "table_owner": "waxwingsuper",
+      "aa_owner": "officewax123",
+      "stage": 0,
+      "burned": false
+    }
+  ]
+}

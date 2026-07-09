@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1400">
+<title>Pocket Hatchery — Gene Rendering Engine</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #FFF6E9; font-family: 'Nunito', system-ui, sans-serif; color: #3A3A52; padding: 24px; }
+  h1 { font-family: 'Baloo 2', system-ui, sans-serif; font-size: 28px; font-weight: 800; margin-bottom: 4px; }
+  .sub { color: #7C7A92; font-size: 13px; margin-bottom: 24px; }
+  .controls { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 20px; }
+  .controls label { font-size: 12px; font-weight: 700; color: #7C7A92; }
+  .controls select, .controls input { padding: 6px 12px; border-radius: 8px; border: 1px solid #EBDCC4; font-size: 13px; background: white; }
+  .controls button { padding: 8px 18px; border-radius: 10px; border: none; font-weight: 700; font-size: 13px; cursor: pointer; transition: transform 0.15s; }
+  .controls button:hover { transform: scale(1.04); }
+  .btn-render { background: #FFCB6B; color: #3A3A52; }
+  .btn-random { background: #C9A8FF; color: #3A3A52; }
+  .btn-all { background: #8FD694; color: #1A3A1A; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+  .card { background: white; border-radius: 18px; padding: 12px; text-align: center; box-shadow: 0 2px 12px rgba(58,58,82,0.08); }
+  .card iframe { width: 220px; height: 260px; border: none; overflow: hidden; }
+  .card .name { font-size: 12px; font-weight: 700; margin-top: 6px; }
+  .card .gene { font-size: 9px; color: #B7B3C2; font-family: monospace; word-break: break-all; margin-top: 4px; }
+  .card .traits { font-size: 10px; color: #7C7A92; margin-top: 4px; }
+  .single { display: flex; gap: 24px; align-items: flex-start; margin-bottom: 24px; }
+  .single iframe { width: 320px; height: 380px; border: none; border-radius: 18px; background: white; box-shadow: 0 4px 20px rgba(58,58,82,0.1); }
+  .single .info { flex: 1; }
+  .single .info table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .single .info td { padding: 4px 8px; border-bottom: 1px solid #F5E6CC; }
+  .single .info td:first-child { font-weight: 700; color: #7C7A92; width: 120px; }
+  .section-title { font-size: 16px; font-weight: 800; margin: 24px 0 12px; color: #5BB572; }
+  #status { font-size: 11px; color: #B7B3C2; margin-top: 8px; }
+</style>
+</head>
+<body>
+
+<h1>🧬 Pocket Hatchery — Gene Rendering Engine</h1>
+<p class="sub">gene-to-CSS bridge · 12 species · 7 silhouettes · 16 gene-driven traits</p>
+
+<div class="controls">
+  <label>Species:</label>
+  <select id="selSpecies"></select>
+  <label>Gene Hex:</label>
+  <input id="inpGene" size="68" placeholder="64 hex chars (checksum256)">
+  <button class="btn-render" onclick="renderOne()">Render</button>
+  <button class="btn-random" onclick="renderRandom()">🎲 Random</button>
+  <button class="btn-all" onclick="renderAll()">🌐 All Species</button>
+  <span id="status"></span>
+</div>
+
+<div id="singleView" class="single" style="display:none">
+  <iframe id="singleFrame"></iframe>
+  <div class="info" id="singleInfo"></div>
+</div>
+
+<div class="section-title">📋 All 12 Species (random gene each)</div>
+<div class="grid" id="grid"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+//  INLINE ENGINE (mirrors engine.js without Node require)
+// ══════════════════════════════════════════════════════════════
+
+const GENE_MAP = {
+  species: {
+    emberling:  {id:'emberling',name:'Emberling',family:'Fire',rarity:'Common',eggType:0,templateId:662889,element:'fire',silhouette:'fox',
+      base:{body:'#E85D3A',bodyDark:'#C14422',accent:'#FF9E4A',pattern:'#FFCB6B',belly:'#FFF1E0',eyeDark:'#3A1A0A',nose:'#FF6B6B'}},
+    blazetail:  {id:'blazetail',name:'Blazetail',family:'Fire',rarity:'Uncommon',eggType:1,element:'fire',silhouette:'fox',
+      base:{body:'#D4452A',bodyDark:'#A8331C',accent:'#FFB347',pattern:'#FFD700',belly:'#FFF3E4',eyeDark:'#2A0F05',nose:'#FF5252'}},
+    drakember:  {id:'drakember',name:'Drakember',family:'Fire',rarity:'Rare',eggType:2,element:'fire',silhouette:'dragon',
+      base:{body:'#9B2C2C',bodyDark:'#6B1A1A',accent:'#FF6B35',pattern:'#FFD166',belly:'#FFE8D6',eyeDark:'#1A0505',nose:'#FF4040'}},
+    aquaring:   {id:'aquaring',name:'Aquaring',family:'Water',rarity:'Common',eggType:0,element:'water',silhouette:'drop',
+      base:{body:'#4ECDC4',bodyDark:'#2D9D96',accent:'#7FDBFF',pattern:'#B8F0FF',belly:'#E8FFFD',eyeDark:'#0A2A2A',nose:'#FF8FA0'}},
+    tidalfin:   {id:'tidalfin',name:'Tidalfin',family:'Water',rarity:'Uncommon',eggType:1,element:'water',silhouette:'drop',
+      base:{body:'#3DB8B0',bodyDark:'#228B84',accent:'#5CC8FF',pattern:'#A8E8FF',belly:'#E0FFFC',eyeDark:'#082020',nose:'#FF7A90'}},
+    leviathorn: {id:'leviathorn',name:'Leviathorn',family:'Water',rarity:'Rare',eggType:2,element:'water',silhouette:'serpent',
+      base:{body:'#1A5276',bodyDark:'#0D3350',accent:'#3498DB',pattern:'#85C1E9',belly:'#D4F1F9',eyeDark:'#020A10',nose:'#FF6080'}},
+    terrabud:   {id:'terrabud',name:'Terrabud',family:'Earth',rarity:'Common',eggType:0,element:'earth',silhouette:'rock',
+      base:{body:'#8B9A6E',bodyDark:'#5C6B42',accent:'#C4A86C',pattern:'#D4C99E',belly:'#F0EDE0',eyeDark:'#1A1F10',nose:'#C49A6C'}},
+    mossback:   {id:'mossback',name:'Mossback',family:'Earth',rarity:'Uncommon',eggType:1,element:'earth',silhouette:'rock',
+      base:{body:'#6B8C5C',bodyDark:'#446B38',accent:'#A8C97C',pattern:'#C8DDB0',belly:'#EDF5E4',eyeDark:'#14200E',nose:'#B8956A'}},
+    zephyrling: {id:'zephyrling',name:'Zephyrling',family:'Air',rarity:'Common',eggType:0,element:'air',silhouette:'bird',
+      base:{body:'#A8DCF0',bodyDark:'#7BBFD4',accent:'#D4F1FF',pattern:'#E8F8FF',belly:'#F5FCFF',eyeDark:'#1A3038',nose:'#FFB89A'}},
+    stormwing:  {id:'stormwing',name:'Stormwing',family:'Air',rarity:'Uncommon',eggType:1,element:'air',silhouette:'bird',
+      base:{body:'#6C8EBF',bodyDark:'#4A6A9A',accent:'#9DB8E0',pattern:'#C8D8F0',belly:'#EDF2FA',eyeDark:'#121A28',nose:'#FF9560'}},
+    wispember:  {id:'wispember',name:'Wispember',family:'Spirit',rarity:'Rare',eggType:2,element:'spirit',silhouette:'wisp',
+      base:{body:'#C9A8FF',bodyDark:'#8B6CDA',accent:'#E8D5FF',pattern:'#F0E8FF',belly:'#FAF5FF',eyeDark:'#1A1030',nose:'#FFB3D0'}},
+    nyxling:    {id:'nyxling',name:'Nyxling',family:'Shadow',rarity:'Legendary',eggType:3,element:'shadow',silhouette:'wisp',
+      base:{body:'#1A1A2E',bodyDark:'#0A0A18',accent:'#4A2A8E',pattern:'#7B5EA7',belly:'#2A2A3E',eyeDark:'#050510',nose:'#FF6080'}}
+  }
+};
+
+function hexToHSL(hex) {
+  let r,g,b;
+  if (hex.startsWith('#')) {
+    const hx = hex.replace('#','');
+    if (hx.length === 3) { r = parseInt(hx[0]+hx[0],16)/255; g = parseInt(hx[1]+hx[1],16)/255; b = parseInt(hx[2]+hx[2],16)/255; }
+    else { r = parseInt(hx.substring(0,2),16)/255; g = parseInt(hx.substring(2,4),16)/255; b = parseInt(hx.substring(4,6),16)/255; }
+  } else return {h:0,s:0,l:50};
+  const max=Math.max(r,g,b), min=Math.min(r,g,b);
+  let h=0,s=0; const l=(max+min)/2;
+  if(max!==min){ const d=max-min; s=l>0.5?d/(2-max-min):d/(max+min);
+    switch(max){case r:h=((g-b)/d+(g<b?6:0))/6;break;case g:h=((b-r)/d+2)/6;break;case b:h=((r-g)/d+4)/6;break;}}
+  return {h:h*360, s:s*100, l:l*100};
+}
+
+function hslShift(hex, hueDeg, satMult=1, lightMult=1) {
+  const {h,s,l}=hexToHSL(hex);
+  const newH=((h+hueDeg)%360+360)%360;
+  const newS=Math.min(100,Math.max(10,s*satMult));
+  const newL=Math.min(92,Math.max(8,l*lightMult));
+  return `hsl(${Math.round(newH)},${Math.round(newS)}%,${Math.round(newL)}%)`;
+}
+
+function byteToRange(hb, min, max) { return min+(parseInt(hb,16)/255)*(max-min); }
+function bytesToInt(h0,h1) { return (parseInt(h0,16)<<8)|parseInt(h1,16); }
+
+function decodeGene(geneHex, species) {
+  if (!geneHex || geneHex.length !== 64) throw new Error('geneHex must be 64 chars');
+  const bytes=[]; for(let i=0;i<32;i++) bytes.push(geneHex.substring(i*2,i*2+2));
+  const t={};
+  t.patternIdx=bytesToInt(bytes[0],bytes[1])%4;
+  t.hueShift=Math.round(byteToRange(bytes[2],-30,30)*10)/10;
+  t.satMult=Math.round(byteToRange(bytes[4],60,100))/100;
+  t.lightMult=Math.round(byteToRange(bytes[6],85,115))/100;
+  t.eyeSize=Math.round(byteToRange(bytes[8],0.8,1.3)*100)/100;
+  t.eyeTint=Math.round(byteToRange(bytes[10],0,60));
+  t.bodyWidth=Math.round(byteToRange(bytes[12],0.88,1.15)*100)/100;
+  t.bodyHeight=Math.round(byteToRange(bytes[14],0.88,1.15)*100)/100;
+  t.accentSize=Math.round(byteToRange(bytes[16],0.85,1.2)*100)/100;
+  t.tailSize=Math.round(byteToRange(bytes[18],0.8,1.3)*100)/100;
+  t.patternDensity=Math.round(byteToRange(bytes[20],0.6,1.5)*100)/100;
+  t.patternHue=Math.round(byteToRange(bytes[22],-20,20)*10)/10;
+  t.shine=Math.round(byteToRange(bytes[24],0.1,0.55)*100)/100;
+  t.sparkleCount=bytesToInt(bytes[26],bytes[27])%13;
+  t.auraHue=Math.round(byteToRange(bytes[28],0,360));
+
+  const base=species.base;
+  const eyeHue=t.eyeTint<30?30+t.eyeTint:t.eyeTint;
+  const auraAlpha=species.rarity==='Legendary'?0.45:species.rarity==='Rare'?0.25:0;
+
+  const css=`:root {
+  --critter-body-final: ${hslShift(base.body,t.hueShift,t.satMult,t.lightMult)};
+  --critter-accent-final: ${hslShift(base.accent,t.hueShift,t.satMult,t.lightMult)};
+  --critter-shadow-final: ${hslShift(base.bodyDark,t.hueShift,t.satMult,t.lightMult*0.96)};
+  --critter-belly-final: ${hslShift(base.belly,t.hueShift*0.3,t.satMult*0.9,t.lightMult)};
+  --critter-pattern: ${hslShift(base.pattern,t.patternHue)};
+  --gene-eye-base: hsl(${eyeHue},70%,35%);
+  --gene-pat-idx: ${t.patternIdx};
+  --gene-eye-scale: ${t.eyeSize}; --gene-body-w: ${t.bodyWidth}; --gene-body-h: ${t.bodyHeight};
+  --gene-accent-scale: ${t.accentSize}; --gene-tail-scale: ${t.tailSize};
+  --gene-pat-density: ${t.patternDensity}; --gene-shine: ${t.shine};
+  --gene-sparkle: ${t.sparkleCount}; --gene-aura: hsla(${t.auraHue},70%,65%,${auraAlpha});
+  --disp-pat-0: ${t.patternIdx===0?'inline':'none'};
+  --disp-pat-1: ${t.patternIdx===1?'inline':'none'};
+  --disp-pat-2: ${t.patternIdx===2?'inline':'none'};
+  --disp-pat-3: ${t.patternIdx===3?'inline':'none'};
+}`;
+  return {css, traits:t};
+}
+
+// Cache for loaded SVG templates
+const svgCache = {};
+function loadSVG(speciesId) {
+  if (svgCache[speciesId]) return svgCache[speciesId];
+  const xhr = new XMLHttpRequest();
+  xhr.open('GET', `templates/${speciesId}.svg`, false);
+  try { xhr.send(); if (xhr.status === 200) { svgCache[speciesId] = xhr.responseText; return xhr.responseText; } }
+  catch(e) { console.warn('SVG load failed:', e.message); }
+  return null;
+}
+
+function renderSVG(geneHex, speciesId) {
+  const s = GENE_MAP.species[speciesId];
+  if (!s) return '<p>Unknown species</p>';
+  const {css, traits} = decodeGene(geneHex, s);
+  let svg = loadSVG(speciesId);
+  if (!svg) {
+    return `<html><head><style>body{margin:0;display:flex;justify-content:center;align-items:center;min-height:100vh;background:transparent;}
+${css}</style></head><body><p style="text-align:center;color:#7C7A92;">${s.name}</p></body></html>`;
+  }
+  // Inject engine CSS into the SVG's :root block (standalone pattern toggle via --disp-pat-N)
+  svg = svg.replace(/:root\s*\{[^}]*\}/s, css);
+  return `<html><head><style>body{margin:0;display:flex;justify-content:center;align-items:center;min-height:100vh;background:transparent;}</style></head><body>${svg}</body></html>`;
+}
+
+// ══════════════════════════════════════════════════════════════
+//  UI
+// ══════════════════════════════════════════════════════════════
+
+function randomHex() {
+  const h='0123456789abcdef'; let s='';
+  for(let i=0;i<64;i++) s+=h[Math.floor(Math.random()*16)];
+  return s;
+}
+
+function init() {
+  const sel=document.getElementById('selSpecies');
+  for(const [id,s] of Object.entries(GENE_MAP.species)) {
+    const o=document.createElement('option'); o.value=id; o.textContent=`${s.name} (${s.family} ${s.rarity})`; sel.appendChild(o);
+  }
+  document.getElementById('inpGene').value = 'fc199058c0aa59f8990793c602a703156d714d03ee3640b21077fc984fbb386f';
+}
+
+function renderOne() {
+  const speciesId=document.getElementById('selSpecies').value;
+  const gene=document.getElementById('inpGene').value.trim();
+  try {
+    const html=renderSVG(gene, speciesId);
+    const frame=document.getElementById('singleFrame');
+    const blob=new Blob([html],{type:'text/html'});
+    frame.src=URL.createObjectURL(blob);
+    document.getElementById('singleView').style.display='flex';
+
+    const s=GENE_MAP.species[speciesId];
+    const {traits}=decodeGene(gene, s);
+    document.getElementById('singleInfo').innerHTML=`<h3>${s.name} · ${s.family} ${s.rarity}</h3>
+<table>
+<tr><td>Pattern</td><td>${['Stripes','Spots','Hearts','Stars'][traits.patternIdx]}</td></tr>
+<tr><td>Hue Shift</td><td>${traits.hueShift}°</td></tr>
+<tr><td>Saturation</td><td>${(traits.satMult*100).toFixed(0)}%</td></tr>
+<tr><td>Lightness</td><td>${(traits.lightMult*100).toFixed(0)}%</td></tr>
+<tr><td>Eye Size</td><td>${traits.eyeSize.toFixed(2)}x</td></tr>
+<tr><td>Body W×H</td><td>${traits.bodyWidth.toFixed(2)}×${traits.bodyHeight.toFixed(2)}</td></tr>
+<tr><td>Accent Size</td><td>${traits.accentSize.toFixed(2)}x</td></tr>
+<tr><td>Tail Size</td><td>${traits.tailSize.toFixed(2)}x</td></tr>
+<tr><td>Pattern Density</td><td>${traits.patternDensity.toFixed(2)}x</td></tr>
+<tr><td>Shine</td><td>${(traits.shine*100).toFixed(0)}%</td></tr>
+<tr><td>Sparkles</td><td>${traits.sparkleCount}</td></tr>
+<tr><td>Aura Hue</td><td>${traits.auraHue}°</td></tr>
+</table>`;
+    document.getElementById('status').textContent=`✓ Rendered ${s.name} with gene traits`;
+  } catch(e) {
+    document.getElementById('status').textContent=`❌ ${e.message}`;
+  }
+}
+
+function renderRandom() {
+  document.getElementById('inpGene').value=randomHex();
+  renderOne();
+}
+
+function renderAll() {
+  const grid=document.getElementById('grid');
+  grid.innerHTML='';
+  for(const [id,s] of Object.entries(GENE_MAP.species)) {
+    const gene=randomHex();
+    const html=renderSVG(gene, id);
+    const blob=new Blob([html],{type:'text/html'});
+    const url=URL.createObjectURL(blob);
+    const {traits}=decodeGene(gene, s);
+    grid.innerHTML+=`<div class="card">
+      <iframe src="${url}"></iframe>
+      <div class="name">${s.name} <span style="color:${s.rarity==='Legendary'?'#FFD86B':s.rarity==='Rare'?'#B07BE8':s.eggType===1?'#5FB8E8':'#8FD694'}">${s.rarity}</span></div>
+      <div class="gene">${gene.substring(0,32)}…</div>
+      <div class="traits">pat:${traits.patternIdx} eyes:${traits.eyeSize}x hue:${traits.hueShift}° body:${traits.bodyWidth}x${traits.bodyHeight}</div>
+    </div>`;
+  }
+  document.getElementById('status').textContent='✓ All 12 species rendered with random genes';
+}
+
+init();
+</script>
+</body>
+</html>
