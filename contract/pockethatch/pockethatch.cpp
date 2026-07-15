@@ -95,6 +95,9 @@ uint32_t pockethatch::fed_duration_for(const config_row& cfg, uint64_t egg_type)
     switch (egg_type) {
         case 1:  return cfg.fed_dur_uncommon;
         case 2:  return cfg.fed_dur_rare;
+        case 3:  return cfg.fed_dur_epic;
+        case 4:  return cfg.fed_dur_legendary;
+        case 5:  return cfg.fed_dur_mythic;
         default: return cfg.fed_dur_common;   // 0 = common
     }
 }
@@ -104,7 +107,46 @@ uint16_t pockethatch::earn_mult_for(const config_row& cfg, uint64_t egg_type) co
     switch (egg_type) {
         case 1:  return cfg.earn_mult_uncommon;
         case 2:  return cfg.earn_mult_rare;
+        case 3:  return cfg.earn_mult_epic;
+        case 4:  return cfg.earn_mult_legendary;
+        case 5:  return cfg.earn_mult_mythic;
         default: return cfg.earn_mult_common; // 0 = common
+    }
+}
+
+// ── Awaken v2 — how long a creature must sleep before auto-awakening (by rarity) ──
+uint32_t pockethatch::awaken_duration_for(const config_row& cfg, uint64_t egg_type) const {
+    switch (egg_type) {
+        case 1:  return cfg.awaken_dur_uncommon;
+        case 2:  return cfg.awaken_dur_rare;
+        case 3:  return cfg.awaken_dur_epic;
+        case 4:  return cfg.awaken_dur_legendary;
+        case 5:  return cfg.awaken_dur_mythic;
+        default: return cfg.awaken_dur_common;
+    }
+}
+
+// ── WAX wake v2 — WAX cost to skip awaken timer (by rarity) ──
+asset pockethatch::wake_cost_for(const config_row& cfg, uint64_t egg_type) const {
+    switch (egg_type) {
+        case 1:  return cfg.wake_cost_uncommon;
+        case 2:  return cfg.wake_cost_rare;
+        case 3:  return cfg.wake_cost_epic;
+        case 4:  return cfg.wake_cost_legendary;
+        case 5:  return cfg.wake_cost_mythic;
+        default: return cfg.wake_cost_common;
+    }
+}
+
+// ── Burn EGG v2 — flat EGG refund on burn (by rarity, CEO locked §6.1) ──
+uint64_t pockethatch::burn_egg_for(const config_row& cfg, uint64_t egg_type) const {
+    switch (egg_type) {
+        case 1:  return cfg.burn_egg_uncommon;
+        case 2:  return cfg.burn_egg_rare;
+        case 3:  return cfg.burn_egg_epic;
+        case 4:  return cfg.burn_egg_legendary;
+        case 5:  return cfg.burn_egg_mythic;
+        default: return cfg.burn_egg_common;
     }
 }
 
@@ -207,12 +249,19 @@ uint64_t pockethatch::roll_egg_type() const {
     config_row cfg = _cfg();
     uint64_t total = (uint64_t)cfg.rarity_w_common
                    + (uint64_t)cfg.rarity_w_uncommon
-                   + (uint64_t)cfg.rarity_w_rare;
+                   + (uint64_t)cfg.rarity_w_rare
+                   + (uint64_t)cfg.rarity_w_epic
+                   + (uint64_t)cfg.rarity_w_legendary
+                   + (uint64_t)cfg.rarity_w_mythic;
     if (total == 0) return 0; // safety: common-only if all weights zero
     uint64_t roll = make_seed() % total;
-    if (roll < cfg.rarity_w_common) return 0;
-    if (roll < cfg.rarity_w_common + cfg.rarity_w_uncommon) return 1;
-    return 2;
+    uint64_t acc = 0;
+    acc += cfg.rarity_w_common;       if (roll < acc) return 0;
+    acc += cfg.rarity_w_uncommon;     if (roll < acc) return 1;
+    acc += cfg.rarity_w_rare;         if (roll < acc) return 2;
+    acc += cfg.rarity_w_epic;         if (roll < acc) return 3;
+    acc += cfg.rarity_w_legendary;    if (roll < acc) return 4;
+    return 5; // mythic
 }
 
 uint64_t pockethatch::resolve_new_asset(name owner) const {
@@ -325,9 +374,8 @@ void pockethatch::hatch(name owner, uint64_t egg_type) {
     auto sp_it = sps.find(template_id);
     check(sp_it != sps.end(), "species not found");
 
-    // ── Deduct EGG cost from player (scaled by rarity) ──
-    uint64_t cost_mult[] = {1, 3, 10}; // common×1, uncommon×3, rare×10
-    uint64_t hatch_egg_cost = cfg.hatch_cost * cost_mult[rolled_egg_type];
+    // ── Deduct EGG cost from player (flat rate — rarity multiplier removed) ──
+    uint64_t hatch_egg_cost = cfg.hatch_cost;
     {
         players_t ps(get_self(), get_self().value);
         auto p_it = ps.find(owner.value);
@@ -555,9 +603,22 @@ void pockethatch::harvest(name owner) {
     uint64_t gross     = 0;                       // EGG, already rarity + satiety scaled
     uint16_t best_mult = cfg.earn_mult_common;    // richest rarity that actually earned
     for (auto it = idx.lower_bound(owner.value); it != idx.end() && it->owner == owner; ++it) {
-        if (it->stage == 0) continue;
         auto sp_it = sps.find(it->template_id);
         if (sp_it == sps.end()) continue;
+
+        // ── Awaken v2: auto-awaken stage 0 → 1 when timer has elapsed ──
+        if (it->stage == 0) {
+            uint32_t awaken_dur = awaken_duration_for(cfg, sp_it->egg_type);
+            if (now >= it->born_at + awaken_dur) {
+                auto primary = crs.find(it->asset_id);
+                crs.modify(primary, same_payer, [&](auto& r) { r.stage = 1; });
+                // falls through to earning below since stage is now 1
+            } else {
+                continue; // still sleeping — skip
+            }
+        }
+
+        if (it->stage == 0) continue; // still sleeping (timer not elapsed)
         uint8_t idx_yield = it->stage - 1;        // stage 1→yield[0], etc.
         if (idx_yield >= 6) continue;
 
@@ -623,17 +684,26 @@ void pockethatch::claimreward(name owner) {
     check(now >= c_it->last_claimed + cfg.harvest_cd, "claim on cooldown");
 
     // Qualification: player must own at least 1 creature stage ≥ 2 (Juvenile)
+    //                AND at least 1 creature must be fed (satiety gate, v2 §5.2.2)
     creatures_t crs(get_self(), get_self().value);
     auto idx = crs.get_index<"byowner"_n>();
+    species_t sps(get_self(), get_self().value);
     uint8_t highest_stage = 0;
+    bool has_fed_creature = false;
     for (auto it = idx.lower_bound(owner.value); it != idx.end() && it->owner == owner; ++it) {
         if (it->stage > highest_stage) highest_stage = it->stage;
+        auto sp_it = sps.find(it->template_id);
+        if (!has_fed_creature && sp_it != sps.end()) {
+            uint32_t fed_dur = fed_duration_for(cfg, sp_it->egg_type);
+            if (now < it->last_fed + fed_dur) has_fed_creature = true;
+        }
     }
     check(highest_stage >= 2, "not qualified — need at least a Juvenile");
+    check(has_fed_creature, "no fed creature — feed before claiming");
 
-    // Payout scales with highest stage
-    // Stage 2 = 20 HATCH, 3 = 30, 4 = 50, 5 = 100 (×10^4 precision)
-    uint64_t base[] = {0, 0, 20, 30, 50, 100};
+    // Payout scales with highest stage (v2 revised, CEO locked §5.2.1)
+    // Stage 2 = 15 HATCH, 3 = 25, 4 = 45, 5 = 85 (×10^4 precision)
+    uint64_t base[] = {0, 0, 15, 25, 45, 85};
     uint64_t idx_pay = std::min((int)highest_stage, 5);
     uint64_t payout_amt = base[idx_pay] * 10000ULL; // ×10^4
     asset payout = asset(payout_amt, HATCH_SYM);
@@ -856,7 +926,7 @@ void pockethatch::burncreature(name owner, uint64_t asset_id) {
     // ── Resilient burn: skip burnasset if NFT is already gone ──
     if (nft_exists(cfg.collection, owner, asset_id)) {
         action(
-            permission_level{get_self(), "active"_n},
+            permission_level{owner, "active"_n},
             "atomicassets"_n,
             "burnasset"_n,
             aa_burn{owner, asset_id}
@@ -866,11 +936,11 @@ void pockethatch::burncreature(name owner, uint64_t asset_id) {
     // ── HATCH payout from reward pool ──
     // formula: base × stage_mult × rarity_mult
     //   stage_mult:   0→0.2, 1→0.5, 2→1, 3→2, 4→5, 5→10
-    //   rarity_mult:  common×1, uncommon×3, rare×10
+    //   rarity_mult:  common×1, uncommon×3, rare×10, epic×25, legendary×60, mythic×150
     uint64_t stage_mul[] = {2, 5, 10, 20, 50, 100};   // ×0.1 → real multiplier
-    uint64_t rarity_mul[] = {10, 30, 100};              // ×0.1 → real multiplier
+    uint64_t rarity_mul[] = {10, 30, 100, 250, 600, 1500}; // ×0.1 → real multiplier
     uint64_t idx_s = std::min((int)stage, 5);
-    uint64_t idx_r = std::min((int)egg_type, 2);
+    uint64_t idx_r = std::min((int)egg_type, 5);
     uint64_t payout_raw = (uint64_t)cfg.burn_base_hatch.amount
                         * stage_mul[idx_s] / 10
                         * rarity_mul[idx_r] / 10;
@@ -892,12 +962,8 @@ void pockethatch::burncreature(name owner, uint64_t asset_id) {
         ).send();
     }
 
-    // ── EGG refund (partial hatch_cost returned) ──
-    uint64_t refund_pct;
-    if      (stage <= 1) refund_pct = 20;
-    else if (stage <= 3) refund_pct = 10;
-    else                 refund_pct = 5;
-    uint64_t refund = cfg.hatch_cost * refund_pct / 100;
+    // ── EGG refund — flat per rarity (v2, CEO locked §6.1) ──
+    uint64_t refund = burn_egg_for(cfg, egg_type);
 
     if (refund > 0) {
         players_t ps(get_self(), get_self().value);
@@ -975,8 +1041,13 @@ void pockethatch::equipcosmetic(name owner, uint64_t asset_id, uint64_t cosmetic
 
 void pockethatch::clearconfig() {
     require_auth(get_self());
-    config_t ct(get_self(), get_self().value);
-    ct.remove();
+    // Use low-level db API to skip binary deserialization of stale config.
+    // Use lowerbound with key=0 to find ANY row regardless of primary key value.
+    using namespace eosio::internal_use_do_not_use;
+    uint64_t scope = get_self().value;
+    uint64_t tbl = "configv3"_n.value;
+    int itr = db_lowerbound_i64(get_self().value, scope, tbl, 0);
+    if (itr >= 0) db_remove_i64(itr);
 }
 
 void pockethatch::clearpool() {
@@ -1124,5 +1195,57 @@ void pockethatch::on_assets_transfer(
                 r.owner = to;
             });
         }
+    }
+}
+
+// ─── WAX wake notification (v2) ───────────────────────────────────────────
+// Player sends WAX to this contract via eosio.token::transfer with memo "wake:<asset_id>".
+// Contract validates, wakes the creature (stage 0→1), and forwards WAX to fee_account.
+
+void pockethatch::on_wax_transfer(name from, name to, asset quantity, std::string memo) {
+    // 1. Ignore outgoing transfers and non-WAX tokens
+    if (to != get_self()) return;
+    check(quantity.symbol == symbol("WAX", 8), "only WAX accepted");
+
+    // 2. Parse memo — expect "wake:<asset_id>"
+    if (memo.rfind("wake:", 0) != 0) {
+        check(false, "unknown memo — use wake:<asset_id>");
+    }
+    uint64_t asset_id = std::stoull(memo.substr(5));
+
+    // 3. Validate creature
+    config_row cfg = _cfg();
+    creatures_t crs(get_self(), get_self().value);
+    auto it = crs.find(asset_id);
+    check(it != crs.end(), "creature not found");
+    check(it->owner == from, "not your creature");
+    check(it->stage == 0, "already awake");
+
+    // 4. Look up species + rarity
+    species_t sps(get_self(), get_self().value);
+    auto sp = sps.find(it->template_id);
+    check(sp != sps.end(), "species not found");
+    uint64_t egg_type = sp->egg_type;
+
+    // 5. Validate WAX amount (excess WAX accepted as donation)
+    //    (timer gate removed — WAX wake is always available during stage 0;
+    //     player may also wait for free auto-awaken via harvest)
+    asset required = wake_cost_for(cfg, egg_type);
+    check(quantity >= required, "insufficient WAX for wake");
+
+    // 6. Wake! stage 0 → 1
+    crs.modify(it, same_payer, [&](auto& r) { r.stage = 1; });
+
+    // 7. Forward WAX to fee_account — ONLY when it is a distinct account.
+    //    CEO decision 2026-07-15: WAX wake fees stay in the game contract itself.
+    //    Live config sets fee_account = get_self(); forwarding to self reverts
+    //    eosio.token with "cannot transfer to self" (the awaken bug). The inbound
+    //    transfer already deposited the WAX here, so skipping the forward simply
+    //    lets the fee accrue in-contract — the intended treasury behaviour.
+    if (quantity.amount > 0 && cfg.fee_account != get_self()) {
+        action(permission_level{get_self(), "active"_n},
+               cfg.wax_contract, "transfer"_n,
+               token_transfer{get_self(), cfg.fee_account, quantity, "wake:" + std::to_string(asset_id)}
+        ).send();
     }
 }

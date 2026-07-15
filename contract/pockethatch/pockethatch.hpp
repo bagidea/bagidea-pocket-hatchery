@@ -136,7 +136,7 @@ struct [[eosio::table("configv3")]] config_row {
     uint64_t    hatch_cost       = 150;     // EGG
     uint64_t    evolve_cost      = 300;     // EGG (× stage+1 in action)
     asset       breed_cost       = asset(50000, symbol("HATCH", 4));  // 5.0000 HATCH
-    uint64_t    feed_cost        = 12;      // EGG per feed (v2 — feeding now matters)
+    uint64_t    feed_cost        = 0;       // EGG per feed (v2: free feeding, CEO locked)
     uint64_t    slot_cost        = 500;     // EGG — 4th slot unlock
     uint64_t    cosmetic_cost    = 100;     // EGG — cosmetic reroll
     asset       name_cost        = asset(10000, symbol("HATCH", 4));  // 1.0000 HATCH rename
@@ -162,9 +162,12 @@ struct [[eosio::table("configv3")]] config_row {
     // Boss-locked testnet tier distribution (weights, NOT %). roll_egg_type()
     // picks the tier by these; species.egg_weight only spreads species WITHIN a
     // tier (uniform → does not change tier odds). 700/250/50 → 70% / 25% / 5%.
-    uint16_t    rarity_w_common  = 700;          // common
-    uint16_t    rarity_w_uncommon= 250;          // uncommon
-    uint16_t    rarity_w_rare    = 50;           // rare
+    uint16_t    rarity_w_common   = 700;          // common
+    uint16_t    rarity_w_uncommon = 250;          // uncommon
+    uint16_t    rarity_w_rare     = 50;           // rare
+    uint16_t    rarity_w_epic     = 250;          // epic
+    uint16_t    rarity_w_legendary= 45;           // legendary
+    uint16_t    rarity_w_mythic   = 5;            // mythic
 
     // ── Burn-creature HATCH payout ──
     asset       burn_base_hatch  = asset(100000, symbol("HATCH", 4));  // 10.0000 HATCH base × stage+rarity multipliers
@@ -174,17 +177,48 @@ struct [[eosio::table("configv3")]] config_row {
     // fed_dur_<rarity> seconds of food. fed_until = creature.last_fed +
     // fed_dur(rarity). satiety% = clamp((fed_until - now)/fed_dur, 0, 1).
     // Rarer creatures stay fed longer AND earn more per fed-hour.
-    uint32_t    fed_dur_common   = 172800;      // 48h  — full→empty decay window
-    uint32_t    fed_dur_uncommon = 259200;      // 72h
-    uint32_t    fed_dur_rare     = 432000;      // 120h — rare stays fed 2.5× longer
-    uint16_t    earn_mult_common   = 10000;     // ×1.00 harvest yield (basis points)
-    uint16_t    earn_mult_uncommon = 11000;     // ×1.10 (verified from speciescfg 2026-07-09)
-    uint16_t    earn_mult_rare     = 14000;     // ×1.40 (verified from speciescfg 2026-07-09)
+    uint32_t    fed_dur_common   = 172800;     // 48h
+    uint32_t    fed_dur_uncommon = 259200;     // 72h
+    uint32_t    fed_dur_rare     = 432000;     // 120h (5d)
+    uint32_t    fed_dur_epic     = 604800;     // 168h (7d)
+    uint32_t    fed_dur_legendary= 864000;     // 240h (10d)
+    uint32_t    fed_dur_mythic   = 1209600;    // 336h (14d)
+    uint16_t    earn_mult_common    = 10000;   // ×1.00 harvest yield (basis points)
+    uint16_t    earn_mult_uncommon  = 11000;   // ×1.10
+    uint16_t    earn_mult_rare      = 14000;   // ×1.40
+    uint16_t    earn_mult_epic      = 18000;   // ×1.80
+    uint16_t    earn_mult_legendary = 24000;   // ×2.40
+    uint16_t    earn_mult_mythic    = 33000;   // ×3.30
     uint8_t     cap_scales_rarity  = 1;         // 1 = daily EGG cap ×earn_mult(best owned rarity); 0 = flat cap
+
+    // ── Awaken timer (v2, CEO locked §1.2) ──
+    uint32_t    awaken_dur_common    = 3600;     // 1h
+    uint32_t    awaken_dur_uncommon  = 5400;     // 1.5h
+    uint32_t    awaken_dur_rare      = 7200;     // 2h
+    uint32_t    awaken_dur_epic      = 9000;     // 2.5h
+    uint32_t    awaken_dur_legendary = 10800;    // 3h
+    uint32_t    awaken_dur_mythic    = 10800;    // 3h
+
+    // ── WAX wake (v2, CEO locked §2.2) ──
+    name        wax_contract         = "eosio.token"_n;
+    asset       wake_cost_common     = asset(300000000, symbol("WAX", 8));     // 3 WAX
+    asset       wake_cost_uncommon   = asset(500000000, symbol("WAX", 8));     // 5 WAX
+    asset       wake_cost_rare       = asset(1000000000, symbol("WAX", 8));    // 10 WAX
+    asset       wake_cost_epic       = asset(2000000000, symbol("WAX", 8));    // 20 WAX
+    asset       wake_cost_legendary  = asset(4000000000, symbol("WAX", 8));    // 40 WAX
+    asset       wake_cost_mythic     = asset(8000000000, symbol("WAX", 8));    // 80 WAX
+
+    // ── Burn EGG refund — flat per rarity (v2, CEO locked §6.1) ──
+    uint64_t    burn_egg_common     = 8;
+    uint64_t    burn_egg_uncommon   = 12;
+    uint64_t    burn_egg_rare       = 16;
+    uint64_t    burn_egg_epic       = 21;
+    uint64_t    burn_egg_legendary  = 26;
+    uint64_t    burn_egg_mythic     = 30;
 };
 typedef singleton<"configv3"_n, config_row> config_t;
 
-struct [[eosio::table("speciescfg")]] species_row {
+struct [[eosio::table("spccfgv2")]] species_row {
     uint64_t    template_id;
     uint64_t    growth_rate;                    // growth-per-second
     uint64_t    thresh_1;                       // G threshold for stage 1
@@ -200,7 +234,7 @@ struct [[eosio::table("speciescfg")]] species_row {
     uint64_t    yield_5;                        // EGG/hr gross ×10^4 for stage 5 (Final)
     uint8_t     max_stage;                      // terminal stage (1..6)
     uint16_t    egg_weight;                     // rarity weight in the hatch pool
-    uint64_t    egg_type;                       // 0=common, 1=uncommon, 2=rare
+    uint64_t    egg_type;                       // 0=common,1=uncommon,2=rare,3=epic,4=legendary,5=mythic
     std::string family;
 
     uint64_t primary_key() const { return template_id; }
@@ -229,7 +263,7 @@ struct [[eosio::table("speciescfg")]] species_row {
     }
 };
 typedef multi_index<
-    "speciescfg"_n, species_row,
+    "spccfgv2"_n, species_row,
     indexed_by<"byeggtype"_n, const_mem_fun<species_row, uint64_t, &species_row::by_eggtype>>
 > species_t;
 
@@ -261,7 +295,7 @@ struct [[eosio::table("claims")]] claim_row {
 };
 typedef multi_index<"claims"_n, claim_row> claims_t;
 
-struct [[eosio::table("creatures")]] creature_row {
+struct [[eosio::table("creatrsv2")]] creature_row {
     uint64_t    asset_id;
     name        owner;
     uint64_t    template_id;
@@ -278,7 +312,7 @@ struct [[eosio::table("creatures")]] creature_row {
     uint64_t by_owner() const { return owner.value; }
 };
 typedef multi_index<
-    "creatures"_n, creature_row,
+    "creatrsv2"_n, creature_row,
     indexed_by<"byowner"_n, const_mem_fun<creature_row, uint64_t, &creature_row::by_owner>>
 > creatures_t;
 
@@ -354,6 +388,9 @@ public:
         std::vector<uint64_t> asset_ids,
         const std::string& memo);
 
+    [[eosio::on_notify("eosio.token::transfer")]]
+    void on_wax_transfer(name from, name to, asset quantity, std::string memo);
+
 private:
     void ensure_player(name owner);
     void reset_daily_if_new_day(player_row& p, uint32_t now);
@@ -363,6 +400,9 @@ private:
     // ── Feed economy v2 helpers ──
     uint32_t fed_duration_for(const config_row& cfg, uint64_t egg_type) const;  // seconds a feed lasts, by rarity
     uint16_t earn_mult_for(const config_row& cfg, uint64_t egg_type) const;     // harvest yield multiplier (bp), by rarity
+    uint32_t awaken_duration_for(const config_row& cfg, uint64_t egg_type) const; // awaken timer (s), by rarity
+    asset    wake_cost_for(const config_row& cfg, uint64_t egg_type) const;       // WAX wake cost, by rarity
+    uint64_t burn_egg_for(const config_row& cfg, uint64_t egg_type) const;        // flat EGG refund on burn, by rarity
     void burn_hatch(name from, const asset& amount, const std::string& memo);
     void fund_pool(const asset& amount, const std::string& source);
     uint64_t make_seed() const;
