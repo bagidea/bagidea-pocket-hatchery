@@ -18,6 +18,9 @@ export const CHAIN_ID = ACTIVE_NET.chainId
 // Hard cap per attempt so a dead node fails fast instead of stalling the UI ~17s.
 export const RPC_TIMEOUT_MS = 7000
 
+// Seconds per on-chain day — mirrors the contract's DAY_SEC (pockethatch.cpp).
+const DAY_SEC = 86400
+
 // ── configv3 — the config table name (Feed v2, deployed 2026-07-09) ──────────
 // Live on phgamecreatr since Feed v2 deploy. Reads fed_dur + earn_mult directly
 // from chain; satiety.ts FED_DUR_DEFAULT is the fallback.
@@ -44,16 +47,65 @@ export interface ChainConfig {
   feed_daily_cap: number
   daily_egg_cap: number
   offline_cap_h: number
+  /** Scale the daily EGG ceiling by the best owned rarity's earn_mult (configv3). */
+  cap_scales_rarity?: number
   tap_egg_cap: number
   feed_boost: number
   season_index: number
   season_started: number
   rng_oracle: string
+  // Hatch rarity roll weights — the contract rolls the tier server-side with these
+  // (pockethatch.cpp roll_egg_type). Cost is flat (hatch_cost); only the OUTCOME
+  // rarity varies. Optional so older config tables without them fall back to spec.
+  rarity_w_common?: number
+  rarity_w_uncommon?: number
+  rarity_w_rare?: number
+  rarity_w_epic?: number
+  rarity_w_legendary?: number
+  rarity_w_mythic?: number
   // Feed v2 satiety durations (seconds) per rarity — configv3. Optional because
   // configv2 does not carry them; when absent, satiety.ts FED_DUR_DEFAULT applies.
   fed_dur_common?: number
   fed_dur_uncommon?: number
   fed_dur_rare?: number
+  fed_dur_epic?: number
+  fed_dur_legendary?: number
+  fed_dur_mythic?: number
+  // Feed v2 harvest-yield multiplier (basis points, ×10000) per rarity — configv3.
+  // The contract's harvest() multiplies the SPECIES' own yield_for(stage) by this
+  // on top (pockethatch.cpp: `gross += yield_for(idx) * fed_h * mult/10000 * …`), so
+  // the true per-creature earn = speciescfg.yield × earn_mult. Optional (configv2
+  // lacks them); when absent, satiety.ts RARITY_EARN_MULT is the fallback.
+  earn_mult_common?: number
+  earn_mult_uncommon?: number
+  earn_mult_rare?: number
+  earn_mult_epic?: number
+  earn_mult_legendary?: number
+  earn_mult_mythic?: number
+  // Awaken v2 — how long a freshly-hatched creature sleeps (stage 0) before it can
+  // be harvested awake (seconds), per rarity — configv3.awaken_dur_*. The contract
+  // auto-awakens stage 0→1 on the next harvest once `born_at + awaken_dur` elapses
+  // (pockethatch.cpp harvest loop), OR the player pays WAX to wake it early.
+  awaken_dur_common?: number
+  awaken_dur_uncommon?: number
+  awaken_dur_rare?: number
+  awaken_dur_epic?: number
+  awaken_dur_legendary?: number
+  awaken_dur_mythic?: number
+  // Awaken v2 — WAX cost to skip the sleep timer, per rarity (asset strings, e.g.
+  // "3.00000000 WAX"). The player sends this to the game contract via
+  // wax_contract::transfer with memo "wake:<asset_id>" (on_wax_transfer). Only
+  // valid WHILE sleeping; once the timer elapses the contract rejects it ("already
+  // awake — just harvest instead") and the harvest auto-awaken is free.
+  wake_cost_common?: string
+  wake_cost_uncommon?: string
+  wake_cost_rare?: string
+  wake_cost_epic?: string
+  wake_cost_legendary?: string
+  wake_cost_mythic?: string
+  // The token contract WAX wake payments go through (configv3.wax_contract =
+  // eosio.token on WAX). The wake transfer targets this contract, not the game one.
+  wax_contract?: string
 }
 
 export interface PlayerRow {
@@ -67,8 +119,33 @@ export interface PlayerRow {
   feed_day: number
   total_egg_farmed: number
   total_hatch_burned: number
-  last_claimed: number      // last claimreward timestamp (unix seconds)
-  claimed_season: number    // season index last claimed in
+}
+
+/**
+ * Mirror the contract's reset_daily_if_new_day (pockethatch.cpp) on the READ side.
+ *
+ * The chain resets the per-day counters LAZILY — egg_harvested_today / feeds_today
+ * only zero out the next time an action runs on a new UTC day, so a player who last
+ * acted yesterday still has yesterday's spent quota / depleted energy sitting in the
+ * raw table until they act again. Reading those raw fields makes the HUD show a
+ * stale "cap reached" / "0 energy" for today. Recompute the EFFECTIVE counters here
+ * exactly as the contract would on the next action (two independent day fields:
+ * harvest_day gates egg_harvested_today; feed_day gates feeds_today).
+ *
+ * `now` MUST be the chain head time (getChainTime) — never client Date.now(). The
+ * day boundary decides today's free energy and harvest quota, and a player must not
+ * be able to shift it forward by setting their device clock ahead.
+ */
+export function effectiveDailyCounters(
+  player: PlayerRow | null,
+  now: number,
+): { eggHarvestedToday: number; feedsToday: number } {
+  if (!player) return { eggHarvestedToday: 0, feedsToday: 0 }
+  const today = Math.floor(now / DAY_SEC)
+  return {
+    eggHarvestedToday: today !== player.harvest_day ? 0 : player.egg_harvested_today,
+    feedsToday: today !== player.feed_day ? 0 : player.feeds_today,
+  }
 }
 
 export interface CreatureRow {
@@ -94,10 +171,12 @@ export interface RewardPoolRow {
   lifetime_paid: string
 }
 
+// One player's claim record (contract: claims_t, primary key = account.value).
+// The claim clock does NOT live on the player row — claimreward keeps it here.
 export interface ClaimRow {
-  season_index: number
-  claimed_at: number
-  amount: string
+  account: string
+  last_claimed: number    // unix seconds of the last successful claimreward
+  claimed_season: number  // season index that claim was made in (0 = never claimed)
 }
 
 // One creature species/template. thresh_1..4 are the growth totals needed to
@@ -126,7 +205,12 @@ export interface GameState {
   creatures: CreatureRow[]
   rewardPool: RewardPoolRow | null
   species: SpeciesRow[]
-  claims: ClaimRow[]
+  /** This player's claim record (claims table) — null when they never claimed. */
+  claim: ClaimRow | null
+  /** Chain head time in unix seconds — the authoritative "now" for the daily
+   *  reset (effectiveDailyCounters). Falls back to the client clock only if the
+   *  head-time read fails on every node. */
+  now: number
 }
 
 // POST to the chain, trying each endpoint in turn with a hard timeout per try.
@@ -166,6 +250,17 @@ interface TableRowsResponse<T> {
   next_key?: string
 }
 
+/**
+ * Chain head time in unix seconds (get_info.head_block_time). This is the
+ * authoritative clock for the daily reset — using it instead of the browser's
+ * Date.now() keeps the HUD honest against a device clock the player controls.
+ * head_block_time is UTC with no zone suffix, so we append 'Z' before parsing.
+ */
+export async function getChainTime(): Promise<number> {
+  const info = await rpc<{ head_block_time: string }>('/v1/chain/get_info', {})
+  return Math.floor(Date.parse(`${info.head_block_time}Z`) / 1000)
+}
+
 export async function getConfig(): Promise<ChainConfig | null> {
   const data = await rpc<TableRowsResponse<ChainConfig>>('/v1/chain/get_table_rows', {
     code: CONTRACT_ACCOUNT,
@@ -194,10 +289,13 @@ export async function getCreatures(owner: string): Promise<CreatureRow[]> {
   // The creatures table is keyed by asset_id. We read the whole table and
   // filter client-side by owner. For a production game with many creatures
   // you'd add a secondary index; this contract exposes only the primary key.
+  // NOTE: the Feed-v2 deploy (configv3, 2026-07-09) RENAMED this table
+  // `creatures` → `creatrsv2` (verified against the live ABI). The old name is
+  // no longer in the ABI and 3060003s.
   const data = await rpc<TableRowsResponse<CreatureRow>>('/v1/chain/get_table_rows', {
     code: CONTRACT_ACCOUNT,
     scope: CONTRACT_ACCOUNT,
-    table: 'creatures',
+    table: 'creatrsv2',
     json: true,
     limit: 1000,
   })
@@ -216,30 +314,38 @@ export async function getRewardPool(): Promise<RewardPoolRow | null> {
 }
 
 export async function getSpecies(): Promise<SpeciesRow[]> {
+  // Feed-v2 deploy renamed this table `speciescfg` → `spccfgv2` (live ABI).
   const data = await rpc<TableRowsResponse<SpeciesRow>>('/v1/chain/get_table_rows', {
     code: CONTRACT_ACCOUNT,
     scope: CONTRACT_ACCOUNT,
-    table: 'speciescfg',
+    table: 'spccfgv2',
     json: true,
     limit: 100,
   })
   return data.rows
 }
 
-export async function getClaims(account: string): Promise<ClaimRow[]> {
-  try {
-    const data = await rpc<TableRowsResponse<ClaimRow>>('/v1/chain/get_table_rows', {
-      code: CONTRACT_ACCOUNT,
-      scope: account,
-      table: 'claims',
-      json: true,
-      limit: 50,
-    })
-    return data.rows
-  } catch {
-    // claims table may not exist yet on-chain — fall back to PlayerRow.claimed_season
-    return []
-  }
+/**
+ * This player's claim record, or null when they have never claimed.
+ *
+ * The `claims` table is scoped to the CONTRACT (claims_t(get_self(), get_self().value)),
+ * not to the player — and it is keyed by account.value, so a lower_bound on the account
+ * name lands on that player's row (or the next one, hence the identity check). Reading it
+ * with scope=account returns an empty set, which silently reads as "never claimed" and
+ * makes the Claim button offer a reward the contract will reject with
+ * "already claimed this season".
+ */
+export async function getClaim(account: string): Promise<ClaimRow | null> {
+  const data = await rpc<TableRowsResponse<ClaimRow>>('/v1/chain/get_table_rows', {
+    code: CONTRACT_ACCOUNT,
+    scope: CONTRACT_ACCOUNT,
+    table: 'claims',
+    json: true,
+    lower_bound: account,
+    limit: 1,
+  })
+  const row = data.rows[0]
+  return row && row.account === account ? row : null
 }
 
 // Fungible-token balance (e.g. $HATCH on hatchtokens1). Returns the numeric
@@ -272,7 +378,8 @@ export async function fetchGameState(account: string): Promise<GameState> {
     creatures: getCreatures(account),
     rewardPool: getRewardPool(),
     species: getSpecies(),
-    claims: getClaims(account),
+    claim: getClaim(account),
+    now: getChainTime(),
   } as const
   const keys = Object.keys(reads) as (keyof typeof reads)[]
   const settled = await Promise.allSettled(Object.values(reads))
@@ -297,6 +404,9 @@ export async function fetchGameState(account: string): Promise<GameState> {
     creatures: or<CreatureRow[]>(2, []),
     rewardPool: or<RewardPoolRow | null>(3, null),
     species: or<SpeciesRow[]>(4, []),
-    claims: or<ClaimRow[]>(5, []),
+    claim: or<ClaimRow | null>(5, null),
+    // Fall back to the client clock only if EVERY node failed the head-time read
+    // (the reset then degrades to Date.now(); the contract still enforces truth).
+    now: or<number>(6, Math.floor(Date.now() / 1000)),
   }
 }

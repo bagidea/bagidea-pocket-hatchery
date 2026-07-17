@@ -8,11 +8,12 @@ html, body, #root { min-height: 100svh; }
 body {
   margin: 0;
   font: 400 16px/1.5 'Nunito', 'Mali', system-ui, sans-serif;
-  color: #1E1B4B;
-  background: linear-gradient(175deg,
-    #BAE6FD 0%, #D1FAE5 20%, #FFF7ED 45%, #FEF3C7 70%, #FDE6D0 100%
-  );
-  background-attachment: fixed;
+  color: var(--ph-text-primary, #EAF0F9);
+  /* Flat charcoal base — the full navy→charcoal gradient + auras live on .app
+     (App.module.css) so the app paints its OWN opaque dark surface at full
+     document height. This keeps the theme correct inside the plugin panel and
+     avoids the background-attachment:fixed gutter quirk (Poppy · 2026-07-16). */
+  background: #0C1022;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -28,7 +29,7 @@ button {
 }
 
 :focus-visible {
-  outline: 3px solid #5FB8E8;
+  outline: 3px solid var(--ph-border-focus, #60A5FA);
   outline-offset: 2px;
 }
 

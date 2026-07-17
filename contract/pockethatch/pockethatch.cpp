@@ -602,21 +602,29 @@ void pockethatch::harvest(name owner) {
     uint32_t cap_start = (now > cfg.offline_cap_h * 3600u) ? (now - cfg.offline_cap_h * 3600u) : 0;
     uint64_t gross     = 0;                       // EGG, already rarity + satiety scaled
     uint16_t best_mult = cfg.earn_mult_common;    // richest rarity that actually earned
+
+    // ── Awaken v2: collect ready-to-awaken asset_ids first (avoid modifying
+    //    during secondary-index iteration — CDT multi_index spec) ──
+    std::vector<uint64_t> awaken_ids;
+    for (auto it = idx.lower_bound(owner.value); it != idx.end() && it->owner == owner; ++it) {
+        if (it->stage != 0) continue;
+        auto sp_it = sps.find(it->template_id);
+        if (sp_it == sps.end()) continue;
+        uint32_t awaken_dur = awaken_duration_for(cfg, sp_it->egg_type);
+        if (now >= it->born_at + awaken_dur) {
+            awaken_ids.push_back(it->asset_id);
+        }
+    }
+    for (uint64_t aid : awaken_ids) {
+        auto primary = crs.find(aid);
+        if (primary != crs.end()) {
+            crs.modify(primary, same_payer, [&](auto& r) { r.stage = 1; });
+        }
+    }
+
     for (auto it = idx.lower_bound(owner.value); it != idx.end() && it->owner == owner; ++it) {
         auto sp_it = sps.find(it->template_id);
         if (sp_it == sps.end()) continue;
-
-        // ── Awaken v2: auto-awaken stage 0 → 1 when timer has elapsed ──
-        if (it->stage == 0) {
-            uint32_t awaken_dur = awaken_duration_for(cfg, sp_it->egg_type);
-            if (now >= it->born_at + awaken_dur) {
-                auto primary = crs.find(it->asset_id);
-                crs.modify(primary, same_payer, [&](auto& r) { r.stage = 1; });
-                // falls through to earning below since stage is now 1
-            } else {
-                continue; // still sleeping — skip
-            }
-        }
 
         if (it->stage == 0) continue; // still sleeping (timer not elapsed)
         uint8_t idx_yield = it->stage - 1;        // stage 1→yield[0], etc.
@@ -826,7 +834,7 @@ void pockethatch::breed(name owner, uint64_t parent_a, uint64_t parent_b) {
         r.fed_growth  = 0;
         r.born_at     = now;
         r.last_sync   = now;
-        r.last_fed    = 0;
+        r.last_fed    = now;   // Feed v2: newborn starts fully fed (match mint_creature)
         r.last_bred   = 0;
         r.genetics    = gpacked;
     });

@@ -1,7 +1,9 @@
 /* ═══════════════════════════════════════════════════════════
-   Pocket Hatchery — CreatureCard (Light Premium Trading Card)
-   Monanisa · 2026-07-03 · v3.0
-   Matches the web's warm glass-morphism theme (tokens.css)
+   Pocket Hatchery — CreatureCard (DARK collector card)
+   Poppy · 2026-07-16 · v4.0
+   Dark-gray rounded card on navy. Per-rarity accent is driven by two
+   custom props set on the rarity class:  --tier (solid) + --tierRGB (r,g,b),
+   so the badge / portrait glow / DNA / rarity word all share one source.
    ═══════════════════════════════════════════════════════════ */
 
 /* ── Card wrapper ─────────────────────────────────────────── */
@@ -11,427 +13,479 @@
   max-width: 290px;
 }
 
-/* ── Card body — glass surface (matches web theme) ──────── */
+/* ── Per-rarity accent tokens ─────────────────────────────── */
+.common    { --tier: #4ADE80; --tierRGB: 74, 222, 128; }
+.uncommon  { --tier: #2DD4BF; --tierRGB: 45, 212, 191; }
+.rare      { --tier: #60A5FA; --tierRGB: 96, 165, 250; }
+.epic      { --tier: #C084FC; --tierRGB: 192, 132, 252; }
+.legendary { --tier: #FBBF24; --tierRGB: 251, 191, 36; }
+.mythic    { --tier: #F472B6; --tierRGB: 244, 114, 182; }
+
+/* ── Card body — dark surface ─────────────────────────────── */
 .card {
   position: relative;
   display: flex;
   flex-direction: column;
-  background: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-radius: 24px;
+  background: linear-gradient(180deg, #1B1F2B 0%, #14171F 100%);
+  border-radius: 22px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.55);
-  background-clip: padding-box;
+  border: 1px solid rgba(255, 255, 255, 0.07);
   box-shadow:
-    0 2px 6px rgba(0, 0, 0, 0.04),
-    0 10px 24px rgba(0, 0, 0, 0.06);
-  /* Crisp hover: short duration + ease-out (no overshoot lag). will-change
-     promotes the card to its own layer so its filtered children (svg
-     drop-shadow, stageBadge backdrop-blur) don't repaint every frame. */
+    0 1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 14px 34px rgba(0, 0, 0, 0.45);
   transition:
     transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1),
-    box-shadow 0.18s ease;
+    box-shadow 0.18s ease,
+    border-color 0.18s ease;
   will-change: transform;
   width: 100%;
 }
 
 .card:hover {
   transform: translateY(-6px);
+  border-color: rgba(var(--tierRGB), 0.45);
   box-shadow:
-    0 4px 12px rgba(0, 0, 0, 0.06),
-    0 16px 36px rgba(0, 0, 0, 0.10);
-  border-color: rgba(255, 255, 255, 0.7);
+    0 1px 0 rgba(255, 255, 255, 0.05) inset,
+    0 20px 44px rgba(0, 0, 0, 0.55),
+    0 0 26px rgba(var(--tierRGB), 0.14);
 }
 
-/* ── Rarity gradient border (::before, outermost) ────────── */
-.card::before {
-  content: '';
-  position: absolute;
-  inset: -3px;
-  border-radius: 27px;
-  z-index: -1;
-  pointer-events: none;
-}
+/* Legendary / mythic get a permanent tier-tinted rim glow */
+.legendary { box-shadow: 0 14px 34px rgba(0,0,0,0.45), 0 0 24px rgba(251,191,36,0.12); }
+.mythic    { box-shadow: 0 14px 34px rgba(0,0,0,0.45), 0 0 26px rgba(244,114,182,0.14); }
 
-/* ── Inner frame (subtle inset line, glass-friendly) ─────── */
-.card::after {
-  content: '';
-  position: absolute;
-  inset: 7px;
-  border-radius: 17px;
-  border: 1px solid rgba(255, 255, 255, 0.30);
-  pointer-events: none;
-  z-index: 2;
-}
-
-/* ── Rarity-specific border gradients ────────────────────── */
-.common::before {
-  background: linear-gradient(160deg, #22C55E, #16A34A, #15803D);
-}
-
-.uncommon::before {
-  background: linear-gradient(160deg, #22D3EE, #06B6D4, #0891B2);
-}
-
-.rare::before {
-  background: linear-gradient(160deg, #60A5FA, #3B82F6, #2563EB);
-}
-
-.epic::before {
-  background: linear-gradient(160deg, #A78BFA, #8B5CF6, #7C3AED);
-}
-
-.legendary::before {
-  background: linear-gradient(160deg, #FDE68A, #F59E0B, #D97706, #F59E0B);
-  box-shadow: 0 0 22px rgba(245, 158, 11, 0.35), 0 0 48px rgba(245, 158, 11, 0.14);
-  animation: legendaryBorder 3s ease-in-out infinite;
-}
-
-@keyframes legendaryBorder {
-  0%, 100% { box-shadow: 0 0 22px rgba(245, 158, 11, 0.35), 0 0 48px rgba(245, 158, 11, 0.14); }
-  50% { box-shadow: 0 0 34px rgba(245, 158, 11, 0.50), 0 0 66px rgba(245, 158, 11, 0.24); }
-}
-
-/* Mythic — rainbow animated border */
-.mythic::before {
-  background: linear-gradient(160deg,
-    #ff9a9e 0%, #fad0c4 16%, #a18cd1 33%,
-    #fbc2eb 50%, #a6c1ee 66%, #96e6a1 83%, #ff9a9e 100%);
-  box-shadow: 0 0 26px rgba(240, 224, 255, 0.45), 0 0 60px rgba(255, 255, 255, 0.18);
-  animation: mythicRainbow 4s linear infinite;
-}
-
-@keyframes mythicRainbow {
-  0% { filter: hue-rotate(0deg); }
-  100% { filter: hue-rotate(360deg); }
-}
-
-/* ── Top bar (rarity icon + asset ID) ────────────────────── */
+/* ── Top bar (rarity badge + asset ID) ────────────────────── */
 .topBar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 14px 18px 8px;
+  padding: 14px 16px 6px;
   position: relative;
   z-index: 3;
 }
 
 .rarityIcon {
-  width: 28px;
-  height: 28px;
-  border-radius: 7px;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 800;
-  color: #FFFFFF;
+  color: #0B0E16;
   font-family: var(--ph-font-body, system-ui);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  background: var(--tier);
+  box-shadow: 0 2px 10px rgba(var(--tierRGB), 0.40);
 }
-
-.common .rarityIcon     { background: linear-gradient(135deg, #22C55E, #16A34A); }
-.uncommon .rarityIcon   { background: linear-gradient(135deg, #06B6D4, #0891B2); }
-.rare .rarityIcon       { background: linear-gradient(135deg, #3B82F6, #2563EB); }
-.epic .rarityIcon       { background: linear-gradient(135deg, #8B5CF6, #7C3AED); }
-.legendary .rarityIcon  { background: linear-gradient(135deg, #F59E0B, #D97706); }
 .mythic .rarityIcon {
-  background: linear-gradient(135deg, #ff9a9e, #a18cd1, #a6c1ee, #96e6a1);
-  animation: mythicRainbow 4s linear infinite;
+  color: #FFFFFF;
+  background: linear-gradient(135deg, #2DD4BF, #A78BFA 55%, #F472B6);
 }
 
 .cardId {
   font-family: var(--ph-font-body, system-ui);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
-  color: var(--ph-text-muted, #94A3B8);
-  letter-spacing: 1px;
+  color: #5C6678;
+  letter-spacing: 0.5px;
   font-variant-numeric: tabular-nums;
 }
 
-/* ── Art window ──────────────────────────────────────────── */
+/* ── Art window — circular tinted glow ────────────────────── */
 .artWrap {
   position: relative;
-  margin: 0 16px;
-  height: 210px;
-  border-radius: 18px;
+  margin: 4px 12px 0;
+  height: 186px;
+  border-radius: 16px;
   overflow: hidden;
   display: grid;
   place-items: center;
   z-index: 1;
-  background: rgba(255, 255, 255, 0.30);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  border: 1px solid rgba(255, 255, 255, 0.40);
 }
 
-/* Rarity aura (radial glow behind creature — softer on light bg) */
+/* Rarity aura — a soft circular glow tinted to the tier color, behind the sprite */
 .artAura {
   position: absolute;
   inset: 0;
-  border-radius: 18px;
   pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 46%, rgba(var(--tierRGB), 0.28) 0%, rgba(var(--tierRGB), 0.10) 34%, transparent 62%);
 }
-
-.common .artAura {
-  background: radial-gradient(ellipse at 50% 45%, rgba(34, 197, 94, 0.16) 0%, transparent 65%);
+/* Faint ground shadow ellipse so the creature "stands" in the glow */
+.artWrap::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 30px;
+  width: 96px;
+  height: 16px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.45) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
 }
-.uncommon .artAura {
-  background: radial-gradient(ellipse at 50% 45%, rgba(6, 182, 212, 0.18) 0%, transparent 65%);
-}
-.rare .artAura {
-  background: radial-gradient(ellipse at 50% 45%, rgba(59, 130, 246, 0.20) 0%, transparent 65%);
-}
-.epic .artAura {
-  background: radial-gradient(ellipse at 50% 45%, rgba(139, 92, 246, 0.22) 0%, transparent 65%);
-}
-.legendary .artAura {
-  background: radial-gradient(ellipse at 50% 45%, rgba(245, 158, 11, 0.28) 0%, transparent 65%);
-  animation: auraPulse 2.5s ease-in-out infinite;
-}
+.epic .artAura      { animation: auraPulse 3s ease-in-out infinite; }
+.legendary .artAura { animation: auraPulse 2.5s ease-in-out infinite; }
 @keyframes auraPulse {
-  0%, 100% { opacity: 0.7; }
-  50% { opacity: 1; }
+  0%, 100% { opacity: 0.75; transform: scale(1.00); }
+  50%       { opacity: 1.00; transform: scale(1.05); }
 }
 .mythic .artAura {
   background:
-    radial-gradient(ellipse at 40% 40%, rgba(255, 255, 255, 0.12) 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 45%, rgba(255, 154, 158, 0.12) 0%, transparent 50%),
-    radial-gradient(ellipse at 60% 50%, rgba(166, 193, 238, 0.12) 0%, transparent 50%);
+    radial-gradient(circle at 44% 42%, rgba(45, 212, 191, 0.18) 0%, transparent 46%),
+    radial-gradient(circle at 58% 50%, rgba(244, 114, 182, 0.20) 0%, transparent 50%),
+    radial-gradient(circle at 50% 46%, rgba(167, 139, 250, 0.16) 0%, transparent 60%);
+  animation: auraPulse 3.2s ease-in-out infinite;
 }
 
-/* SVG sprite — gene-tinted inline render */
+/* SVG sprite — gene-tinted inline render (unchanged art pipeline) */
 .svgWrap {
-  width: 90%;
-  height: 90%;
+  width: 66%;
+  height: 66%;
   z-index: 1;
   display: grid;
   place-items: center;
-  animation: creatureFloat 3.5s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  animation: creatureFloat 3.8s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  transform-origin: center bottom;
 }
 
 .svgWrap :global(svg) {
   width: 100%;
   height: 100%;
   display: block;
-  filter: drop-shadow(0 4px 12px rgba(30, 27, 75, 0.14)) brightness(1.05);
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.45)) brightness(1.04) saturate(1.06);
 }
 
 @keyframes creatureFloat {
-  0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-6px) scale(1.03); }
+  0%   { transform: translateY(0)    rotate(0deg)   scale(1.00); }
+  30%  { transform: translateY(-5px) rotate(0.6deg) scale(1.02); }
+  60%  { transform: translateY(-8px) rotate(-0.4deg) scale(1.03); }
+  100% { transform: translateY(0)    rotate(0deg)   scale(1.00); }
 }
 
-/* ── Sparkle particles (epic+ rarities) ──────────────────── */
-/* Warm-toned sparkles visible on light cream background.
-   Diamond shape (45° rotated square) + twinkle animation.
-   Count: epic=5, legendary=6, mythic=8 (per NFT-CARD-DESIGN.md) */
+/* ── Feed reaction: happy bounce ── */
+@keyframes feedBounce {
+  0%   { transform: translateY(0)     scale(1.00) rotate(0deg); }
+  18%  { transform: translateY(-16px) scale(1.10) rotate(-3deg); }
+  35%  { transform: translateY(-6px)  scale(0.96) rotate(2deg); }
+  52%  { transform: translateY(-20px) scale(1.08) rotate(-2deg); }
+  68%  { transform: translateY(-4px)  scale(0.98) rotate(1deg); }
+  82%  { transform: translateY(-10px) scale(1.04) rotate(0deg); }
+  92%  { transform: translateY(-2px)  scale(1.00); }
+  100% { transform: translateY(0)     scale(1.00); }
+}
+.svgWrap[data-anim="feed"] {
+  animation: feedBounce 0.75s cubic-bezier(0.34, 1.56, 0.64, 1) forwards !important;
+}
+.svgWrap[data-anim="feed"] :global(svg) {
+  filter: drop-shadow(0 8px 16px rgba(34, 197, 94, 0.45)) brightness(1.15) saturate(1.2) !important;
+}
+
+/* ── Evolve burst ── */
+@keyframes evolveBurst {
+  0%   { transform: scale(1.00);  filter: drop-shadow(0 8px 16px rgba(0,0,0,0.45)) brightness(1.04); }
+  15%  { transform: scale(0.82);  filter: drop-shadow(0 2px 6px rgba(192,132,252,0.3)) brightness(0.9); }
+  40%  { transform: scale(1.38);  filter: drop-shadow(0 0 36px rgba(192,132,252,1.0)) brightness(1.6) saturate(1.5); }
+  60%  { transform: scale(1.18);  filter: drop-shadow(0 0 24px rgba(192,132,252,0.7)) brightness(1.3) saturate(1.3); }
+  80%  { transform: scale(1.06);  filter: drop-shadow(0 8px 18px rgba(192,132,252,0.3)) brightness(1.1); }
+  100% { transform: scale(1.00);  filter: drop-shadow(0 8px 16px rgba(0,0,0,0.45)) brightness(1.04); }
+}
+.svgWrap[data-anim="evolve"] {
+  animation: evolveBurst 0.95s cubic-bezier(0.22, 1.2, 0.36, 1) forwards !important;
+}
+
+/* ── Sparkle particles (rare+ rarities) ───────────────────── */
 .sparkles {
   position: absolute;
-  inset: 8px;
+  inset: 6px;
   pointer-events: none;
   z-index: 2;
   overflow: hidden;
   border-radius: 14px;
 }
-
 .sparkle {
   position: absolute;
-  width: 5px;
-  height: 5px;
-  border-radius: 1px;
-  transform: rotate(45deg);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
   opacity: 0;
   animation: sparkleTwinkle 3s ease-in-out infinite;
-  /* glow ring — color set via style prop by rarity */
-  box-shadow: 0 0 4px 1px currentColor;
+  box-shadow: 0 0 6px 1px currentColor;
+  background: currentColor;
 }
-
-/* 8 positions — epic uses first 5, legendary 6, mythic all 8 */
-.sparkle:nth-child(1) { top: 12%; left: 18%; animation-delay: 0.0s; }
-.sparkle:nth-child(2) { top: 22%; left: 75%; animation-delay: 0.6s; }
-.sparkle:nth-child(3) { top: 60%; left: 14%; animation-delay: 1.2s; }
-.sparkle:nth-child(4) { top: 68%; left: 80%; animation-delay: 1.8s; }
-.sparkle:nth-child(5) { top: 36%; left: 85%; animation-delay: 2.4s; }
-.sparkle:nth-child(6) { top: 48%; left: 10%; animation-delay: 1.0s; }
-.sparkle:nth-child(7) { top: 78%; left: 40%; animation-delay: 0.4s; }
-.sparkle:nth-child(8) { top: 30%; left: 50%; animation-delay: 1.6s; }
-
+.sparkle:nth-child(1)  { top: 12%; left: 18%; animation-delay: 0.0s; }
+.sparkle:nth-child(2)  { top: 22%; left: 78%; animation-delay: 0.6s; }
+.sparkle:nth-child(3)  { top: 62%; left: 12%; animation-delay: 1.2s; }
+.sparkle:nth-child(4)  { top: 70%; left: 82%; animation-delay: 1.8s; }
+.sparkle:nth-child(5)  { top: 34%; left: 86%; animation-delay: 2.4s; }
+.sparkle:nth-child(6)  { top: 48%; left: 8%;  animation-delay: 1.0s; }
+.sparkle:nth-child(7)  { top: 80%; left: 42%; animation-delay: 0.4s; }
+.sparkle:nth-child(8)  { top: 28%; left: 50%; animation-delay: 1.6s; }
+.sparkle:nth-child(9)  { top: 8%;  left: 58%; animation-delay: 0.9s; }
+.sparkle:nth-child(10) { top: 56%; left: 62%; animation-delay: 2.1s; }
+.sparkle:nth-child(11) { top: 84%; left: 22%; animation-delay: 0.3s; }
+.sparkle:nth-child(12) { top: 18%; left: 38%; animation-delay: 1.4s; }
 @keyframes sparkleTwinkle {
-  0%, 100% { opacity: 0.15; transform: rotate(45deg) scale(0.4); }
-  50% { opacity: 0.85; transform: rotate(45deg) scale(1.2); }
+  0%, 100% { opacity: 0.10; transform: scale(0.4); }
+  50%      { opacity: 0.95; transform: scale(1.3); }
 }
 
-/* Stage badge (top-right) — light glass pill */
-.stageBadge {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  padding: 3px 12px;
-  background: rgba(255, 255, 255, 0.70);
-  border: 1px solid rgba(255, 255, 255, 0.55);
-  border-radius: 999px;
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--ph-text-muted, #94A3B8);
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  z-index: 2;
-  backdrop-filter: blur(8px);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-}
-
-/* ── Info section ────────────────────────────────────────── */
+/* ── Info section ─────────────────────────────────────────── */
 .info {
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  padding: 6px 18px 6px;
+  gap: 7px;
+  padding: 8px 18px 6px;
   position: relative;
   z-index: 3;
+}
+
+/* Stage pill — dark chip, amber status dot + stage word + real chain stage */
+.stagePill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  padding: 4px 11px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.7px;
+  color: #AAB2C0;
+  text-transform: uppercase;
+}
+.stageDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #F5B544;
+  box-shadow: 0 0 6px rgba(245, 181, 68, 0.8);
+  flex-shrink: 0;
 }
 
 .name {
   font-family: var(--ph-font-display, 'Baloo 2', system-ui);
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
-  color: var(--ph-text-primary, #1E1B4B);
+  color: #F1F4F9;
   letter-spacing: -0.3px;
   margin: 0;
-  line-height: 1.2;
+  line-height: 1.15;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* A long nickname truncates rather than pushing the rename controls off the card. */
+.nameText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+/* Rename / clear — quiet until the card is hovered, so the name stays the hero. */
+.renameBtn {
+  flex: none;
+  border: 0;
+  background: transparent;
+  padding: 2px;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+  border-radius: var(--ph-radius-sm, 12px);
+  transition: opacity 120ms ease;
+}
+
+.card:hover .renameBtn,
+.renameBtn:focus-visible {
+  opacity: 0.75;
+}
+
+.renameBtn:hover {
+  opacity: 1;
+}
+
+.renameBtn:focus-visible {
+  outline: 2px solid var(--ph-border-focus, #60A5FA);
+  outline-offset: 1px;
+}
+
+.nameInput {
+  font-family: var(--ph-font-display, 'Baloo 2', system-ui);
+  font-size: 20px;
+  font-weight: 700;
+  width: 100%;
+  color: var(--ph-text-primary, #EAF0F9);
+  background: var(--ph-surface-sunken, rgba(0, 0, 0, 0.30));
+  border: 1px solid var(--ph-border-focus, #60A5FA);
+  border-radius: var(--ph-radius-sm, 12px);
+  padding: 2px 8px;
+  letter-spacing: -0.3px;
+  line-height: 1.15;
+}
+
+.nameInput:focus {
+  outline: none;
+}
+
+.topBarRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Pin — an outline pin until pinned, then a filled one on a golden chip, so the
+   pinned state reads without relying on the emoji swap alone. */
+.pinBtn {
+  border: 1px solid var(--ph-border-soft, rgba(255, 255, 255, 0.12));
+  background: var(--ph-surface-sunken, rgba(0, 0, 0, 0.30));
+  border-radius: var(--ph-radius-pill, 999px);
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 120ms ease, border-color 120ms ease;
+}
+
+.card:hover .pinBtn,
+.pinBtn:focus-visible {
+  opacity: 1;
+}
+
+.pinBtnOn {
+  opacity: 1;
+  border-color: var(--ph-color-golden-65, rgba(245, 158, 11, 0.65));
+  box-shadow: var(--ph-aura-gold, 0 0 12px rgba(245, 158, 11, 0.35));
+}
+
+.pinBtn:focus-visible {
+  outline: 2px solid var(--ph-border-focus, #60A5FA);
+  outline-offset: 1px;
 }
 
 .speciesLabel {
-  font-size: 11px;
-  color: var(--ph-text-muted, #94A3B8);
+  font-size: 12px;
+  color: #7A8494;
   font-weight: 600;
-  margin-top: -2px;
+  margin-top: -3px;
 }
+.sciName { font-style: italic; }
+.sep { color: #4B5464; }
+.element { font-style: normal; font-weight: 700; }
 
-/* Family badge — colored pill per element (Fire/Water/Earth/Air/Void/Mythical) */
-.familyBadge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  width: fit-content;
-  padding: 2px 10px;
-  border-radius: 999px;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.3px;
-  border: 1px solid;
-  margin-top: 2px;
-}
-
-/* ── Genetics / DNA row ──────────────────────────────────── */
+/* ── Genetics / DNA row ───────────────────────────────────── */
 .geneRow {
   display: flex;
   align-items: center;
-  gap: 5px;
-  margin: 2px 0;
+  gap: 8px;
+  margin: 1px 0;
 }
-
 .geneLabel {
-  font-size: 8px;
-  font-weight: 700;
-  color: var(--ph-text-muted, #94A3B8);
+  font-size: 9px;
+  font-weight: 800;
+  color: #6B7486;
   letter-spacing: 1px;
   text-transform: uppercase;
 }
-
+.geneDots {
+  display: inline-flex;
+  gap: 5px;
+}
 .geneDot {
-  width: 8px;
-  height: 8px;
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
-  border: 1px solid rgba(30, 27, 75, 0.10);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   flex-shrink: 0;
-  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
 }
 
-/* ── Stats row — warm glass chips ────────────────────────── */
+/* ── Stats row — 3 dark chips (POW / CHARM / #N SP) ────────── */
 .statsRow {
-  display: flex;
-  gap: 10px;
-  margin-top: 3px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 4px;
 }
-
 .statItem {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 5px;
-  background: rgba(255, 255, 255, 0.55);
-  border: 1px solid rgba(255, 255, 255, 0.50);
-  border-radius: 8px;
-  padding: 4px 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 9px;
+  padding: 6px 4px;
 }
-
 .statIcon {
-  font-size: 13px;
+  font-size: 12px;
   line-height: 1;
 }
-
 .statValue {
   font-family: var(--ph-font-body, system-ui);
   font-size: 13px;
   font-weight: 800;
-  color: var(--ph-text-primary, #1E1B4B);
+  color: #EBEEF4;
+  font-variant-numeric: tabular-nums;
 }
-
 .statLabel {
   font-size: 8px;
-  color: var(--ph-text-muted, #94A3B8);
+  color: #6B7486;
   font-weight: 700;
   letter-spacing: 0.5px;
   text-transform: uppercase;
 }
+.card:hover .statItem {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.10);
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
 
-/* ── Rarity footer ───────────────────────────────────────── */
+/* ── Rarity footer — thin tier line + big spaced rarity word ─ */
 .rarityFooter {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 0 18px 6px;
+  gap: 12px;
+  padding: 4px 18px 8px;
   position: relative;
   z-index: 3;
 }
-
 .rarityLine {
   flex: 1;
   height: 1px;
-  opacity: 0.40;
+  background: linear-gradient(90deg, transparent, var(--tier));
+  opacity: 0.55;
 }
-
-.common .rarityLine     { background: #22C55E; }
-.uncommon .rarityLine   { background: #06B6D4; }
-.rare .rarityLine       { background: #3B82F6; }
-.epic .rarityLine       { background: #8B5CF6; }
-.legendary .rarityLine  { background: #F59E0B; }
-.mythic .rarityLine {
-  background: linear-gradient(90deg, #ff9a9e, #a18cd1, #a6c1ee, #96e6a1);
+.rarityLine:last-child {
+  background: linear-gradient(90deg, var(--tier), transparent);
 }
-
 .rarityName {
   font-family: var(--ph-font-body, system-ui);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 800;
-  letter-spacing: 2px;
+  letter-spacing: 4px;
   text-transform: uppercase;
+  color: var(--tier);
+  text-indent: 4px; /* balance the trailing letter-spacing */
 }
-
-.common .rarityName     { color: #16A34A; }
-.uncommon .rarityName   { color: #0891B2; }
-.rare .rarityName       { color: #2563EB; }
-.epic .rarityName       { color: #7C3AED; }
-.legendary .rarityName  { color: #D97706; }
 .mythic .rarityName {
-  background: linear-gradient(90deg, #c08497, #8B5CF6, #5FB8E8, #34D399);
+  background: linear-gradient(90deg, #2DD4BF, #A78BFA, #F472B6);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* ── Progress bar ────────────────────────────────────────── */
+/* ── Progress bar ─────────────────────────────────────────── */
 .progressSection {
   padding: 0 18px 10px;
   position: relative;
@@ -440,42 +494,37 @@
   flex-direction: column;
   gap: 4px;
 }
-
 .progressTrack {
   height: 8px;
-  background: rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.06);
   border-radius: 999px;
   overflow: hidden;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4);
 }
-
 .progressFill {
   height: 100%;
   border-radius: 999px;
   transition: width 0.5s cubic-bezier(0, 0, 0.2, 1);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.35) inset;
 }
-
 .progressLabel {
   font-size: 10px;
   text-align: center;
-  color: var(--ph-text-muted, #94A3B8);
+  color: #6B7486;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
-
 .maxBadge {
   text-align: center;
   font-size: 11px;
-  font-weight: 700;
-  color: #D97706;
-  background: rgba(245, 158, 11, 0.10);
-  border: 1px solid rgba(245, 158, 11, 0.18);
-  padding: 4px 14px;
+  font-weight: 800;
+  color: var(--tier);
+  background: rgba(var(--tierRGB), 0.10);
+  border: 1px solid rgba(var(--tierRGB), 0.28);
+  padding: 5px 14px;
   border-radius: 999px;
 }
 
-/* ── Actions ─────────────────────────────────────────────── */
+/* ── Actions ──────────────────────────────────────────────── */
 .actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -484,28 +533,20 @@
   position: relative;
   z-index: 3;
 }
-
-/* Feed v2 moved the Feed button into SatietyMeter, so Evolve spans the row. */
-.evolveFull {
-  grid-column: 1 / -1;
-}
+.evolveFull { grid-column: 1 / -1; }
 
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 5px;
-  padding: 10px 0;
+  padding: 11px 0;
   border: none;
-  border-radius: 999px;
+  border-radius: 12px;
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 800;
   font-family: var(--ph-font-body, system-ui);
   cursor: pointer;
-  /* Hover/active: animate transform + box-shadow only (cheap, compositable).
-     opacity is included so the disabled state fades instead of snapping;
-     filter is deliberately NOT transitioned — it's expensive and the
-     grayscale only flips with disabled state, not on hover. */
   transition:
     transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1),
     box-shadow 0.15s ease,
@@ -513,35 +554,119 @@
   user-select: none;
   letter-spacing: 0.2px;
 }
-
-.btn:hover:not(:disabled) {
-  transform: scale(1.04);
-}
-
-.btn:active:not(:disabled) {
-  transform: scale(0.96);
-}
-
+.btn:hover:not(:disabled) { transform: scale(1.04); }
+.btn:active:not(:disabled) { transform: scale(0.96); }
 .btn:disabled {
-  opacity: 0.30;
+  opacity: 0.35;
   cursor: not-allowed;
-  filter: grayscale(0.6);
-}
-
-.feedBtn {
-  background: linear-gradient(135deg, #22C55E, #16A34A);
-  color: #FFFFFF;
-  box-shadow: 0 2px 10px rgba(34, 197, 94, 0.25);
-}
-.feedBtn:hover:not(:disabled) {
-  box-shadow: 0 4px 16px rgba(34, 197, 94, 0.40);
+  filter: grayscale(0.5);
 }
 
 .evolveBtn {
-  background: linear-gradient(135deg, #8B5CF6, #7C3AED);
+  background: linear-gradient(135deg, #A855F7, #7C3AED);
   color: #FFFFFF;
-  box-shadow: 0 2px 10px rgba(139, 92, 246, 0.25);
+  box-shadow: 0 2px 12px rgba(124, 58, 237, 0.35);
 }
 .evolveBtn:hover:not(:disabled) {
-  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.40);
+  box-shadow: 0 4px 18px rgba(124, 58, 237, 0.5);
+}
+
+/* Burn — quiet ghost until the final confirm */
+.burnGhost {
+  background: transparent;
+  color: #F87171;
+  box-shadow: inset 0 0 0 1.5px rgba(248, 113, 113, 0.40);
+}
+.burnGhost:hover:not(:disabled) {
+  background: rgba(248, 113, 113, 0.10);
+  box-shadow: inset 0 0 0 1.5px rgba(248, 113, 113, 0.75);
+}
+.burnConfirm {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(248, 113, 113, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(248, 113, 113, 0.30);
+}
+.burnWarn {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: #FCA5A5;
+  text-align: center;
+}
+.burnConfirmRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.cancelBtn {
+  background: rgba(148, 163, 184, 0.14);
+  color: #CBD5E1;
+}
+.cancelBtn:hover:not(:disabled) {
+  background: rgba(148, 163, 184, 0.24);
+}
+.burnBtn {
+  background: linear-gradient(135deg, #EF4444, #B91C1C);
+  color: #FFFFFF;
+  box-shadow: 0 2px 12px rgba(239, 68, 68, 0.35);
+}
+.burnBtn:hover:not(:disabled) {
+  box-shadow: 0 4px 18px rgba(239, 68, 68, 0.5);
+}
+
+/* ── Asleep (stage 0) — dim the card a touch ── */
+.asleep { filter: saturate(0.85); }
+
+/* Sleep veil over the art window */
+.sleepVeil {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  border-radius: 16px;
+  pointer-events: none;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(ellipse at 50% 40%, rgba(30, 41, 99, 0.20) 0%, rgba(8, 11, 22, 0.60) 100%);
+  backdrop-filter: grayscale(0.35) brightness(0.82);
+  -webkit-backdrop-filter: grayscale(0.35) brightness(0.82);
+}
+.sleepZzz {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  font-size: 22px;
+  font-weight: 800;
+  color: rgba(199, 210, 254, 0.92);
+  letter-spacing: 0.06em;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+  animation: zzzFloat 2.6s ease-in-out infinite;
+}
+@keyframes zzzFloat {
+  0%   { transform: translateY(2px);  opacity: 0.55; }
+  50%  { transform: translateY(-4px); opacity: 1; }
+  100% { transform: translateY(2px);  opacity: 0.55; }
+}
+.sleepTag {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  font-weight: 800;
+  color: #ffffff;
+  padding: 4px 12px;
+  border-radius: 999px;
+  white-space: nowrap;
+  background: rgba(79, 70, 229, 0.80);
+  border: 1px solid rgba(199, 210, 254, 0.45);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .svgWrap, .artAura, .sleepZzz, .sparkle { animation: none !important; }
 }

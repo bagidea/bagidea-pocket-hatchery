@@ -12,7 +12,7 @@ import type { Rarity } from './CreatureCard'
 import styles from './SatietyMeter.module.css'
 
 /**
- * SatietyMeter — the Feed-v2 "ความอิ่ม" block: a live-decaying satiety bar, the
+ * SatietyMeter — the Feed-v2 satiety block: a live-decaying satiety bar, the
  * creature's rarity earn rate (why it's worth feeding), and a stateful Feed
  * button (Full / Hungry / Starving + cooldown countdown).
  *
@@ -35,6 +35,18 @@ interface SatietyMeterProps {
    * When absent, the per-rarity spec default (FED_DUR_DEFAULT) is used.
    */
   fedDurSec?: number
+  /**
+   * Live feed cooldown (seconds) from chain (configv3.feed_cd). Overrides the
+   * config's feedCooldownSec fallback so the "Feed in …" countdown matches chain.
+   */
+  feedCdSec?: number
+  /**
+   * Live full-satiety earn (EGG/hr) from chain (speciescfg.yield × earn_mult) and
+   * the total rarity premium for the badge. When both are present the meter shows
+   * exactly what harvest() pays; when absent it reconstructs from satiety.ts.
+   */
+  earnFull?: number
+  earnMult?: number
 }
 
 /** Format seconds into a short countdown (mirrors App.tsx's formatCooldown). */
@@ -56,6 +68,9 @@ export function SatietyMeter({
   disabled = false,
   config = MOCK_SATIETY_CONFIG,
   fedDurSec,
+  feedCdSec,
+  earnFull,
+  earnMult,
 }: SatietyMeterProps) {
   // 1s tick → the bar decays and the cooldown counts down on screen.
   const [now, setNow] = useState(() => Math.floor(Date.now() / 1000))
@@ -66,9 +81,18 @@ export function SatietyMeter({
 
   // Resolve the fed_dur: preview override > live chain value > per-rarity default.
   const fedDur = fedDurFor(rarity, config, fedDurSec)
-  const reading = computeSatiety(lastFed, now, fedDur, config)
-  const cd = feedCooldown(lastFed, now, config)
-  const earn = earnRate(rarity, stage, reading.state)
+  // Bind the feed cooldown to the live chain value (configv3.feed_cd) when threaded,
+  // else the config fallback. A preview config with its own short cooldown wins.
+  const effConfig =
+    feedCdSec != null && feedCdSec > 0 && config.fedDurSec == null
+      ? { ...config, feedCooldownSec: feedCdSec }
+      : config
+  const reading = computeSatiety(lastFed, now, fedDur, effConfig)
+  const cd = feedCooldown(lastFed, now, effConfig)
+  // Prefer the chain-real earn (species.yield × earn_mult) when the card threads
+  // it; fall back to satiety.ts's reconstruction for demo/preview creatures.
+  const live = earnFull != null && earnMult != null ? { baseFull: earnFull, multiplier: earnMult } : undefined
+  const earn = earnRate(rarity, stage, reading.state, live)
 
   const stateClass =
     reading.state === 'full' ? styles.full
@@ -77,6 +101,15 @@ export function SatietyMeter({
 
   // The Feed button is blocked while an action is running or the cooldown is up.
   const feedBlocked = disabled || cd.onCooldown
+  // A just-woken creature (stage 0→1) inherits last_fed = born_at, so the 6h feed
+  // cooldown fires while it is actually FULL (fed_until = last_fed + fed_dur is
+  // days out). Showing "Feed on cooldown" there reads like the game is broken, so
+  // when the cooldown is up but the creature is still fed (fed_until in the
+  // future) we say "Full — feed again in …" instead. Only once fed_until has
+  // passed do we fall back to the plain cooldown label. `now`/`lastFed` are
+  // unix seconds; fedDur is the live configv3 value threaded through the card.
+  const fedUntil = lastFed > 0 ? lastFed + fedDur : now
+  const stillFed = now < fedUntil
 
   return (
     <div className={styles.wrap}>
@@ -96,18 +129,26 @@ export function SatietyMeter({
         />
       </div>
 
-      {/* ── Earn rate (rarity-driven) ── */}
+      {/* ── Earn rate (rarity-driven) ──
+          Satiety empty → the creature stops earning (contract: no food = 0 EGG),
+          so flag it grey and prompt a feed instead of showing a misleading rate. */}
       <div className={styles.earnRow}>
         <span className={styles.earnRarity}>
           {rarity.charAt(0).toUpperCase() + rarity.slice(1)} ×{earn.multiplier.toFixed(2)}
         </span>
-        <span className={styles.earnRate} title="EGG earned per hour at current satiety">
-          {earn.effective.toFixed(1)}
-          <span className={styles.earnUnit}>EGG/hr</span>
-          {reading.state !== 'full' && (
-            <span className={styles.earnBase}>(full: {earn.base.toFixed(1)})</span>
-          )}
-        </span>
+        {reading.percent <= 0 ? (
+          <span className={styles.notEarning} title="Out of food — feed to start earning EGG again">
+            💤 Not earning
+          </span>
+        ) : (
+          <span className={styles.earnRate} title="EGG earned per hour at current satiety">
+            {earn.effective.toFixed(1)}
+            <span className={styles.earnUnit}>EGG/hr</span>
+            {reading.state !== 'full' && (
+              <span className={styles.earnBase}>(full: {earn.base.toFixed(1)})</span>
+            )}
+          </span>
+        )}
       </div>
 
       {/* ── Feed button (stateful) ── */}
@@ -117,7 +158,11 @@ export function SatietyMeter({
         disabled={feedBlocked}
       >
         {cd.onCooldown ? (
-          <>⏳ Feed in {fmt(cd.secondsLeft)}</>
+          stillFed ? (
+            <>😋 Full — feed again in {fmt(cd.secondsLeft)}</>
+          ) : (
+            <>⏳ Feed in {fmt(cd.secondsLeft)}</>
+          )
         ) : reading.state === 'starving' ? (
           <>🍎 Feed now! · Free</>
         ) : reading.state === 'hungry' ? (
@@ -126,6 +171,16 @@ export function SatietyMeter({
           <>🍎 Feed · Free</>
         )}
       </button>
+
+      {/* When the creature is already fed (Feed correctly gated), Feed is NOT the
+          next step — it would only error on chain. Point the player at what
+          actually pays out: the Harvest button. Only shown while genuinely fed
+          and on the feed cooldown, so it never competes with a real Feed prompt. */}
+      {cd.onCooldown && stillFed && reading.percent > 0 && (
+        <span className={styles.nextStep}>
+          🌾 Fed &amp; earning — collect EGG with Harvest below
+        </span>
+      )}
     </div>
   )
 }

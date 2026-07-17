@@ -23,16 +23,16 @@
   gap: 20px;
   padding: 24px;
   background:
-    radial-gradient(ellipse at 20% 50%, rgba(255, 203, 107, 0.12) 0%, transparent 55%),
-    radial-gradient(ellipse at 80% 50%, rgba(255, 154, 158, 0.10) 0%, transparent 55%),
-    rgba(255, 255, 255, 0.55);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+    radial-gradient(ellipse at 20% 50%, rgba(var(--tier-legendary-rgb), 0.12) 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 50%, rgba(var(--tier-mythic-rgb), 0.10) 0%, transparent 55%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+  backdrop-filter: var(--ph-panel-blur);
+  -webkit-backdrop-filter: var(--ph-panel-blur);
   border-radius: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.55);
+  border: 1px solid var(--ph-panel-border);
   box-shadow:
-    0 4px 6px rgba(0, 0, 0, 0.03),
-    0 12px 28px rgba(196, 154, 108, 0.10);
+    0 1px 0 rgba(255, 255, 255, 0.05) inset,
+    0 16px 40px rgba(0, 0, 0, 0.40);
   flex-wrap: wrap;
 }
 
@@ -59,10 +59,10 @@
   min-width: 160px;
   text-align: center;
   padding: 14px 22px;
-  background: rgba(255, 255, 255, 0.75);
+  background: var(--ph-panel);
   border-radius: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.55);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--ph-panel-border);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
 }
 
 .costLabel {
@@ -105,10 +105,10 @@
 
 /* ── Selector grid ────────────────────────────────────────── */
 .selectorSection {
-  background: rgba(255, 255, 255, 0.40);
+  background: var(--ph-panel);
   border-radius: 24px;
   padding: 22px;
-  border: 1px solid rgba(255, 255, 255, 0.45);
+  border: 1px solid var(--ph-panel-border);
 }
 
 .selectorGrid {
@@ -123,11 +123,11 @@
   align-items: center;
   gap: 12px;
   padding: 12px;
-  border: 2px solid rgba(255, 255, 255, 0.55);
+  border: 2px solid var(--ph-panel-border);
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.65);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: var(--ph-panel);
+  backdrop-filter: var(--ph-panel-blur);
+  -webkit-backdrop-filter: var(--ph-panel-blur);
   cursor: pointer;
   transition:
     transform 0.15s ease,
@@ -138,14 +138,14 @@
 
 .selectorCard:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
-  border-color: rgba(255, 203, 107, 0.6);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.40);
+  border-color: rgba(var(--tier-legendary-rgb), 0.6);
 }
 
 .selectorCard.selected {
-  border-color: #F59E0B;
-  background: rgba(255, 243, 224, 0.85);
-  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
+  border-color: var(--tier-legendary);
+  background: rgba(var(--tier-legendary-rgb), 0.14);
+  box-shadow: 0 0 0 3px rgba(var(--tier-legendary-rgb), 0.20), 0 0 20px rgba(var(--tier-legendary-rgb), 0.15);
 }
 
 .selectorCard.common::before,
@@ -175,7 +175,7 @@
   height: 64px;
   flex-shrink: 0;
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.05);
   display: grid;
   place-items: center;
   overflow: hidden;
@@ -215,13 +215,13 @@
 }
 
 .cooldownBadge.ready {
-  background: rgba(34, 197, 94, 0.12);
-  color: #16A34A;
+  background: rgba(34, 197, 94, 0.16);
+  color: #4ADE80;
 }
 
 .cooldownBadge.busy {
-  background: rgba(242, 114, 140, 0.12);
-  color: #d4606f;
+  background: rgba(244, 114, 182, 0.16);
+  color: #F9A8D4;
 }
 
 .slotBadge {
@@ -248,12 +248,12 @@
   gap: 18px;
   padding: 28px;
   background:
-    radial-gradient(ellipse at 50% 0%, rgba(255, 203, 107, 0.10) 0%, transparent 60%),
-    rgba(255, 255, 255, 0.55);
+    radial-gradient(ellipse at 50% 0%, rgba(var(--tier-legendary-rgb), 0.10) 0%, transparent 60%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
   border-radius: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.55);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--ph-panel-border);
+  backdrop-filter: var(--ph-panel-blur);
+  -webkit-backdrop-filter: var(--ph-panel-blur);
 }
 
 .previewSlots {
@@ -275,14 +275,14 @@
   gap: 14px;
   padding: 16px;
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.75);
-  border: 2px dashed rgba(196, 154, 108, 0.25);
+  background: var(--ph-panel);
+  border: 2px dashed var(--ph-panel-border-strong);
   position: relative;
 }
 
 .parentSlot {
   border-style: solid;
-  border-color: rgba(255, 255, 255, 0.6);
+  border-color: var(--ph-panel-border-strong);
 }
 
 .parentArt {
@@ -290,7 +290,7 @@
   height: 72px;
   flex-shrink: 0;
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.05);
   display: grid;
   place-items: center;
 }
@@ -351,7 +351,7 @@
   height: 24px;
   border: none;
   border-radius: 50%;
-  background: rgba(58, 58, 82, 0.08);
+  background: rgba(255, 255, 255, 0.08);
   color: var(--ph-text-muted);
   font-size: 12px;
   cursor: pointer;
@@ -361,8 +361,8 @@
 }
 
 .clearBtn:hover {
-  background: rgba(242, 114, 140, 0.18);
-  color: #d4606f;
+  background: rgba(244, 114, 182, 0.20);
+  color: #F9A8D4;
 }
 
 .heartDivider {
@@ -384,13 +384,13 @@
 }
 
 .statusLine.ok {
-  background: rgba(34, 197, 94, 0.12);
-  color: #16A34A;
+  background: rgba(34, 197, 94, 0.16);
+  color: #4ADE80;
 }
 
 .statusLine.warn {
-  background: rgba(245, 158, 11, 0.12);
-  color: #B45309;
+  background: rgba(245, 158, 11, 0.16);
+  color: #FBBF24;
 }
 
 /* ── Breed button ─────────────────────────────────────────── */
@@ -445,14 +445,14 @@
   gap: 10px;
   padding: 64px 24px;
   text-align: center;
-  background: rgba(255, 255, 255, 0.45);
+  background: var(--ph-panel);
   border-radius: 24px;
-  border: 2px dashed rgba(196, 154, 108, 0.25);
+  border: 2px dashed var(--ph-panel-border-strong);
 }
 
 .emptyIcon {
   font-size: 52px;
-  opacity: 0.45;
+  opacity: 0.5;
 }
 
 .emptyText {

@@ -20,22 +20,48 @@
   --ph-color-earth:    #F97316;
   --ph-color-ink:      #1E1B4B;
 
-  /* ---- Surfaces ---- */
-  --ph-surface-canvas: #FAFAFA;
-  --ph-surface-raised: #FFFFFF;
-  --ph-surface-sunken: #F0E8D8;
-  --ph-scrim:          rgba(30, 27, 75, 0.50);
+  /* ---- Surfaces (v0.3 DARK — Poppy 2026-07-16) ----
+     The whole web/panel now lives in the same dark world as the collector
+     cards. Surfaces are deep-navy glass so the tier glows read as intended. */
+  --ph-surface-canvas: #0C1022;
+  --ph-surface-raised: rgba(255, 255, 255, 0.05);
+  --ph-surface-sunken: rgba(0, 0, 0, 0.30);
+  --ph-scrim:          rgba(6, 8, 18, 0.66);
 
-  /* ---- Text ---- */
-  --ph-text-primary:   #1E1B4B;
-  --ph-text-muted:     #5B6B7D;  /* v0.1.1: darkened from #94A3B8 for WCAG AA (~5.2:1 on #fff) */
+  /* ---- Text (on dark) ---- */
+  --ph-text-primary:   #EAF0F9;  /* ~15:1 on canvas — WCAG AAA */
+  --ph-text-muted:     #97A2B6;  /* ~5.6:1 on canvas — WCAG AA */
   --ph-text-on-golden: #1E1B4B;
   --ph-text-on-dark:   #FAFAFA;
-  --ph-text-disabled:  #A9A6C4;
+  --ph-text-disabled:  #5B6478;
 
   /* ---- Borders / focus ---- */
-  --ph-border-soft:  #E8D5B8;
-  --ph-border-focus: #3B82F6;
+  --ph-border-soft:  rgba(255, 255, 255, 0.12);
+  --ph-border-focus: #60A5FA;
+
+  /* ---- Dark shell surfaces (one glass system across the page) ----
+     Reused by App shell, header, chips, hero, tabs, breeding, empty/loading. */
+  --ph-shell-bg-top:    #131836;  /* deep indigo-navy */
+  --ph-shell-bg-mid:    #0C1022;
+  --ph-shell-bg-bottom: #080A14;  /* charcoal */
+  --ph-panel:        rgba(255, 255, 255, 0.045);  /* translucent glass fill */
+  --ph-panel-raised: rgba(255, 255, 255, 0.07);   /* hover / active glass */
+  --ph-panel-border: rgba(255, 255, 255, 0.09);
+  --ph-panel-border-strong: rgba(255, 255, 255, 0.14);
+  --ph-panel-blur:   blur(16px);
+
+  /* ---- Tier accents (mirror CreatureCard --tier/--tierRGB so the page and
+     the cards share ONE color system; glows echo the rarity palette). ---- */
+  --tier-common:    #4ADE80;  --tier-common-rgb:    74, 222, 128;
+  --tier-uncommon:  #2DD4BF;  --tier-uncommon-rgb:  45, 212, 191;
+  --tier-rare:      #60A5FA;  --tier-rare-rgb:      96, 165, 250;
+  --tier-epic:      #C084FC;  --tier-epic-rgb:      192, 132, 252;
+  --tier-legendary: #FBBF24;  --tier-legendary-rgb: 251, 191, 36;
+  --tier-mythic:    #F472B6;  --tier-mythic-rgb:    244, 114, 182;
+  /* Page-wide accent aura (soft, echoes rare/epic) used behind hero + landing. */
+  --ph-aura-rare:   rgba(96, 165, 250, 0.14);
+  --ph-aura-epic:   rgba(192, 132, 252, 0.12);
+  --ph-aura-gold:   rgba(251, 191, 36, 0.10);
 
   /* ---- Semantic state ---- */
   --ph-success: #22C55E;
@@ -43,15 +69,20 @@
   --ph-danger:  #F43F5E;
   --ph-info:    #3B82F6;
 
-  /* ---- Rarity tiers (ART.md §3 — frame / aura / badge) ---- */
+  /* ---- Rarity tiers (ART.md §3 — frame / aura / badge) — 6-tier ---- */
   --ph-rarity-common:    #22C55E;
+  --ph-rarity-uncommon:  #2DD4BF;
   --ph-rarity-rare:      #3B82F6;
   --ph-rarity-epic:      #8B5CF6;
   --ph-rarity-legendary: #F59E0B;
+  --ph-rarity-mythic:    #EF4444;
   --ph-rarity-common-aura:    rgba(34, 197, 94, 0.45);
+  --ph-rarity-uncommon-aura:  rgba(45, 212, 191, 0.45);
   --ph-rarity-rare-aura:      rgba(59, 130, 246, 0.50);
   --ph-rarity-epic-aura:      rgba(139, 92, 246, 0.55);
   --ph-rarity-legendary-aura: rgba(245, 158, 11, 0.60);
+  --ph-rarity-mythic-aura:    rgba(239, 68, 68, 0.55);
+  --ph-glow-mythic:           0 0 40px rgba(239, 68, 68, 0.50), 0 0 80px rgba(139, 92, 246, 0.30);
 
   /* ---- Spacing (4px grid) ---- */
   --ph-space-0: 0px;

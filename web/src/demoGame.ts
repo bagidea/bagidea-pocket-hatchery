@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react'
 import type { Creature } from './components/CreatureCard'
+import { AWAKEN_DUR_DEFAULT, WAKE_COST_WAX_DEFAULT } from './awaken'
 
 /**
  * Local, fully-reactive game loop for `?demo` mode.
@@ -22,7 +23,10 @@ const DAILY_EGG_CAP = 240    // config.daily_egg_cap
 const TAP_EGG = 60           // config.tap_egg_cap — EGG per Harvest tap
 const FEED_DAILY_CAP = 100   // config.feed_daily_cap
 const FEED_BOOST = 1000      // config.feed_boost — growth per feed
-const REWARD_HATCH = 5       // HATCH granted per Claim Reward
+// Claim payout scales with the highest-stage creature, mirroring the live
+// contract (pockethatch.cpp claimreward base[]={0,0,15,25,45,85}). Claimable
+// from Stage-2 (Juvenile) up. Index by stage; clamp to 5.
+const CLAIM_SCALE = [0, 0, 15, 25, 45, 85]
 const HATCH_EGG_COST = 150   // config.hatch_cost — EGG burned to Hatch one egg
 const STARTING_EGG = 0       // initplayer-style: must Harvest to farm first
 
@@ -115,17 +119,25 @@ function demoGenetics(species: string): string {
 function freshCreature(stage = 0, growth = 0): Creature {
   const id = String(++demoAssetSeq)
   const species = pickSpecies()
+  const now = Math.floor(Date.now() / 1000)
+  const rarity = RARITY_BY_STAGE[stage] ?? 'rare'
+  // Awaken v2: a freshly-hatched creature (stage 0) hatches ASLEEP. bornAt/awakenDur
+  // drive the AwakenMeter's sleep timer; wakeCost is the WAX to wake it early. These
+  // mirror the on-chain configv3 defaults per rarity (real "1h / 3 WAX" for common).
   return {
     assetId: id,
     name: `${species} #${id}`,
     species,
     stage,
     maxStage: MAX_REACHABLE,
-    rarity: RARITY_BY_STAGE[stage] ?? 'rare',
+    rarity,
     growth,
     growthToNext: GROWTH_TO_NEXT[stage] ?? 0,
     genetics: demoGenetics(species),
-    lastFed: Math.floor(Date.now() / 1000), // Feed-v2 satiety clock: starts full
+    lastFed: now, // Feed-v2 satiety clock: starts full
+    bornAt: now,
+    awakenDur: AWAKEN_DUR_DEFAULT[rarity] ?? AWAKEN_DUR_DEFAULT.common,
+    wakeCostWax: WAKE_COST_WAX_DEFAULT[rarity] ?? WAKE_COST_WAX_DEFAULT.common,
   }
 }
 
@@ -177,6 +189,33 @@ export function useDemoGame() {
           lastHatched: { speciesId: baby.species.toLowerCase(), speciesName: baby.species },
         },
         `🐣 Hatched ${baby.name} (-${HATCH_EGG_COST} EGG). Feed it to grow!`,
+      )
+    })
+  }, [withLog])
+
+  // Awaken v2: wake a sleeping (stage 0) egg → Baby (stage 1). On chain this is a
+  // WAX payment (wake_cost) to the contract; in demo it just flips the stage so the
+  // hatch → wake → feed loop is playable locally without a wallet.
+  const wake = useCallback((assetId: string) => {
+    setState((prev) => {
+      const target = prev.creatures.find((c) => c.assetId === assetId)
+      if (!target) return prev
+      if (target.stage !== 0) return withLog(prev, `Wake: #${assetId} is already awake.`)
+      const creatures = prev.creatures.map((c) =>
+        c.assetId === assetId
+          ? {
+              ...c,
+              stage: 1,
+              rarity: RARITY_BY_STAGE[1] ?? c.rarity,
+              growth: 0,
+              growthToNext: GROWTH_TO_NEXT[1] ?? 0,
+              lastFed: 0, // never fed yet → reads full + feed available right after waking
+            }
+          : c,
+      )
+      return withLog(
+        { ...prev, creatures },
+        `⚡ Woke #${assetId} (−${target.wakeCostWax ?? 3} WAX) → Baby. Feed it to grow!`,
       )
     })
   }, [withLog])
@@ -245,13 +284,14 @@ export function useDemoGame() {
 
   const claimReward = useCallback(() => {
     setState((prev) => {
-      const hasAdult = prev.creatures.some((c) => c.stage >= MAX_REACHABLE)
-      if (!hasAdult) {
-        return withLog(prev, `Claim: need a Stage-${MAX_REACHABLE} (Champion) creature first. Evolve one to max.`)
+      const highest = prev.creatures.reduce((max, c) => Math.max(max, c.stage), 0)
+      const payout = CLAIM_SCALE[Math.min(highest, 5)] ?? 0
+      if (payout <= 0) {
+        return withLog(prev, 'Claim: need a Stage-2 (Juvenile) creature or higher first. Evolve one up.')
       }
       return withLog(
-        { ...prev, hatch: prev.hatch + REWARD_HATCH },
-        `🎁 Claimed ${REWARD_HATCH} HATCH (balance ${prev.hatch + REWARD_HATCH}).`,
+        { ...prev, hatch: prev.hatch + payout },
+        `🎁 Claimed ${payout} HATCH (stage ${highest}, balance ${prev.hatch + payout}).`,
       )
     })
   }, [withLog])
@@ -265,5 +305,5 @@ export function useDemoGame() {
     )
   }, [withLog])
 
-  return { state, harvest, hatch, feed, evolve, claimReward, initplayer }
+  return { state, harvest, hatch, wake, feed, evolve, claimReward, initplayer }
 }
