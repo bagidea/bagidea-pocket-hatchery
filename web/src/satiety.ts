@@ -3,27 +3,25 @@ import type { Rarity } from './components/CreatureCard'
 /**
  * satiety.ts — the Feed v2 mechanics seam (PURE LOGIC — no JSX, no CSS).
  *
- * Everything the "ความอิ่ม" (satiety) system needs to reason about time lives
+ * Everything the satiety system needs to reason about time lives
  * here so the UI (SatietyMeter) just renders what these functions return, and
  * the chain layer (play.ts `toCreature`) just supplies the inputs.
  *
- * ── THE MODEL (3-tier, chain-anchored) ───────────────────────────────────────
+ * ── THE MODEL (6-tier, chain-anchored) ───────────────────────────────────────
  * A creature is FULL right after you feed it (creatures.last_fed = now) and its
  * satiety runs down linearly over `fed_dur` — a duration that depends on the
- * creature's rarity (speciescfg.egg_type → common/uncommon/rare):
+ * creature's rarity (speciescfg.egg_type → 0=common … 5=mythic):
  *
  *     satiety% = clamp((last_fed + fed_dur − now) / fed_dur, 0, 1) × 100
  *
- * fed_dur comes from configv3.fed_dur_{common|uncommon|rare} (48h / 72h / 120h).
+ * fed_dur comes from configv3.fed_dur_{common|uncommon|rare|epic|legendary|mythic}.
  * Low satiety throttles the creature's EGG earn rate — that is the whole reason a
  * player comes back to feed. Rarer creatures both stay fed longer AND earn more
- * per hour, so a Rare is worth far more attention than a Common.
+ * per hour, so a Mythic is worth far more attention than a Common.
  *
  * ── RARITY (must match chain) ─────────────────────────────────────────────────
- * On chain there are exactly THREE rarities, from speciescfg.egg_type:
- *     0 = Common · 1 = Uncommon · 2 = Rare
- * (GENETICS-SPEC.md §"Rarity อยู่ที่ species level เท่านั้น"). No epic/legendary/
- * mythic exist on chain — those were mock tiers and are gone.
+ * On chain there are SIX rarities, from speciescfg.egg_type:
+ *     0 = Common · 1 = Uncommon · 2 = Rare · 3 = Epic · 4 = Legendary · 5 = Mythic
  *
  * ── BINDING STATUS (2026-07-08) ──────────────────────────────────────────────
  * `last_fed` is REAL and already on chain (creature_row.last_fed, parsed in
@@ -43,29 +41,41 @@ export type SatietyState = 'full' | 'hungry' | 'starving'
 // fields and play.ts threads them down (overriding these). Edit here only if the
 // spec durations themselves change.
 export const FED_DUR_DEFAULT: Record<Rarity, number> = {
-  common: 48 * 3600,   // 48h
-  uncommon: 72 * 3600, // 72h
-  rare: 120 * 3600,    // 120h
+  common: 48 * 3600,    // 48h
+  uncommon: 72 * 3600,  // 72h
+  rare: 120 * 3600,     // 120h (5d)
+  epic: 168 * 3600,     // 168h (7d)
+  legendary: 240 * 3600,// 240h (10d)
+  mythic: 336 * 3600,   // 336h (14d)
 }
 
-// ── earn multiplier per rarity — REAL on-chain ratios ────────────────────────
-// VERIFIED from speciescfg on phgamecreatr (2026-07-09): every rarer species'
-// yield_n is a CONSTANT multiple of the common one at every stage —
-//   common  662976: 100/300/600/1200/2400  → ×1.00
-//   uncommon 662977: 110/330/660/1320/2640  → ×1.10
-//   rare    662978: 140/420/840/1680/3360  → ×1.40
-// So earn is driven by STAGE (the 100→2400 curve in BASE_EARN_BY_STAGE); rarity
-// is only a modest nudge. The old {1.5, 2.5} were mock. If Kevin re-tunes the
-// yields, update these three numbers HERE (one place) and rebuild.
-// ⚠️ LIMITATION: this "common-base × ratio" model assumes the ratio is CONSTANT
-// across stages — true only because the sole deployed family (Fire) holds
-// 1.0/1.1/1.4 at every stage. If a future family ships a per-stage yield curve
-// that is NOT a fixed multiple of common, this reconstruction drifts; then read
-// the species' own yield[] from speciescfg directly instead of a scalar mult.
+// ── TOTAL earn premium per rarity — FALLBACK only ────────────────────────────
+// The REAL per-creature earn is read live from chain (play.ts toCreature →
+// Creature.earnFull), because the deployed contract's harvest() COMPOUNDS two
+// rarity factors that both live on chain (verified in pockethatch.cpp:578-582):
+//
+//   gross += speciescfg.yield_for(stage) * fed_h * earn_mult/10000 * avg_sat/10000
+//
+//   1) speciescfg.yield already differs per tier — 662976/7/8 (Fire) hold
+//      100/110/140 at stage 1 → an embedded ×1.00 / ×1.10 / ×1.40, and
+//   2) configv3.earn_mult_{common|uncommon|rare} = 10000/11000/14000 multiplies
+//      AGAIN on top → ×1.00 / ×1.10 / ×1.40.
+//
+// So the TOTAL rarity premium a player actually harvests is the PRODUCT:
+//   common ×1.00 · uncommon 1.1×1.1 = ×1.21 · rare 1.4×1.4 = ×1.96
+// (⚠️ the compounding may be unintended — flagged to Kevin/CEO; the UI mirrors
+// what the chain PAYS, whatever the economy intent.)
+//
+// These constants are used ONLY when a live per-creature earnFull isn't available
+// (demo mode, ?feedlab preview). Real cards read species.yield × earn_mult live,
+// so they auto-correct if Kevin retunes either yields OR earn_mult on chain.
 export const RARITY_EARN_MULT: Record<Rarity, number> = {
   common: 1.0,
-  uncommon: 1.1,
-  rare: 1.4,
+  uncommon: 1.21,   // 1.1 (species yield) × 1.1 (earn_mult)
+  rare: 1.96,       // 1.4 × 1.4
+  epic: 3.24,       // 1.8 × 1.8
+  legendary: 5.76,  // 2.4 × 2.4
+  mythic: 10.89,    // 3.3 × 3.3
 }
 
 export interface SatietyConfig {
@@ -75,7 +85,12 @@ export interface SatietyConfig {
    * When absent, fed_dur comes from the creature's rarity (chain / FED_DUR_DEFAULT).
    */
   fedDurSec?: number
-  /** Minimum seconds between two feeds (anti-spam cooldown). */
+  /**
+   * Minimum seconds between two feeds (anti-spam cooldown). FALLBACK value — the
+   * live cooldown is configv3.feed_cd (21600 = 6h), threaded per-creature through
+   * play.ts → Creature.feedCd → SatietyMeter's `feedCdSec` prop, which overrides
+   * this. Kept here so demo/preview (no chain) still have a sane cooldown.
+   */
   feedCooldownSec: number
   /** percent ≥ this → "full". */
   fullAt: number
@@ -222,8 +237,36 @@ export interface EarnRate {
   multiplier: number
 }
 
-/** Earn rate for a creature given its rarity, stage and current satiety state. */
-export function earnRate(rarity: Rarity, stage: number, state: SatietyState): EarnRate {
+/**
+ * Live earn override for a creature, read straight from chain in play.ts
+ * (species.yield_for(stage) × configv3.earn_mult). When present it BYPASSES the
+ * common-base × RARITY_EARN_MULT reconstruction so the card shows exactly what
+ * harvest() pays; `multiplier` is the total premium vs a common at the same stage.
+ */
+export interface LiveEarn {
+  /** EGG/hr at full satiety, from chain (species yield × earn_mult). */
+  baseFull: number
+  /** Total rarity premium vs common at this stage, for the "×N" badge. */
+  multiplier: number
+}
+
+/**
+ * Earn rate for a creature at its current satiety state.
+ *
+ * Prefer `live` (real per-creature values from chain) — that's the chain-truthful
+ * path and handles per-stage yield curves + on-chain retunes automatically. Only
+ * when `live` is absent (demo / ?feedlab preview) do we reconstruct from the
+ * common-base curve × RARITY_EARN_MULT (the TOTAL premium fallback).
+ */
+export function earnRate(
+  rarity: Rarity,
+  stage: number,
+  state: SatietyState,
+  live?: LiveEarn,
+): EarnRate {
+  if (live) {
+    return { base: live.baseFull, effective: live.baseFull * satietyEarnFactor(state), multiplier: live.multiplier }
+  }
   const stageBase = BASE_EARN_BY_STAGE[clamp(stage, 0, BASE_EARN_BY_STAGE.length - 1)] ?? 0
   const multiplier = RARITY_EARN_MULT[rarity] ?? 1.0
   const base = stageBase * multiplier

@@ -41,6 +41,15 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (p) => p.replace(/^\/office/, ''),
       },
+      // Creature nicknames + pins (prefs.ts) live in the plugin's data dir, reached
+      // through the daemon's own plugin cmd route. In the real deploy the daemon
+      // serves the panel, so this path is already same-origin; in dev the app runs
+      // on :5173 and would 404. Proxy it so a dev run stores prefs for real instead
+      // of silently degrading to session-only.
+      '/plugin/pocket-hatchery/cmd': {
+        target: 'http://127.0.0.1:8787',
+        changeOrigin: true,
+      },
     },
   },
 })

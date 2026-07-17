@@ -1,7 +1,7 @@
 import type { Session } from '@wharfkit/session'
 import { getActiveNetwork } from './network'
 
-// Follows the active network (?network= switcher). testnet = pockethatch1;
+// Follows the active network (?network= switcher). testnet = phgamecreatr;
 // mainnet = '' until Kevin deploys there.
 export const CONTRACT_ACCOUNT = getActiveNetwork().contract
 
@@ -48,13 +48,17 @@ export class PocketHatcheryContract {
   }
 
   // Public so play.ts can sign an arbitrary action through the unified GameSigner
-  // (the WCW path). Named methods below are thin wrappers over this.
+  // (the WCW path). Named methods below are thin wrappers over this. `contract`
+  // overrides the target account for actions that aren't on the game contract —
+  // e.g. the Awaken WAX wake, which is an eosio.token::transfer, not a game action.
   async push(
     name: string,
     data: Record<string, unknown>,
+    contract?: string,
   ): Promise<ContractCallResult> {
+    const account = contract ?? CONTRACT_ACCOUNT
     const action = {
-      account: CONTRACT_ACCOUNT,
+      account,
       name,
       authorization: [{ actor: this.actor, permission: this.permission }],
       data,

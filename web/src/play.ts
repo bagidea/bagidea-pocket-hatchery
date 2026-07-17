@@ -35,17 +35,21 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Session } from '@wharfkit/session'
 import { login, restore, logout } from './wallet'
 import { getContract } from './contract'
-import { isPlayable } from './network'
+import { isPlayable, getActiveNetwork } from './network'
 import { waxwingStatus, ensureNetwork, waxwingAccount, waxwingBuildAction, waxwingWaitForIntent, waxwingCancel, openWaxwingPanel, type WaxwingIntent } from './waxwing'
 import {
   fetchGameState,
   getTokenBalance,
+  effectiveDailyCounters,
   type ChainConfig,
+  type ClaimRow,
   type CreatureRow,
   type PlayerRow,
+  type RewardPoolRow,
   type SpeciesRow,
 } from './chain'
-import { fedDurFor } from './satiety'
+import { fedDurFor, BASE_EARN_BY_STAGE } from './satiety'
+import { awakenDurFor, waxWhole } from './awaken'
 
 export type ConnectMode = 'wcw' | 'waxwing'
 
@@ -65,11 +69,23 @@ export interface Resources {
   claimedSeason: number
   /** Current season index from config. */
   currentSeason: number
+  /** Max hours of offline earning credited per harvest (configv3.offline_cap_h). */
+  offlineCapH: number
+  /** Base daily EGG ceiling (configv3.daily_egg_cap). */
+  dailyEggCap: number
+  /** Whether the daily ceiling scales by best owned rarity (configv3.cap_scales_rarity). */
+  capScalesRarity: boolean
+  /** EGG already harvested toward today's cap (player.egg_harvested_today). */
+  eggHarvestedToday: number
+  /** HATCH left in the shared reward pool (rewardpool.balance) — claimreward pays from it. */
+  poolBalance: number
+  /** Whether the game is halted on chain (configv3.paused) — every action is refused. */
+  paused: boolean
 }
 
-// On-chain rarity = speciescfg.egg_type (0/1/2). Three tiers only — matches
-// CreatureCard's Rarity union. GENETICS-SPEC.md §"Rarity อยู่ที่ species level".
-export type Rarity = 'common' | 'uncommon' | 'rare'
+// On-chain rarity = speciescfg.egg_type (0–5). Six tiers.
+// 0=common, 1=uncommon, 2=rare, 3=epic, 4=legendary, 5=mythic.
+export type Rarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'mythic'
 
 export interface Creature {
   assetId: string
@@ -90,6 +106,20 @@ export interface Creature {
   breedCooldown: number
   /** fed_dur (seconds) for this creature's rarity — configv3.fed_dur_* (or spec default). */
   fedDur: number
+  /** Min seconds between feeds (configv3.feed_cd) — the SatietyMeter cooldown. */
+  feedCd: number
+  /** Unix seconds the creature hatched (chain: creature_row.born_at). Awaken-v2 sleep clock. */
+  bornAt: number
+  /** awaken_dur (seconds) for this rarity — configv3.awaken_dur_* (or spec default). Sleep length. */
+  awakenDur: number
+  /** WAX wake cost as an asset string ("3.00000000 WAX") — configv3.wake_cost_*. The transfer quantity. */
+  wakeCost?: string
+  /** WAX wake cost in whole units (3, 5, 10…) for the button label. */
+  wakeCostWax?: number
+  /** Chain-real full-satiety earn (EGG/hr): speciescfg.yield_for(stage) × configv3.earn_mult. */
+  earnFull?: number
+  /** Total rarity earn premium vs a common at this stage (for the "×N" badge). */
+  earnMult?: number
 }
 
 export interface LastAction {
@@ -124,18 +154,36 @@ const ACTION_LABEL: Record<string, string> = {
   accelerate: 'Accelerate Growth',
   harvest: 'Harvest EGG',
   claimreward: 'Claim HATCH Reward',
+  burncreature: 'Burn Creature',
+  transfer: 'Wake Creature (WAX)',
 }
+
+/**
+ * What a gameplay action resolves to. Every action calls `run(...)`, which returns
+ * `{ ok, txid? }`; the ones gated by a client-side pre-check (cooldown, missing
+ * creature) also resolve `void` on the early-return path. Callers may inspect `ok`
+ * (hatch does) or fire-and-forget — the value is optional. Typed honestly rather
+ * than as `Promise<void>`: the actions genuinely return a result, and leaning on
+ * the void-return leniency proved brittle under this module's import cycle +
+ * strictFunctionTypes (it silently flipped once a second action — hatch — was
+ * typed honestly, turning every remaining `Promise<void>` action into an error).
+ */
+export type ActionResult = { ok: boolean; txid?: string } | void
 
 export interface GameActions {
   connectWallet: (mode?: ConnectMode) => Promise<void>
   disconnectWallet: () => Promise<void>
-  hatch: (eggType?: number) => Promise<void>
-  feed: (assetId: string) => Promise<void>
-  evolve: (assetId: string) => Promise<void>
-  breed: (parentA: string, parentB: string) => Promise<void>
-  accelerate: (assetId: string, amount: string) => Promise<void>
-  harvest: () => Promise<void>
-  claimReward: () => Promise<void>
+  hatch: (eggType?: number) => Promise<{ ok: boolean; txid?: string }>
+  feed: (assetId: string) => Promise<ActionResult>
+  /** Wake a sleeping (stage 0) creature early by paying WAX (Awaken v2). */
+  awaken: (assetId: string) => Promise<ActionResult>
+  evolve: (assetId: string) => Promise<ActionResult>
+  breed: (parentA: string, parentB: string) => Promise<ActionResult>
+  accelerate: (assetId: string, amount: string) => Promise<ActionResult>
+  /** Permanently destroy a creature (burncreature). Irreversible — gate behind a UI confirm. */
+  burn: (assetId: string) => Promise<ActionResult>
+  harvest: () => Promise<ActionResult>
+  claimReward: () => Promise<ActionResult>
   refresh: () => Promise<void>
   confirmPending: () => Promise<void>
   cancelPending: () => void
@@ -150,21 +198,152 @@ export interface GameActions {
   hatchCost: number | null
   /** Live breed cost in whole HATCH units (parsed from config.breed_cost). */
   breedCost: number | null
+  /** Live rarity odds + earn premium for one hatch (from configv3 weights). */
+  hatchOdds: HatchOdds[]
 }
 
-const EMPTY_RESOURCES: Resources = { egg: 0, energy: 0, maxEnergy: 0, hatch: 0, lastHarvest: 0, lastClaimed: 0, harvestCd: 0, claimedSeason: 0, currentSeason: 0 }
+const EMPTY_RESOURCES: Resources = { egg: 0, energy: 0, maxEnergy: 0, hatch: 0, lastHarvest: 0, lastClaimed: 0, harvestCd: 0, claimedSeason: 0, currentSeason: 0, offlineCapH: 0, dailyEggCap: 0, capScalesRarity: false, eggHarvestedToday: 0, poolBalance: 0, paused: false }
 
-// speciescfg.egg_type (0/1/2) → display rarity. Matches CreatureCard's union.
-// Exactly three tiers on chain; egg_type is clamped to this range in toCreature.
-const RARITY_BY_EGG_TYPE: Rarity[] = ['common', 'uncommon', 'rare']
+// speciescfg.egg_type (0–5) → display rarity. Matches CreatureCard's union.
+const RARITY_BY_EGG_TYPE: Rarity[] = ['common', 'uncommon', 'rare', 'epic', 'legendary', 'mythic']
 
 /** Resolve the live fed_dur (seconds) for a rarity from configv3, or spec default. */
 function fedDurFromConfig(cfg: ChainConfig | null, rarity: Rarity): number {
-  const live =
-    rarity === 'common' ? cfg?.fed_dur_common
-      : rarity === 'uncommon' ? cfg?.fed_dur_uncommon
-        : cfg?.fed_dur_rare
-  return fedDurFor(rarity, undefined, live)
+  const live: Record<Rarity, number | undefined> = {
+    common: cfg?.fed_dur_common,
+    uncommon: cfg?.fed_dur_uncommon,
+    rare: cfg?.fed_dur_rare,
+    epic: cfg?.fed_dur_epic,
+    legendary: cfg?.fed_dur_legendary,
+    mythic: cfg?.fed_dur_mythic,
+  }
+  return fedDurFor(rarity, undefined, live[rarity])
+}
+
+/** Resolve the live awaken_dur (seconds) for a rarity from configv3, or spec default. */
+function awakenDurFromConfig(cfg: ChainConfig | null, rarity: Rarity): number {
+  const live: Record<Rarity, number | undefined> = {
+    common: cfg?.awaken_dur_common,
+    uncommon: cfg?.awaken_dur_uncommon,
+    rare: cfg?.awaken_dur_rare,
+    epic: cfg?.awaken_dur_epic,
+    legendary: cfg?.awaken_dur_legendary,
+    mythic: cfg?.awaken_dur_mythic,
+  }
+  return awakenDurFor(rarity, live[rarity])
+}
+
+/**
+ * Resolve the live WAX wake cost for a rarity from configv3. Returns the asset
+ * string ("3.00000000 WAX") the transfer quantity must equal exactly, plus the
+ * whole-WAX number for the button. Undefined config → spec fallback string.
+ */
+function wakeCostFromConfig(cfg: ChainConfig | null, rarity: Rarity): { asset: string; wax: number } {
+  const live: Record<Rarity, string | undefined> = {
+    common: cfg?.wake_cost_common,
+    uncommon: cfg?.wake_cost_uncommon,
+    rare: cfg?.wake_cost_rare,
+    epic: cfg?.wake_cost_epic,
+    legendary: cfg?.wake_cost_legendary,
+    mythic: cfg?.wake_cost_mythic,
+  }
+  const asset = live[rarity]
+  if (asset) return { asset, wax: waxWhole(asset) }
+  // Fallback (configv3 lacks the field): mirror WAKE_COST_WAX_DEFAULT as a WAX-8
+  // asset string so a wake built off the fallback still validates on chain.
+  const fallback: Record<Rarity, number> = { common: 3, uncommon: 5, rare: 10, epic: 20, legendary: 40, mythic: 80 }
+  const wax = fallback[rarity] ?? 3
+  return { asset: `${wax.toFixed(8)} WAX`, wax }
+}
+
+// Fallback total premium when a creature has no species row / is at egg stage —
+// mirrors satiety.ts RARITY_EARN_MULT so demo and edge cases stay consistent.
+const RARITY_MULT_FALLBACK: Record<Rarity, number> = {
+  common: 1.0, uncommon: 1.21, rare: 1.96, epic: 3.24, legendary: 5.76, mythic: 10.89
+}
+
+// Hatch odds shown on the CTA. Every hatch costs the same flat EGG (hatch_cost);
+// what varies is the rarity you ROLL. Surfacing the odds + the harvest premium is
+// what makes chasing Rare worth it (higher earn_mult = more EGG farmed per feed).
+export interface HatchOdds {
+  rarity: Rarity
+  pct: number      // % chance of rolling this tier (may be fractional, e.g. 0.45)
+  earnMult: number // harvest EGG yield multiplier vs common (×)
+}
+
+// On-chain governance defaults — LOCKED 6-tier numbers (RARITY-6TIER-SPEC §1):
+// rarity_w 6900/2000/800/250/45/5 (bp, /10000) · earn_mult ×1.0/1.1/1.4/2.0/3.2/5.0.
+// These stand in until chain configv3 carries the 6-tier fields; the connected
+// dashboard overrides per-field from live configv3 where present.
+const RARITY_WEIGHT_DEFAULT: Record<Rarity, number> = {
+  common: 6900, uncommon: 2000, rare: 800, epic: 250, legendary: 45, mythic: 5
+}
+const EARN_MULT_DEFAULT: Record<Rarity, number> = {
+  common: 1.0, uncommon: 1.1, rare: 1.4, epic: 2.0, legendary: 3.2, mythic: 5.0
+}
+
+/** Build the hatch-odds list live from configv3, falling back to spec defaults. */
+export function hatchOddsFromConfig(cfg: ChainConfig | null): HatchOdds[] {
+  const RARITIES: Rarity[] = ['common', 'uncommon', 'rare', 'epic', 'legendary', 'mythic']
+  const weight: Record<Rarity, number> = {
+    common: cfg?.rarity_w_common ?? RARITY_WEIGHT_DEFAULT.common,
+    uncommon: cfg?.rarity_w_uncommon ?? RARITY_WEIGHT_DEFAULT.uncommon,
+    rare: cfg?.rarity_w_rare ?? RARITY_WEIGHT_DEFAULT.rare,
+    epic: cfg?.rarity_w_epic ?? RARITY_WEIGHT_DEFAULT.epic,
+    legendary: cfg?.rarity_w_legendary ?? RARITY_WEIGHT_DEFAULT.legendary,
+    mythic: cfg?.rarity_w_mythic ?? RARITY_WEIGHT_DEFAULT.mythic,
+  }
+  const total = Object.values(weight).reduce((a, b) => a + b, 0) || 1
+  const earnBp: Record<Rarity, number | undefined> = {
+    common: cfg?.earn_mult_common,
+    uncommon: cfg?.earn_mult_uncommon,
+    rare: cfg?.earn_mult_rare,
+    epic: cfg?.earn_mult_epic,
+    legendary: cfg?.earn_mult_legendary,
+    mythic: cfg?.earn_mult_mythic,
+  }
+  return RARITIES.map((r) => ({
+    rarity: r,
+    // Keep fractional precision — the rare top tiers are sub-1% (Legendary 0.45%,
+    // Mythic 0.05%) and Epic is 2.5%; rounding to whole percent would erase them.
+    pct: (weight[r] * 100) / total,
+    earnMult: earnBp[r] != null ? earnBp[r]! / 10000 : EARN_MULT_DEFAULT[r],
+  }))
+}
+
+/** configv3.earn_mult_{rarity} in basis points (×10000). Defaults to ×1.00. */
+function earnMultBp(cfg: ChainConfig | null, rarity: Rarity): number {
+  const map: Record<Rarity, number | undefined> = {
+    common: cfg?.earn_mult_common,
+    uncommon: cfg?.earn_mult_uncommon,
+    rare: cfg?.earn_mult_rare,
+    epic: cfg?.earn_mult_epic,
+    legendary: cfg?.earn_mult_legendary,
+    mythic: cfg?.earn_mult_mythic,
+  }
+  const bp = map[rarity]
+  return bp && bp > 0 ? bp : 10000
+}
+
+/**
+ * Chain-real full-satiety earn (EGG/hr) for one creature, mirroring the deployed
+ * harvest() exactly: `speciescfg.yield_for(stage) × configv3.earn_mult / 10000`.
+ * The species yields already carry a per-tier ratio AND earn_mult multiplies on
+ * top (compounding — see satiety.ts RARITY_EARN_MULT). Reading the species' OWN
+ * yields here (not a common-base reconstruction) keeps the card correct even for
+ * per-stage yield curves or on-chain retunes. Stage 0 (egg) earns nothing.
+ *
+ * Returns { earnFull, earnMult } where earnMult is the total premium vs a common
+ * at the same stage (BASE_EARN_BY_STAGE), for the "×N" badge.
+ */
+function earnFromChain(sp: SpeciesRow | undefined, stage: number, cfg: ChainConfig | null, rarity: Rarity): { earnFull: number; earnMult: number } {
+  if (!sp || stage <= 0) return { earnFull: 0, earnMult: RARITY_MULT_FALLBACK[rarity] }
+  const yields = [sp.yield_0, sp.yield_1, sp.yield_2, sp.yield_3, sp.yield_4]
+  const stageYield = yields[Math.min(stage, yields.length) - 1] ?? 0 // stage 1 → yield_0
+  const earnFull = (stageYield * earnMultBp(cfg, rarity)) / 10000
+  const commonBase = BASE_EARN_BY_STAGE[Math.min(stage, BASE_EARN_BY_STAGE.length - 1)] ?? 0
+  const earnMult = commonBase > 0 ? earnFull / commonBase : RARITY_MULT_FALLBACK[rarity]
+  return { earnFull, earnMult }
 }
 
 /**
@@ -203,7 +382,9 @@ function toCreature(
   // Real species name from the gene's species_id (bits 0–3), falling back to
   // the chain's speciescfg.family or the old hardcoded default.
   const name = speciesNameFromGene(row.genetics)
-  const rarity = RARITY_BY_EGG_TYPE[Math.min(Math.max(sp?.egg_type ?? 0, 0), 2)]
+  const rarity = RARITY_BY_EGG_TYPE[Math.min(Math.max(sp?.egg_type ?? 0, 0), 5)]
+  const earn = earnFromChain(sp, row.stage, cfg, rarity)
+  const wake = wakeCostFromConfig(cfg, rarity)
   return {
     assetId: row.asset_id,
     name,
@@ -219,6 +400,13 @@ function toCreature(
     lastBred: row.last_bred ?? 0,
     breedCooldown: breedCd,
     fedDur: fedDurFromConfig(cfg, rarity),
+    feedCd: cfg?.feed_cd ?? 21600,
+    bornAt: row.born_at ?? 0,
+    awakenDur: awakenDurFromConfig(cfg, rarity),
+    wakeCost: wake.asset,
+    wakeCostWax: wake.wax,
+    earnFull: earn.earnFull,
+    earnMult: earn.earnMult,
   }
 }
 
@@ -232,25 +420,78 @@ function parseAssetAmount(asset: string | undefined): number {
   return m ? Number(m[1]) : 0
 }
 
+/**
+ * A compact signature of the mutable on-chain state we render, so a post-action
+ * poll can tell when the RPC read node has actually caught up to the block the
+ * action landed in (vs. reading the pre-action state from a lagging node). Covers
+ * every field an action mutates: player counters/balances, per-creature
+ * stage/growth/timers (wake flips stage 0→1, feed bumps last_fed/fed_growth,
+ * evolve bumps stage, harvest bumps last_harvest, hatch adds a creature), and the
+ * HATCH balance (claimreward). Creatures are sorted by asset_id so ordering from
+ * the RPC never changes the signature.
+ */
+function stateSignature(
+  creatures: CreatureRow[],
+  player: PlayerRow | null,
+  claim: ClaimRow | null,
+  hatch: number,
+): string {
+  const p = player
+    ? [
+        player.egg_balance,
+        player.last_harvest,
+        player.harvest_day,
+        player.egg_harvested_today,
+        player.feeds_today,
+        player.feed_day,
+        // The claim clock is a separate table — without it a successful claimreward
+        // moves nothing in this signature and the post-action poll never settles.
+        claim?.last_claimed ?? 0,
+        claim?.claimed_season ?? 0,
+      ].join(',')
+    : 'none'
+  const cs = creatures
+    .slice()
+    .sort((a, b) => (a.asset_id < b.asset_id ? -1 : a.asset_id > b.asset_id ? 1 : 0))
+    .map((c) => `${c.asset_id}:${c.stage}:${c.growth_base}:${c.fed_growth}:${c.born_at}:${c.last_fed}:${c.last_bred}`)
+    .join('|')
+  return `${creatures.length}#${p}#${cs}#${hatch}`
+}
+
 function toResources(
   cfg: ChainConfig | null,
   player: PlayerRow | null,
+  claim: ClaimRow | null,
+  rewardPool: RewardPoolRow | null,
   hatchBalance: number,
+  now: number,
 ): Resources {
   // "Energy" = feeds remaining today (feed_daily_cap − feeds_today). This is
   // the on-chain analogue of action energy and matches the live 99/100 read.
+  // Both per-day counters are read through effectiveDailyCounters so a UTC-day
+  // rollover shows today's fresh quota — the contract resets them lazily, so the
+  // raw table still holds yesterday's values until the player next acts. `now` is
+  // chain head time (chain.ts fetchGameState), never client Date.now().
   const cap = cfg?.feed_daily_cap ?? 0
-  const feeds = player?.feeds_today ?? 0
+  const { eggHarvestedToday, feedsToday } = effectiveDailyCounters(player, now)
   return {
     egg: player?.egg_balance ?? 0,
-    energy: Math.max(0, cap - feeds),
+    energy: Math.max(0, cap - feedsToday),
     maxEnergy: cap,
     hatch: hatchBalance,
     lastHarvest: player?.last_harvest ?? 0,
-    lastClaimed: player?.last_claimed ?? 0,
+    // The claim clock lives in the contract-scoped `claims` table, NOT on the player
+    // row — reading it off the player silently reads as "never claimed".
+    lastClaimed: claim?.last_claimed ?? 0,
     harvestCd: cfg?.harvest_cd ?? 0,
-    claimedSeason: player?.claimed_season ?? 0,
+    claimedSeason: claim?.claimed_season ?? 0,
     currentSeason: cfg?.season_index ?? 0,
+    offlineCapH: cfg?.offline_cap_h ?? 8,
+    dailyEggCap: cfg?.daily_egg_cap ?? 0,
+    capScalesRarity: !!cfg?.cap_scales_rarity,
+    eggHarvestedToday,
+    poolBalance: rewardPool ? parseAssetAmount(rewardPool.balance) : 0,
+    paused: !!cfg?.paused,
   }
 }
 
@@ -260,7 +501,14 @@ function toResources(
 // to the wallet choice.
 interface GameSigner {
   actor: string
-  push(action: string, data: Record<string, unknown>): Promise<{ txid?: string }>
+  // `opts.contract` targets a non-game contract (Awaken pays via eosio.token::transfer);
+  // `opts.label` overrides the Sign-popup summary. Both default to the game contract /
+  // the action's ACTION_LABEL when omitted, so every existing call is unchanged.
+  push(
+    action: string,
+    data: Record<string, unknown>,
+    opts?: { contract?: string; label?: string },
+  ): Promise<{ txid?: string }>
 }
 
 // ── The hook ─────────────────────────────────────────────────────────────────
@@ -277,6 +525,7 @@ export function useGameActions(): GameActions {
   const [pendingSign, setPendingSign] = useState<PendingSign | null>(null)
   const [breedCost, setBreedCost] = useState<number | null>(null)
   const [hatchCost, setHatchCost] = useState<number | null>(null)
+  const [hatchOdds, setHatchOdds] = useState<HatchOdds[]>(() => hatchOddsFromConfig(null))
 
   // Track the currently-pending intent so cancel/disconnect can drop it.
   // No deferred promise needed — waxwingWaitForIntent polls the daemon, and
@@ -289,6 +538,10 @@ export function useGameActions(): GameActions {
   const creaturesRef = useRef<Creature[]>([])
   const feedBoostRef = useRef<number>(100)
   const configRef = useRef<ChainConfig | null>(null)
+  // Signature of the last chain state we successfully read (stateSignature). A
+  // post-action poll compares against this to know when the read node has caught
+  // up to the block the action landed in.
+  const stateSigRef = useRef<string>('')
   resourcesRef.current = resources
   creaturesRef.current = creatures
 
@@ -326,15 +579,38 @@ export function useGameActions(): GameActions {
         // instead of implying a zero-cost action.
         setBreedCost(state.config.breed_cost ? parseAssetAmount(state.config.breed_cost) : null)
         setHatchCost(state.config.hatch_cost ?? null)
+        setHatchOdds(hatchOddsFromConfig(state.config))
       }
-      setResources(toResources(state.config, state.player, hatch))
+      setResources(toResources(state.config, state.player, state.claim, state.rewardPool, hatch, state.now))
       const breedCd = state.config?.breed_cd ?? 86400
       setCreatures(state.creatures.map((c) => toCreature(c, state.species, breedCd, state.config)))
+      // Record the on-chain signature so a post-action poll can detect when the
+      // read node has advanced past the pre-action state.
+      stateSigRef.current = stateSignature(state.creatures, state.player, state.claim, hatch)
     } catch (err) {
       // A read hiccup must not crash the dashboard; surface it softly.
       setLastAction({ ok: false, label: 'Refresh', error: readableError(err) })
     }
   }, [])
+
+  // After an action broadcasts, the RPC read node can still be a block or two
+  // behind: a single immediate refresh may read the PRE-action state and leave the
+  // HUD stale (looks like the wake/feed/harvest never happened, cooldowns wrong).
+  // Poll a few spaced refreshes until the on-chain signature changes from what it
+  // was before the action — then stop early — or until the budget (~11s) is spent
+  // (the 20s background poll is the final backstop). Each refresh repaints the UI,
+  // so the panel updates itself the moment the node catches up.
+  const POST_ACTION_POLL_MS = [500, 1200, 2000, 3000, 4000] // cumulative ~10.7s
+  const refreshUntilChanged = useCallback(
+    async (before: string) => {
+      for (const delay of POST_ACTION_POLL_MS) {
+        await new Promise((r) => setTimeout(r, delay))
+        await refresh()
+        if (stateSigRef.current !== before) return // read node caught up — HUD fresh
+      }
+    },
+    [refresh],
+  )
 
   // Live-poll while connected so the HUD reflects on-chain changes (and the
   // result of actions signed from another device/wallet).
@@ -354,7 +630,7 @@ export function useGameActions(): GameActions {
       const c = getContract(s)
       return {
         actor: String(s.actor),
-        push: (action, data) => c.push(action, data).then((r) => ({ txid: r.txid })),
+        push: (action, data, opts) => c.push(action, data, opts?.contract).then((r) => ({ txid: r.txid })),
       }
     }
     if (mode === 'waxwing') {
@@ -366,9 +642,9 @@ export function useGameActions(): GameActions {
       // thing that ever broadcasts a gameplay action.
       return {
         actor,
-        push: async (action, data) => {
-          const label = ACTION_LABEL[action] ?? action
-          const intent = await waxwingBuildAction(action, data, actor, { label })
+        push: async (action, data, opts) => {
+          const label = opts?.label ?? ACTION_LABEL[action] ?? action
+          const intent = await waxwingBuildAction(action, data, actor, { label, contract: opts?.contract })
           pendingIntentRef.current = intent
           setPendingSign({ intent, label })
           // Open waxwing so the player can unlock + sign in the wallet UI.
@@ -394,10 +670,16 @@ export function useGameActions(): GameActions {
       setAnimating(true)
       try {
         const signer = buildSigner() // throws if not connected → caught below
+        // Snapshot the chain state BEFORE broadcasting so the post-action poll can
+        // detect the exact block the action lands in (guards against a lagging RPC
+        // read node returning stale rows on the first refresh).
+        const beforeSig = stateSigRef.current
         const r = await fn(signer)
         const tail = r.txid ? ` · ${r.txid.slice(0, 10)}…` : ''
         setLastAction({ ok: true, label: `${label}${tail}` })
-        await refresh()
+        // Poll until the read node reflects the tx (not a single stale read).
+        await refreshUntilChanged(beforeSig)
+        return { ok: true as const, txid: r.txid }
       } catch (err) {
         const msg = readableError(err)
         if (msg === 'cancelled') {
@@ -411,11 +693,12 @@ export function useGameActions(): GameActions {
         } else {
           setLastAction({ ok: false, label, error: msg })
         }
+        return { ok: false as const }
       } finally {
         setAnimating(false)
       }
     },
-    [refresh, buildSigner],
+    [refreshUntilChanged, buildSigner],
   )
 
   const connectWallet = useCallback(
@@ -529,6 +812,44 @@ export function useGameActions(): GameActions {
       }),
     [run],
   )
+  // Awaken — wake a sleeping (stage 0) creature EARLY by paying WAX. This is NOT
+  // a game-contract action: the contract's on_wax_transfer wakes the creature when
+  // it receives `wax_contract::transfer{ owner → game, wake_cost, memo:"wake:<id>" }`
+  // (pockethatch.cpp:1205). So we push a `transfer` to the WAX token contract via
+  // the unified signer's contract override, through the same Sign-intent gate as
+  // every other action. Once the sleep timer elapses the contract REJECTS a paid
+  // wake (harvest auto-awakens for free), so we guard that client-side too.
+  const awaken = useCallback(
+    (assetId: string) => {
+      const c = creaturesRef.current.find((c) => c.assetId === assetId)
+      if (!c) {
+        setLastAction({ ok: false, label: 'Wake', error: 'Creature not found' })
+        return Promise.resolve()
+      }
+      if (c.stage > 0) {
+        setLastAction({ ok: false, label: 'Wake', error: 'Already awake' })
+        return Promise.resolve()
+      }
+      const now = Math.floor(Date.now() / 1000)
+      if (c.bornAt > 0 && c.awakenDur > 0 && now >= c.bornAt + c.awakenDur) {
+        setLastAction({ ok: false, label: 'Wake', error: 'Timer elapsed — harvest to awaken for free' })
+        return Promise.resolve()
+      }
+      const cfg = configRef.current
+      const wake = wakeCostFromConfig(cfg, c.rarity)
+      const waxContract = cfg?.wax_contract ?? 'eosio.token'
+      const gameContract = getActiveNetwork().contract // wake WAX is sent TO the game contract
+      return run('Wake', (s) =>
+        s.push(
+          'transfer',
+          { from: s.actor, to: gameContract, quantity: wake.asset, memo: `wake:${assetId}` },
+          { contract: waxContract, label: `Wake ${c.name} · ${wake.wax} WAX` },
+        ),
+      )
+    },
+    [run],
+  )
+
   const evolve = useCallback(
     (assetId: string) => {
       const c = creaturesRef.current.find((c) => c.assetId === assetId)
@@ -549,6 +870,24 @@ export function useGameActions(): GameActions {
         return Promise.resolve()
       }
       return run('Evolve', (s) => s.push('evolve', { owner: s.actor, asset_id: assetId }))
+    },
+    [run],
+  )
+
+  // Burn — permanently destroy a creature (burncreature). Same single-action
+  // sign-intent shape as evolve; the contract retires the AtomicAssets NFT under
+  // its own authority, so the player's top-level authorization is all that's
+  // needed — no inline transfer, no eosio.code. Irreversible: the destructive
+  // confirm lives in the UI (CreatureCard), this only guards that the creature
+  // still exists before opening the Sign gate.
+  const burn = useCallback(
+    (assetId: string) => {
+      const c = creaturesRef.current.find((c) => c.assetId === assetId)
+      if (!c) {
+        setLastAction({ ok: false, label: 'Burn', error: 'Creature not found' })
+        return Promise.resolve()
+      }
+      return run('Burn', (s) => s.push('burncreature', { owner: s.actor, asset_id: assetId }))
     },
     [run],
   )
@@ -672,9 +1011,11 @@ export function useGameActions(): GameActions {
     disconnectWallet,
     hatch,
     feed,
+    awaken,
     evolve,
     breed,
     accelerate,
+    burn,
     harvest,
     claimReward,
     refresh,
@@ -689,5 +1030,6 @@ export function useGameActions(): GameActions {
     connectedAs: connectMode === 'wcw' ? (session ? String(session.actor) : null) : waxwingActor ?? null,
     hatchCost,
     breedCost,
+    hatchOdds,
   }
 }

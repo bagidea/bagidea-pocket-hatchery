@@ -53,7 +53,7 @@ function SelectableCard({
       aria-pressed={selected}
     >
       <div className={styles.selectorArt}>
-        <CreatureSprite genetics={creature.genetics} species={creature.name || creature.species} />
+        <CreatureSprite genetics={creature.genetics} species={creature.name || creature.species} assetId={creature.assetId} rarity={creature.rarity} />
       </div>
       <div className={styles.selectorInfo}>
         <div className={styles.selectorName}>{creature.name || creature.species}</div>
@@ -231,7 +231,7 @@ function ParentSlot({
   return (
     <div className={styles.parentSlot}>
       <div className={styles.parentArt}>
-        <CreatureSprite genetics={creature.genetics} species={creature.name || creature.species} />
+        <CreatureSprite genetics={creature.genetics} species={creature.name || creature.species} assetId={creature.assetId} rarity={creature.rarity} />
       </div>
       <div className={styles.parentInfo}>
         <div className={styles.parentLabel}>{label}</div>

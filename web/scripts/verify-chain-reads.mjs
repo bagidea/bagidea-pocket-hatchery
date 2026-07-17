@@ -59,8 +59,11 @@ async function rpc(path, body) {
 // ── Mirror the 5 chain.ts table reads ────────────────────────────────────────
 // Identical scope/limit/lower_bound/upper_bound to getConfig/getPlayer/...
 async function getConfig() {
+  // configv3 = the Feed-v2 config table (deployed on phgamecreatr 2026-07-09,
+  // carries fed_dur_* + earn_mult_*). configv2 was REPLACED and is no longer in
+  // the ABI — reading it now 3060003s. Mirrors chain.ts CONFIG_TABLE = 'configv3'.
   const d = await rpc('/v1/chain/get_table_rows', {
-    code: CONTRACT, scope: CONTRACT, table: 'configv2', json: true, limit: 1,
+    code: CONTRACT, scope: CONTRACT, table: 'configv3', json: true, limit: 1,
   })
   return d.rows[0] ?? null
 }
@@ -72,8 +75,9 @@ async function getPlayer(account) {
   return d.rows[0] ?? null
 }
 async function getCreatures(owner) {
+  // Feed-v2 deploy renamed `creatures` → `creatrsv2` (live ABI). Mirrors chain.ts.
   const d = await rpc('/v1/chain/get_table_rows', {
-    code: CONTRACT, scope: CONTRACT, table: 'creatures', json: true, limit: 1000,
+    code: CONTRACT, scope: CONTRACT, table: 'creatrsv2', json: true, limit: 1000,
   })
   return d.rows.filter((r) => r.owner === owner)
 }
@@ -84,8 +88,9 @@ async function getRewardPool() {
   return d.rows[0] ?? null
 }
 async function getSpecies() {
+  // Feed-v2 deploy renamed `speciescfg` → `spccfgv2` (live ABI). Mirrors chain.ts.
   const d = await rpc('/v1/chain/get_table_rows', {
-    code: CONTRACT, scope: CONTRACT, table: 'speciescfg', json: true, limit: 100,
+    code: CONTRACT, scope: CONTRACT, table: 'spccfgv2', json: true, limit: 100,
   })
   return d.rows
 }
@@ -138,11 +143,17 @@ ok(`creatures  → ${state.creatures.length} owned (${state.creatures.map((c) =>
 if (state.rewardPool) {
   ok(`rewardPool → balance=${state.rewardPool.balance}`)
 } else bad('rewardPool is null — rewardpool table did not read')
-ok(`species    → ${state.species.length} entries (template_ids=${state.species.map((s) => s.template_id).join(',')})`)
+if (state.species.length > 0) {
+  ok(`species    → ${state.species.length} entries (template_ids=${state.species.map((s) => s.template_id).join(',')})`)
+} else bad('species is EMPTY — spccfgv2 did not read (a wrong table name reads [] via the allSettled fallback, not a genuine read)')
 
-const allRead = !!(state.config && state.player && state.rewardPool) && Array.isArray(state.creatures) && Array.isArray(state.species)
+// species is game-config and always populated on the live contract, so an empty
+// species array means the read REJECTED and fell back to [] — the exact silent
+// failure that a wrong table name (creatures→creatrsv2 / speciescfg→spccfgv2)
+// produces. Assert length>0 so a renamed table can never pass A on the fallback.
+const allRead = !!(state.config && state.player && state.rewardPool) && Array.isArray(state.creatures) && state.species.length > 0
 try {
-  assert.ok(allRead, 'one or more tables came back null/missing')
+  assert.ok(allRead, 'one or more tables came back null/empty (real read failed → fallback)')
   console.log('   → A PASS: all 5 tables read, NO 3060003 on any of them.\n')
 } catch (e) { bad(e.message) }
 

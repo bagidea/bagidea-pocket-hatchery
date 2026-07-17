@@ -1,206 +1,353 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
   <defs>
-    <!-- Body cell-shading gradients -->
-    <radialGradient id="bodyBase" cx="42%" cy="36%">
+    <!-- Body cell-shading -->
+    <radialGradient id="fkBodyBase" cx="42%" cy="36%">
       <stop offset="0%" stop-color="#FFCC80"/>
       <stop offset="45%" stop-color="#FF6B35"/>
       <stop offset="100%" stop-color="#C02000"/>
     </radialGradient>
-    <radialGradient id="bodyHL" cx="35%" cy="28%">
+    <radialGradient id="fkBodyHL" cx="35%" cy="28%">
       <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.55"/>
-      <stop offset="60%" stop-color="#FFFFFF" stop-opacity="0.1"/>
+      <stop offset="60%" stop-color="#FFFFFF" stop-opacity="0.10"/>
       <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
     </radialGradient>
-    <!-- Flame corona variants -->
-    <linearGradient id="flameOrange" x1="0" y1="1" x2="0" y2="0">
+    <!-- Flame variants -->
+    <linearGradient id="fkFlameOrange" x1="0" y1="1" x2="0" y2="0">
       <stop offset="0%" stop-color="#E84020"/>
       <stop offset="35%" stop-color="#FF7030"/>
       <stop offset="65%" stop-color="#FFB840"/>
       <stop offset="100%" stop-color="#FFEEAA" stop-opacity="0"/>
     </linearGradient>
-    <linearGradient id="flameGolden" x1="0" y1="1" x2="0" y2="0">
+    <linearGradient id="fkFlameGolden" x1="0" y1="1" x2="0" y2="0">
       <stop offset="0%" stop-color="#B8780A"/>
       <stop offset="35%" stop-color="#DDA020"/>
       <stop offset="65%" stop-color="#FFD856"/>
       <stop offset="100%" stop-color="#FFFDE4" stop-opacity="0"/>
     </linearGradient>
-    <linearGradient id="flameBlue" x1="0" y1="1" x2="0" y2="0">
+    <linearGradient id="fkFlameBlue" x1="0" y1="1" x2="0" y2="0">
       <stop offset="0%" stop-color="#0D47A1"/>
       <stop offset="35%" stop-color="#1E88E5"/>
       <stop offset="65%" stop-color="#80D8FF"/>
       <stop offset="100%" stop-color="#E3F2FD" stop-opacity="0"/>
     </linearGradient>
-    <linearGradient id="flamePurple" x1="0" y1="1" x2="0" y2="0">
+    <linearGradient id="fkFlamePurple" x1="0" y1="1" x2="0" y2="0">
       <stop offset="0%" stop-color="#4A148C"/>
       <stop offset="35%" stop-color="#8E24AA"/>
       <stop offset="65%" stop-color="#E040FB"/>
       <stop offset="100%" stop-color="#F3E5F5" stop-opacity="0"/>
     </linearGradient>
-    <!-- Eye iris gradient -->
-    <radialGradient id="irisL" cx="38%" cy="32%">
-      <stop offset="0%" stop-color="#FFB020"/>
+    <!-- Flame-to-body SSS: warm amber scatter at crown junction -->
+    <radialGradient id="fkFlameSSS" cx="50%" cy="18%">
+      <stop offset="0%" stop-color="#FFD060" stop-opacity="0.60"/>
+      <stop offset="38%" stop-color="#FF8820" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="#FF4000" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Left rim light gradient (warm rim glow, left arc) -->
+    <linearGradient id="fkLeftRim" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#FF9050"/>
+      <stop offset="100%" stop-color="#FF9050" stop-opacity="0"/>
+    </linearGradient>
+    <!-- Eye iris -->
+    <radialGradient id="fkIrisL" cx="38%" cy="32%">
+      <stop offset="0%" stop-color="#FFD060"/>
       <stop offset="55%" stop-color="#E06000"/>
       <stop offset="100%" stop-color="#8B2500"/>
     </radialGradient>
-    <radialGradient id="irisR" cx="38%" cy="32%">
-      <stop offset="0%" stop-color="#FFB020"/>
+    <radialGradient id="fkIrisR" cx="38%" cy="32%">
+      <stop offset="0%" stop-color="#FFD060"/>
       <stop offset="55%" stop-color="#E06000"/>
       <stop offset="100%" stop-color="#8B2500"/>
     </radialGradient>
-    <!-- Soft ambient glow -->
-    <filter id="glow">
+    <filter id="fkGlow">
       <feGaussianBlur stdDeviation="3" result="blur"/>
       <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
-    <filter id="softGlow"><feGaussianBlur stdDeviation="7"/></filter>
-    <filter id="rimLight">
+    <filter id="fkSoftGlow"><feGaussianBlur stdDeviation="7"/></filter>
+    <filter id="fkRimLight">
       <feGaussianBlur stdDeviation="1.5" result="blur"/>
       <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
+    <!-- Catchlight primary glow: soft halo behind white highlight -->
+    <filter id="fkCatchGlow" x="-120%" y="-120%" width="340%" height="340%">
+      <feGaussianBlur stdDeviation="1.4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <!-- Wing SSS left: amber subsurface scatter flowing outward through thin flame wing -->
+    <radialGradient id="fkWingSSSL" cx="82%" cy="50%">
+      <stop offset="0%"   stop-color="#FFD060" stop-opacity="0.62"/>
+      <stop offset="44%"  stop-color="#FF8020" stop-opacity="0.30"/>
+      <stop offset="100%" stop-color="#FF4000" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Wing SSS right: mirrored -->
+    <radialGradient id="fkWingSSSR" cx="18%" cy="50%">
+      <stop offset="0%"   stop-color="#FFD060" stop-opacity="0.62"/>
+      <stop offset="44%"  stop-color="#FF8020" stop-opacity="0.30"/>
+      <stop offset="100%" stop-color="#FF4000" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Iris limbal depth: warm darkening at outer iris ring for eye volume -->
+    <radialGradient id="fkIrisDepth" cx="50%" cy="50%">
+      <stop offset="0%"   stop-color="#FFD060" stop-opacity="0"/>
+      <stop offset="65%"  stop-color="#E06000" stop-opacity="0.22"/>
+      <stop offset="90%"  stop-color="#5A1500" stop-opacity="0.50"/>
+      <stop offset="100%" stop-color="#1A0500" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Wing-arm junction AO -->
+    <radialGradient id="fkWingAO" cx="50%" cy="50%">
+      <stop offset="0%"   stop-color="#1A0000" stop-opacity="0.52"/>
+      <stop offset="100%" stop-color="#1A0000" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Body SSS: ambient amber heat from internal flame -->
+    <radialGradient id="fkBodySSS" cx="50%" cy="40%">
+      <stop offset="0%"   stop-color="#FF9A00" stop-opacity="0.20"/>
+      <stop offset="55%"  stop-color="#FF6B35" stop-opacity="0.09"/>
+      <stop offset="100%" stop-color="#FF4000" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Hot specular at wing arm tips -->
+    <radialGradient id="fkWingSpec" cx="50%" cy="50%">
+      <stop offset="0%"   stop-color="#FFFFFF" stop-opacity="0.88"/>
+      <stop offset="45%"  stop-color="#FFD060" stop-opacity="0.48"/>
+      <stop offset="100%" stop-color="#FFD060" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Iris corneal arc (upper crescent) -->
+    <linearGradient id="fkIrisArc" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#FFFFFF" stop-opacity="0.60"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
     <style>
       .gene-tint { filter: hue-rotate(var(--gene-hue-shift, 0deg)) saturate(var(--gene-sat-mult, 1)) brightness(var(--gene-light-mult, 1)); }
     </style>
   </defs>
 
   <g class="gene-tint">
-  <!-- ═══ BODY: Chibi flame spirit — round body + flame crown ═══ -->
+  <!-- ═══ BODY: Chibi flame spirit ═══ -->
   <g id="body">
+    <!-- AO contact shadow (ground occlusion beneath body) -->
+    <ellipse cx="101" cy="164" rx="36" ry="7.5" fill="#1A0000" opacity="0.28" filter="url(#fkSoftGlow)"/>
+    <!-- AO: body-side contact depth -->
+    <ellipse cx="67" cy="150" rx="14" ry="5" fill="#1A0000" opacity="0.20" filter="url(#fkSoftGlow)" transform="rotate(-25 67 150)"/>
+    <ellipse cx="133" cy="150" rx="14" ry="5" fill="#1A0000" opacity="0.20" filter="url(#fkSoftGlow)" transform="rotate(25 133 150)"/>
     <!-- Ambient body halo -->
-    <ellipse cx="100" cy="118" rx="50" ry="46" fill="#FF5010" opacity="0.1" filter="url(#softGlow)"/>
+    <ellipse cx="100" cy="118" rx="52" ry="48" fill="#FF5010" opacity="0.10" filter="url(#fkSoftGlow)"/>
+    <!-- Idle pulse: flame breathing aura -->
+    <ellipse cx="100" cy="118" rx="56" ry="52" fill="#FF6B35" opacity="0">
+      <animate attributeName="opacity" values="0;0.05;0.02;0.05;0" dur="3.8s" repeatCount="indefinite" calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1"/>
+      <animate attributeName="rx" values="56;60;56;58;56" dur="3.8s" repeatCount="indefinite"/>
+      <animate attributeName="ry" values="52;56;52;54;52" dur="3.8s" repeatCount="indefinite"/>
+    </ellipse>
 
-    <!-- === FLAME CROWN (default orange) === -->
-    <!-- Outer flame shape — tall wispy -->
+    <!-- === FLAME CROWN (default orange, with flicker animation) === -->
+    <!-- Outer flame — tall wispy -->
     <path d="M100,36 Q110,58 116,80 Q121,102 110,118 Q105,124 100,125 Q95,124 90,118 Q79,102 84,80 Q90,58 100,36Z"
-          fill="url(#flameOrange)" opacity="0.9"/>
-    <!-- Inner brighter core flame -->
+          fill="url(#fkFlameOrange)" opacity="0.9">
+      <animate attributeName="opacity" values="0.9;1.0;0.78;0.95;0.9" dur="0.9s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1"/>
+    </path>
+    <!-- Inner brighter core -->
     <path d="M100,44 Q107,63 110,84 Q113,104 105,116 Q102,121 100,122 Q98,121 95,116 Q87,104 90,84 Q93,63 100,44Z"
-          fill="#FFD060" opacity="0.45"/>
-    <!-- Left side flame arm -->
+          fill="#FFD060" opacity="0.45">
+      <animate attributeName="opacity" values="0.45;0.72;0.38;0.62;0.45" dur="0.7s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1"/>
+    </path>
+    <!-- Left flame arm -->
     <path d="M88,90 Q74,80 68,88 Q64,96 72,104 Q80,110 88,105"
-          fill="url(#flameOrange)" opacity="0.75"/>
-    <!-- Right side flame arm -->
+          fill="url(#fkFlameOrange)" opacity="0.75">
+      <animate attributeName="opacity" values="0.75;0.90;0.55;0.82;0.75" dur="1.1s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1"/>
+    </path>
+    <!-- Right flame arm -->
     <path d="M112,90 Q126,80 132,88 Q136,96 128,104 Q120,110 112,105"
-          fill="url(#flameOrange)" opacity="0.75"/>
+          fill="url(#fkFlameOrange)" opacity="0.75">
+      <animate attributeName="opacity" values="0.75;0.55;0.88;0.70;0.75" dur="1.3s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1"/>
+    </path>
+    <!-- Wing SSS left: amber subsurface scatter through thin flame arm tissue -->
+    <path d="M88,90 Q74,80 68,88 Q64,96 72,104 Q80,110 88,105" fill="url(#fkWingSSSL)" opacity="0.82"/>
+    <!-- Wing SSS right: mirrored amber scatter -->
+    <path d="M112,90 Q126,80 132,88 Q136,96 128,104 Q120,110 112,105" fill="url(#fkWingSSSR)" opacity="0.82"/>
+    <!-- Wing-tip glow: luminous hot cores at flame arm tips -->
+    <circle cx="68" cy="96" r="10" fill="#FFD060" opacity="0" filter="url(#fkSoftGlow)">
+      <animate attributeName="opacity" values="0.0;0.30;0.10;0.25;0.0" dur="1.1s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1"/>
+    </circle>
+    <circle cx="132" cy="96" r="10" fill="#FFD060" opacity="0" filter="url(#fkSoftGlow)">
+      <animate attributeName="opacity" values="0.0;0.12;0.32;0.18;0.0" dur="1.3s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1"/>
+    </circle>
 
-    <!-- === CHIBI BODY (round, cell-shaded) === -->
-    <!-- Drop shadow -->
-    <ellipse cx="103" cy="126" rx="39" ry="34" fill="#700800" opacity="0.2"/>
-    <!-- Base body -->
-    <ellipse cx="100" cy="122" rx="40" ry="35" fill="url(#bodyBase)" stroke="#8B1A00" stroke-width="2.5"/>
-    <!-- Cell-shade shadow band (bottom-right arc) -->
-    <path d="M100,154 Q126,152 138,134 Q144,122 138,108" fill="none" stroke="#B83010" stroke-width="8" stroke-linecap="round" opacity="0.4"/>
-    <!-- Cell-shade highlight patch (top-left) -->
+    <!-- Wing arm tip specular: bright hot core at each flame tip -->
+    <circle cx="68" cy="96" r="5.5" fill="url(#fkWingSpec)"/>
+    <circle cx="132" cy="96" r="5.5" fill="url(#fkWingSpec)"/>
+    <!-- Wing-arm junction AO: contact shadow at flame arm base -->
+    <ellipse cx="78" cy="101" rx="9" ry="5" fill="url(#fkWingAO)" filter="url(#fkSoftGlow)" transform="rotate(-20 78 101)"/>
+    <ellipse cx="122" cy="101" rx="9" ry="5" fill="url(#fkWingAO)" filter="url(#fkSoftGlow)" transform="rotate(20 122 101)"/>
+    <!-- === CHIBI BODY === -->
+    <ellipse cx="103" cy="126" rx="39" ry="34" fill="#700800" opacity="0.18"/>
+    <ellipse cx="100" cy="122" rx="40" ry="35" fill="url(#fkBodyBase)" stroke="#8B1A00" stroke-width="2.5"/>
+    <!-- Body SSS: ambient internal heat scatter (fkBodySSS) -->
+    <ellipse cx="100" cy="118" rx="37" ry="31" fill="url(#fkBodySSS)"/>
+    <!-- Cell-shade shadow band -->
+    <path d="M100,154 Q126,152 138,134 Q144,122 138,108" fill="none" stroke="#B83010" stroke-width="8" stroke-linecap="round" opacity="0.38"/>
+    <!-- Cell-shade highlight patch -->
     <ellipse cx="84" cy="108" rx="22" ry="15" fill="#FFAA60" opacity="0.55" transform="rotate(-18 84 108)"/>
-    <!-- Top specular highlight -->
-    <ellipse cx="80" cy="105" rx="11" ry="7" fill="url(#bodyHL)"/>
-    <!-- Rim light (right edge) -->
-    <path d="M128,110 Q140,122 136,138 Q130,148 120,152" fill="none" stroke="#FF9050" stroke-width="3" stroke-linecap="round" opacity="0.5" filter="url(#rimLight)"/>
+    <!-- Top specular -->
+    <ellipse cx="80" cy="105" rx="11" ry="7" fill="url(#fkBodyHL)"/>
+    <!-- Rim light right edge -->
+    <path d="M128,110 Q140,122 136,138 Q130,148 120,152" fill="none" stroke="#FF9050" stroke-width="3" stroke-linecap="round" opacity="0.5" filter="url(#fkRimLight)"/>
+    <!-- Rim light left edge (new) -->
+    <path d="M72,110 Q60,122 64,138 Q70,148 80,152" fill="none" stroke="#FF9050" stroke-width="2.5" stroke-linecap="round" opacity="0.40" filter="url(#fkRimLight)"/>
+    <!-- Flame-to-body SSS glow at crown junction (warm amber scatter) -->
+    <ellipse cx="100" cy="105" rx="28" ry="16" fill="url(#fkFlameSSS)" opacity="0.82"/>
+    <!-- Hot crown: white-hot inner core at junction peak -->
+    <ellipse cx="100" cy="97" rx="11" ry="7" fill="#FFFFFF" opacity="0.08" filter="url(#fkSoftGlow)"/>
+    <!-- Inner flame: animated white-hot pulsing core at crown peak -->
+    <circle cx="100" cy="65" r="6" fill="#FFFFFF" opacity="0" filter="url(#fkSoftGlow)">
+      <animate attributeName="opacity" values="0.07;0.18;0.08;0.15;0.07" dur="0.7s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1"/>
+    </circle>
+    <circle cx="100" cy="57" r="3.5" fill="#FFFDE4" opacity="0" filter="url(#fkSoftGlow)">
+      <animate attributeName="opacity" values="0.05;0.14;0.06;0.11;0.05" dur="0.9s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1" begin="0.2s"/>
+    </circle>
+    <!-- Scale texture detail -->
+    <ellipse cx="100" cy="138" rx="10" ry="5" fill="none" stroke="#C04010" stroke-width="0.7" opacity="0.32"/>
+    <ellipse cx="86" cy="132" rx="8" ry="4" fill="none" stroke="#C04010" stroke-width="0.7" opacity="0.28" transform="rotate(-15 86 132)"/>
+    <ellipse cx="114" cy="132" rx="8" ry="4" fill="none" stroke="#C04010" stroke-width="0.7" opacity="0.28" transform="rotate(15 114 132)"/>
+    <!-- Additional upper body scale textures (new) -->
+    <ellipse cx="90" cy="117" rx="7" ry="3.2" fill="none" stroke="#C04010" stroke-width="0.65" opacity="0.22" transform="rotate(-24 90 117)"/>
+    <ellipse cx="110" cy="117" rx="7" ry="3.2" fill="none" stroke="#C04010" stroke-width="0.65" opacity="0.22" transform="rotate(24 110 117)"/>
+    <ellipse cx="100" cy="111" rx="8.5" ry="3.5" fill="none" stroke="#C04010" stroke-width="0.60" opacity="0.18"/>
+    <!-- Micro-scale: upper chest close-weave -->
+    <ellipse cx="95" cy="103" rx="5" ry="2" fill="none" stroke="#C04010" stroke-width="0.50" opacity="0.14" transform="rotate(-15 95 103)"/>
+    <ellipse cx="105" cy="103" rx="5" ry="2" fill="none" stroke="#C04010" stroke-width="0.50" opacity="0.14" transform="rotate(15 105 103)"/>
+    <ellipse cx="100" cy="97" rx="6.5" ry="2" fill="none" stroke="#C04010" stroke-width="0.48" opacity="0.12"/>
 
-    <!-- === SCALE TEXTURE (surface detail) === -->
-    <ellipse cx="100" cy="138" rx="10" ry="5" fill="none" stroke="#C04010" stroke-width="0.7" opacity="0.35" transform="rotate(0 100 138)"/>
-    <ellipse cx="86" cy="132" rx="8" ry="4" fill="none" stroke="#C04010" stroke-width="0.7" opacity="0.3" transform="rotate(-15 86 132)"/>
-    <ellipse cx="114" cy="132" rx="8" ry="4" fill="none" stroke="#C04010" stroke-width="0.7" opacity="0.3" transform="rotate(15 114 132)"/>
-
+    <!-- Scale specular dots: tiny highlight at each scale ridge high-point -->
+    <circle cx="100" cy="136" r="0.70" fill="#FFFFFF" opacity="0.40"/>
+    <circle cx="86"  cy="130" r="0.60" fill="#FFFFFF" opacity="0.35"/>
+    <circle cx="114" cy="130" r="0.60" fill="#FFFFFF" opacity="0.35"/>
+    <circle cx="90"  cy="115" r="0.52" fill="#FFFFFF" opacity="0.26"/>
+    <circle cx="110" cy="115" r="0.52" fill="#FFFFFF" opacity="0.26"/>
+    <circle cx="100" cy="109" r="0.55" fill="#FFFFFF" opacity="0.24"/>
+    <circle cx="95"  cy="102" r="0.45" fill="#FFFFFF" opacity="0.20"/>
+    <circle cx="105" cy="102" r="0.45" fill="#FFFFFF" opacity="0.20"/>
     <!-- === FACE === -->
     <!-- Left eye socket -->
     <ellipse cx="87" cy="116" rx="9.5" ry="10.5" fill="#1A0500"/>
-    <!-- Left iris -->
-    <ellipse cx="87" cy="116" rx="7.5" ry="8.5" fill="url(#irisL)"/>
-    <!-- Left pupil -->
+    <ellipse cx="87" cy="116" rx="7.5" ry="8.5" fill="url(#fkIrisL)"/>
     <ellipse cx="87" cy="117" rx="5" ry="5.5" fill="#1A0500"/>
-    <!-- Left catchlight main -->
-    <circle cx="83" cy="111" r="3" fill="#FFFFFF"/>
-    <!-- Left catchlight tiny -->
+    <!-- Left eye catchlights: primary+fkCatchGlow, warm gold, secondary white, micro top -->
+    <circle cx="83" cy="111" r="3" fill="#FFFFFF" filter="url(#fkCatchGlow)"/>
+    <circle cx="89" cy="111" r="1.6" fill="#FFD080" opacity="0.88"/>
     <circle cx="91" cy="120" r="1.3" fill="#FFFFFF" opacity="0.75"/>
-
+    <circle cx="84" cy="108.5" r="0.85" fill="#FFFFFF" opacity="0.90"/>
     <!-- Right eye socket -->
     <ellipse cx="113" cy="116" rx="9.5" ry="10.5" fill="#1A0500"/>
-    <!-- Right iris -->
-    <ellipse cx="113" cy="116" rx="7.5" ry="8.5" fill="url(#irisR)"/>
-    <!-- Right pupil -->
+    <ellipse cx="113" cy="116" rx="7.5" ry="8.5" fill="url(#fkIrisR)"/>
     <ellipse cx="113" cy="117" rx="5" ry="5.5" fill="#1A0500"/>
-    <!-- Right catchlight main -->
-    <circle cx="109" cy="111" r="3" fill="#FFFFFF"/>
-    <!-- Right catchlight tiny -->
+    <!-- Right eye catchlights: primary+fkCatchGlow, warm gold, secondary white, micro top -->
+    <circle cx="109" cy="111" r="3" fill="#FFFFFF" filter="url(#fkCatchGlow)"/>
+    <circle cx="115" cy="111" r="1.6" fill="#FFD080" opacity="0.88"/>
     <circle cx="117" cy="120" r="1.3" fill="#FFFFFF" opacity="0.75"/>
-
-    <!-- Eye outline rings -->
+    <circle cx="110" cy="108.5" r="0.85" fill="#FFFFFF" opacity="0.90"/>
+    <!-- Eye outlines -->
     <ellipse cx="87" cy="116" rx="9.5" ry="10.5" fill="none" stroke="#1A0500" stroke-width="1"/>
     <ellipse cx="113" cy="116" rx="9.5" ry="10.5" fill="none" stroke="#1A0500" stroke-width="1"/>
+    <!-- Iris limbal depth: warm darkening at outer iris ring for eye volume (fkIrisDepth) -->
+    <ellipse cx="87" cy="116" rx="7.5" ry="8.5" fill="url(#fkIrisDepth)"/>
+    <ellipse cx="113" cy="116" rx="7.5" ry="8.5" fill="url(#fkIrisDepth)"/>
+    <!-- Iris corneal arc: upper crescent highlight (fkIrisArc) -->
+    <path d="M80.5,108 Q87,105 93.5,108" fill="none" stroke="url(#fkIrisArc)" stroke-width="2.0" stroke-linecap="round" opacity="0.55"/>
+    <path d="M106.5,108 Q113,105 119.5,108" fill="none" stroke="url(#fkIrisArc)" stroke-width="2.0" stroke-linecap="round" opacity="0.55"/>
+    <!-- Catchlight sparkle: animated twinkle on primary highlights (staggered) -->
+    <circle cx="83" cy="111" r="1.2" fill="#FFFFFF" opacity="0.75">
+      <animate attributeName="r" values="1.2;1.9;1.2;1.6;1.2" dur="2.8s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1"/>
+      <animate attributeName="opacity" values="0.75;1.0;0.75;0.90;0.75" dur="2.8s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="109" cy="111" r="1.2" fill="#FFFFFF" opacity="0.75">
+      <animate attributeName="r" values="1.2;1.6;1.2;1.9;1.2" dur="2.8s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1" begin="0.5s"/>
+      <animate attributeName="opacity" values="0.75;0.90;0.75;1.0;0.75" dur="2.8s" repeatCount="indefinite" begin="0.5s"/>
+    </circle>
+    <!-- ── EYELID BLINK (body-matching orange, covers eye) ── -->
+    <ellipse cx="87" cy="116" rx="10.5" ry="0" fill="#FF6B35">
+      <animate attributeName="ry" values="0;0;11.5;0;0" keyTimes="0;0.72;0.77;0.83;1" dur="6s" repeatCount="indefinite" calcMode="linear"/>
+    </ellipse>
+    <ellipse cx="113" cy="116" rx="10.5" ry="0" fill="#FF6B35">
+      <animate attributeName="ry" values="0;0;11.5;0;0" keyTimes="0;0.72;0.77;0.83;1" dur="6s" repeatCount="indefinite" calcMode="linear" begin="0.06s"/>
+    </ellipse>
 
     <!-- Blush cheeks -->
     <circle cx="72" cy="124" r="9.5" fill="#FF5577" opacity="0.38"/>
     <circle cx="128" cy="124" r="9.5" fill="#FF5577" opacity="0.38"/>
-    <!-- Cheek highlight (makes blush look soft/3D) -->
-    <circle cx="70" cy="121" r="4" fill="#FF88AA" opacity="0.3"/>
-    <circle cx="126" cy="121" r="4" fill="#FF88AA" opacity="0.3"/>
-
-    <!-- Mouth (cute wide smile) -->
+    <circle cx="70" cy="121" r="4" fill="#FF88AA" opacity="0.28"/>
+    <circle cx="126" cy="121" r="4" fill="#FF88AA" opacity="0.28"/>
+    <!-- Mouth (cute smile + teeth hint) -->
     <path d="M91,130 Q100,138 109,130" fill="none" stroke="#6B1500" stroke-width="2" stroke-linecap="round"/>
-    <!-- Tiny teeth hint -->
-    <path d="M96,131 Q100,133 104,131" fill="none" stroke="#FFFFFF" stroke-width="1.2" stroke-linecap="round" opacity="0.6"/>
-
+    <path d="M96,131 Q100,133 104,131" fill="none" stroke="#FFFFFF" stroke-width="1.2" stroke-linecap="round" opacity="0.58"/>
     <!-- Flame feet wisps -->
     <path d="M90,154 Q85,164 89,170 Q93,165 91,157Z" fill="#FF8030" opacity="0.65"/>
-    <path d="M100,156 Q97,167 101,172 Q105,167 103,157Z" fill="#FFA040" opacity="0.7"/>
+    <path d="M100,156 Q97,167 101,172 Q105,167 103,157Z" fill="#FFA040" opacity="0.70"/>
     <path d="M110,154 Q115,164 111,170 Q107,165 109,157Z" fill="#FF8030" opacity="0.65"/>
   </g>
 
-  <!-- ═══ TRAIT: Flame Color (slot-flamecolor) ═══ -->
-  <g id="slot-flamecolor-0"><!-- orange: default —no extra layers--></g>
+  <!-- ═══ TRAIT: Flame Color ═══ -->
+  <g id="slot-flamecolor-0"><!-- orange: default --></g>
   <g id="slot-flamecolor-1" style="display:none"><!-- golden -->
-    <path d="M100,36 Q110,58 116,80 Q121,102 110,118 Q105,124 100,125 Q95,124 90,118 Q79,102 84,80 Q90,58 100,36Z" fill="url(#flameGolden)" opacity="0.88"/>
-    <path d="M88,90 Q74,80 68,88 Q64,96 72,104 Q80,110 88,105" fill="url(#flameGolden)" opacity="0.7"/>
-    <path d="M112,90 Q126,80 132,88 Q136,96 128,104 Q120,110 112,105" fill="url(#flameGolden)" opacity="0.7"/>
+    <path d="M100,36 Q110,58 116,80 Q121,102 110,118 Q105,124 100,125 Q95,124 90,118 Q79,102 84,80 Q90,58 100,36Z" fill="url(#fkFlameGolden)" opacity="0.88">
+      <animate attributeName="opacity" values="0.88;1.0;0.74;0.92;0.88" dur="0.9s" repeatCount="indefinite"/>
+    </path>
+    <path d="M88,90 Q74,80 68,88 Q64,96 72,104 Q80,110 88,105" fill="url(#fkFlameGolden)" opacity="0.70">
+      <animate attributeName="opacity" values="0.70;0.85;0.52;0.78;0.70" dur="1.1s" repeatCount="indefinite"/>
+    </path>
+    <path d="M112,90 Q126,80 132,88 Q136,96 128,104 Q120,110 112,105" fill="url(#fkFlameGolden)" opacity="0.70">
+      <animate attributeName="opacity" values="0.70;0.52;0.85;0.65;0.70" dur="1.3s" repeatCount="indefinite"/>
+    </path>
     <ellipse cx="100" cy="122" rx="40" ry="35" fill="#C88A00" opacity="0.42"/>
   </g>
   <g id="slot-flamecolor-2" style="display:none"><!-- blue -->
-    <path d="M100,36 Q110,58 116,80 Q121,102 110,118 Q105,124 100,125 Q95,124 90,118 Q79,102 84,80 Q90,58 100,36Z" fill="url(#flameBlue)" opacity="0.88"/>
-    <path d="M88,90 Q74,80 68,88 Q64,96 72,104 Q80,110 88,105" fill="url(#flameBlue)" opacity="0.7"/>
-    <path d="M112,90 Q126,80 132,88 Q136,96 128,104 Q120,110 112,105" fill="url(#flameBlue)" opacity="0.7"/>
+    <path d="M100,36 Q110,58 116,80 Q121,102 110,118 Q105,124 100,125 Q95,124 90,118 Q79,102 84,80 Q90,58 100,36Z" fill="url(#fkFlameBlue)" opacity="0.88">
+      <animate attributeName="opacity" values="0.88;1.0;0.74;0.92;0.88" dur="0.9s" repeatCount="indefinite"/>
+    </path>
+    <path d="M88,90 Q74,80 68,88 Q64,96 72,104 Q80,110 88,105" fill="url(#fkFlameBlue)" opacity="0.70"/>
+    <path d="M112,90 Q126,80 132,88 Q136,96 128,104 Q120,110 112,105" fill="url(#fkFlameBlue)" opacity="0.70"/>
     <ellipse cx="100" cy="122" rx="40" ry="35" fill="#0D47A1" opacity="0.42"/>
   </g>
   <g id="slot-flamecolor-3" style="display:none"><!-- purple -->
-    <path d="M100,36 Q110,58 116,80 Q121,102 110,118 Q105,124 100,125 Q95,124 90,118 Q79,102 84,80 Q90,58 100,36Z" fill="url(#flamePurple)" opacity="0.88"/>
-    <path d="M88,90 Q74,80 68,88 Q64,96 72,104 Q80,110 88,105" fill="url(#flamePurple)" opacity="0.7"/>
-    <path d="M112,90 Q126,80 132,88 Q136,96 128,104 Q120,110 112,105" fill="url(#flamePurple)" opacity="0.7"/>
+    <path d="M100,36 Q110,58 116,80 Q121,102 110,118 Q105,124 100,125 Q95,124 90,118 Q79,102 84,80 Q90,58 100,36Z" fill="url(#fkFlamePurple)" opacity="0.88">
+      <animate attributeName="opacity" values="0.88;1.0;0.74;0.92;0.88" dur="0.9s" repeatCount="indefinite"/>
+    </path>
+    <path d="M88,90 Q74,80 68,88 Q64,96 72,104 Q80,110 88,105" fill="url(#fkFlamePurple)" opacity="0.70"/>
+    <path d="M112,90 Q126,80 132,88 Q136,96 128,104 Q120,110 112,105" fill="url(#fkFlamePurple)" opacity="0.70"/>
     <ellipse cx="100" cy="122" rx="40" ry="35" fill="#4A148C" opacity="0.42"/>
   </g>
 
-  <!-- ═══ TRAIT: Flame Shape (slot-flameshape) ═══ -->
-  <g id="slot-flameshape-0"><!-- wispy: default —no extra--></g>
+  <!-- ═══ TRAIT: Flame Shape ═══ -->
+  <g id="slot-flameshape-0"><!-- wispy: default --></g>
   <g id="slot-flameshape-1" style="display:none"><!-- triple crown -->
-    <path d="M100,28 Q106,48 108,70 Q110,92 103,110 Q100,115 97,110 Q90,92 92,70 Q94,48 100,28Z" fill="url(#flameOrange)" opacity="0.92"/>
-    <path d="M85,44 Q80,28 86,24 Q92,30 90,46Z" fill="url(#flameOrange)" opacity="0.78"/>
-    <path d="M115,44 Q120,28 114,24 Q108,30 110,46Z" fill="url(#flameOrange)" opacity="0.78"/>
+    <path d="M100,28 Q106,48 108,70 Q110,92 103,110 Q100,115 97,110 Q90,92 92,70 Q94,48 100,28Z" fill="url(#fkFlameOrange)" opacity="0.92">
+      <animate attributeName="opacity" values="0.92;1.0;0.80;0.95;0.92" dur="0.8s" repeatCount="indefinite"/>
+    </path>
+    <path d="M85,44 Q80,28 86,24 Q92,30 90,46Z" fill="url(#fkFlameOrange)" opacity="0.78"/>
+    <path d="M115,44 Q120,28 114,24 Q108,30 110,46Z" fill="url(#fkFlameOrange)" opacity="0.78"/>
   </g>
   <g id="slot-flameshape-2" style="display:none"><!-- wide fan -->
-    <path d="M100,54 Q122,58 134,74 Q142,90 132,106 Q116,118 100,120 Q84,118 68,106 Q58,90 66,74 Q78,58 100,54Z" fill="url(#flameOrange)" opacity="0.72"/>
-    <path d="M100,54 Q112,62 116,80 Q110,98 100,104 Q90,98 84,80 Q88,62 100,54Z" fill="url(#flameOrange)" opacity="0.9"/>
+    <path d="M100,54 Q122,58 134,74 Q142,90 132,106 Q116,118 100,120 Q84,118 68,106 Q58,90 66,74 Q78,58 100,54Z" fill="url(#fkFlameOrange)" opacity="0.72"/>
+    <path d="M100,54 Q112,62 116,80 Q110,98 100,104 Q90,98 84,80 Q88,62 100,54Z" fill="url(#fkFlameOrange)" opacity="0.9"/>
   </g>
   <g id="slot-flameshape-3" style="display:none"><!-- spiral -->
     <path d="M100,42 Q114,54 120,74 Q126,94 114,110" fill="none" stroke="#FFA040" stroke-width="7" stroke-linecap="round" opacity="0.68"/>
-    <path d="M100,42 Q86,54 80,74 Q74,94 86,110" fill="none" stroke="#FF6B35" stroke-width="5.5" stroke-linecap="round" opacity="0.6"/>
+    <path d="M100,42 Q86,54 80,74 Q74,94 86,110" fill="none" stroke="#FF6B35" stroke-width="5.5" stroke-linecap="round" opacity="0.60"/>
     <circle cx="100" cy="42" r="6" fill="#FFD060" opacity="0.95"/>
-    <circle cx="100" cy="42" r="3" fill="#FFFFFF" opacity="0.7"/>
+    <circle cx="100" cy="42" r="3" fill="#FFFFFF" opacity="0.70"/>
   </g>
 
-  <!-- ═══ TRAIT: Spark Level (slot-sparks) ═══ -->
+  <!-- ═══ TRAIT: Spark Level ═══ -->
   <g id="slot-sparks-0">
     <circle cx="86" cy="54" r="2.2" fill="#FFD060" opacity="0.72"/>
     <circle cx="115" cy="48" r="2" fill="#FFD060" opacity="0.62"/>
   </g>
   <g id="slot-sparks-1" style="display:none">
-    <circle cx="82" cy="52" r="2.5" fill="#FFD060" opacity="0.82" filter="url(#glow)"/>
-    <circle cx="118" cy="44" r="3" fill="#FFD060" opacity="0.72" filter="url(#glow)"/>
+    <circle cx="82" cy="52" r="2.5" fill="#FFD060" opacity="0.82" filter="url(#fkGlow)"><animate attributeName="opacity" values="0.82;0.45;0.82" dur="1.4s" repeatCount="indefinite"/></circle>
+    <circle cx="118" cy="44" r="3" fill="#FFD060" opacity="0.72" filter="url(#fkGlow)"><animate attributeName="opacity" values="0.72;0.35;0.72" dur="1.8s" repeatCount="indefinite"/></circle>
     <circle cx="72" cy="74" r="2" fill="#FFA040" opacity="0.62"/>
     <circle cx="128" cy="68" r="1.8" fill="#FFA040" opacity="0.57"/>
     <circle cx="93" cy="38" r="2.2" fill="#FFFFFF" opacity="0.52"/>
     <circle cx="108" cy="44" r="1.7" fill="#FFFFFF" opacity="0.47"/>
   </g>
   <g id="slot-sparks-2" style="display:none">
-    <circle cx="76" cy="48" r="3" fill="#FFD060" opacity="0.9" filter="url(#glow)"/>
-    <circle cx="124" cy="40" r="3.5" fill="#FFD060" opacity="0.85" filter="url(#glow)"/>
+    <circle cx="76" cy="48" r="3" fill="#FFD060" opacity="0.9" filter="url(#fkGlow)"><animate attributeName="opacity" values="0.9;0.45;0.9" dur="1.1s" repeatCount="indefinite"/></circle>
+    <circle cx="124" cy="40" r="3.5" fill="#FFD060" opacity="0.85" filter="url(#fkGlow)"><animate attributeName="opacity" values="0.85;0.40;0.85" dur="1.4s" repeatCount="indefinite" begin="0.4s"/></circle>
     <circle cx="66" cy="72" r="2.2" fill="#FFA040" opacity="0.72"/>
     <circle cx="134" cy="66" r="2.2" fill="#FFA040" opacity="0.67"/>
     <circle cx="86" cy="32" r="2.5" fill="#FFFFFF" opacity="0.67"/>
@@ -210,8 +357,8 @@
     <path d="M86,34 L80,50 M100,28 L96,44 M114,34 L120,50" fill="none" stroke="#FFD060" stroke-width="0.9" opacity="0.42" stroke-dasharray="2,3"/>
   </g>
   <g id="slot-sparks-3" style="display:none">
-    <circle cx="76" cy="44" r="3" fill="#A78BFA" opacity="0.92" filter="url(#glow)"/>
-    <circle cx="124" cy="36" r="3.5" fill="#A78BFA" opacity="0.87" filter="url(#glow)"/>
+    <circle cx="76" cy="44" r="3" fill="#A78BFA" opacity="0.92" filter="url(#fkGlow)"><animate attributeName="opacity" values="0.92;0.40;0.92" dur="1.2s" repeatCount="indefinite"/></circle>
+    <circle cx="124" cy="36" r="3.5" fill="#A78BFA" opacity="0.87" filter="url(#fkGlow)"><animate attributeName="opacity" values="0.87;0.38;0.87" dur="1.6s" repeatCount="indefinite" begin="0.5s"/></circle>
     <circle cx="64" cy="68" r="2.5" fill="#60A5FA" opacity="0.77"/>
     <circle cx="136" cy="62" r="2.2" fill="#60A5FA" opacity="0.72"/>
     <circle cx="86" cy="28" r="2.8" fill="#FFFFFF" opacity="0.72"/>
@@ -222,16 +369,18 @@
 
   <!-- ═══ RARITY ═══ -->
   <g id="rare-iridescent" style="display:none">
-    <ellipse cx="100" cy="112" rx="52" ry="58" fill="none" stroke="#A78BFA" stroke-width="1.5" opacity="0.47" stroke-dasharray="6,4"/>
+    <ellipse cx="100" cy="112" rx="52" ry="58" fill="none" stroke="#A78BFA" stroke-width="1.5" opacity="0.47" stroke-dasharray="6,4">
+      <animate attributeName="opacity" values="0.47;0.75;0.47" dur="3s" repeatCount="indefinite"/>
+    </ellipse>
   </g>
   <g id="legendary-aura" style="display:none">
-    <circle cx="100" cy="112" r="64" fill="#FF6B35" opacity="0.08" filter="url(#softGlow)"/>
+    <circle cx="100" cy="112" r="64" fill="#FF6B35" opacity="0.08" filter="url(#fkSoftGlow)"/>
     <circle cx="68" cy="72" r="2.8" fill="#FFD060" opacity="0.57"><animate attributeName="opacity" values="0.57;0.15;0.57" dur="2s" repeatCount="indefinite"/></circle>
     <circle cx="134" cy="64" r="3.2" fill="#FFFFFF" opacity="0.47"><animate attributeName="opacity" values="0.47;0.1;0.47" dur="1.5s" repeatCount="indefinite"/></circle>
     <circle cx="74" cy="148" r="2.2" fill="#FFD060" opacity="0.42"><animate attributeName="opacity" values="0.42;0.1;0.42" dur="2.2s" repeatCount="indefinite"/></circle>
   </g>
   <g id="mut-shiny" style="display:none"><ellipse cx="100" cy="112" rx="54" ry="60" fill="none" stroke="#FFD060" stroke-width="1.2" opacity="0.37" stroke-dasharray="5,5"/></g>
-  <g id="mut-prismatic" style="display:none"><ellipse cx="100" cy="112" rx="52" ry="58" fill="none" stroke="#A78BFA" stroke-width="1.5" opacity="0.47" filter="url(#glow)"/></g>
-  <g id="mut-ethereal" style="display:none"><circle cx="100" cy="112" r="60" fill="#A78BFA" opacity="0.08" filter="url(#softGlow)"/></g>
+  <g id="mut-prismatic" style="display:none"><ellipse cx="100" cy="112" rx="52" ry="58" fill="none" stroke="#A78BFA" stroke-width="1.5" opacity="0.47" filter="url(#fkGlow)"/></g>
+  <g id="mut-ethereal" style="display:none"><circle cx="100" cy="112" r="60" fill="#A78BFA" opacity="0.08" filter="url(#fkSoftGlow)"/></g>
   </g>
 </svg>

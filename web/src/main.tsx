@@ -10,6 +10,9 @@ import '@fontsource/mali/600.css'
 import './styles/tokens.css'
 import './index.css'
 import App from './App.tsx'
+import { initVariationSpec } from './variationSpecImpl'
+
+initVariationSpec()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

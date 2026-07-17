@@ -7,6 +7,14 @@
   flex-direction: column;
   min-height: 100svh;
   position: relative;
+  /* The app's own opaque dark world — deep navy→charcoal with a soft rare/epic
+     aura glow from the top (echoes the tier palette). Painted at full document
+     height (non-fixed) so every surface, including bottom glass buttons, always
+     sits on a real dark layer — no backdrop-filter/fixed-bg gutter artifacts. */
+  background:
+    radial-gradient(ellipse 90% 55% at 50% -8%, rgba(96, 130, 246, 0.16) 0%, transparent 60%),
+    radial-gradient(ellipse 70% 45% at 85% 12%, rgba(192, 132, 252, 0.10) 0%, transparent 55%),
+    linear-gradient(180deg, #131836 0%, #0C1022 42%, #080A14 100%);
 }
 
 /* Farm background overlay (bg-farm-v2.png) — sits behind all content */
@@ -16,7 +24,10 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  opacity: 0.09;
+  /* Faint farm texture over the navy — soft-light so it tints without washing
+     the dark backdrop out (Poppy · dark shell 2026-07-16). */
+  opacity: 0.05;
+  mix-blend-mode: soft-light;
   pointer-events: none;
   z-index: 0;
 }
@@ -32,11 +43,11 @@
   position: sticky;
   top: 0;
   z-index: 50;
-  background: rgba(255,255,255,0.75);
+  background: rgba(12, 16, 34, 0.72);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255,255,255,0.5);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  border-bottom: 1px solid var(--ph-panel-border);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 6px 20px rgba(0, 0, 0, 0.35);
 }
 
 .brand {
@@ -55,7 +66,8 @@
 .title {
   margin: 0;
   font: 700 22px/1.2 'Baloo 2', 'Fredoka', var(--ph-font-display);
-  background: linear-gradient(135deg, #1E1B4B 0%, #7C3AED 100%);
+  /* Bright sky→lavender so it reads on the dark header. */
+  background: linear-gradient(135deg, #93C5FD 0%, #C4B5FD 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -69,9 +81,10 @@
   font-size: 12px;
   font-family: var(--ph-font-numeric);
   color: var(--ph-text-muted);
-  background: rgba(255,255,255,0.7);
+  background: var(--ph-panel);
+  border: 1px solid var(--ph-panel-border);
   border-radius: 99px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
 }
 
 .chainDot {
@@ -106,9 +119,10 @@
   font-size: 12px;
   font-family: var(--ph-font-numeric);
   color: var(--ph-text-primary);
-  background: rgba(255,255,255,0.7);
+  background: var(--ph-panel);
+  border: 1px solid var(--ph-panel-border);
   border-radius: 99px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
   max-width: 60vw;
 }
 
@@ -127,7 +141,7 @@
 
 .walletDisconnect {
   border: none;
-  background: rgba(58,58,82,0.08);
+  background: rgba(255, 255, 255, 0.07);
   color: var(--ph-text-muted);
   font: 600 11px/1 var(--ph-font-body);
   padding: 6px 12px;
@@ -138,8 +152,8 @@
 }
 
 .walletDisconnect:hover {
-  background: rgba(242,114,140,0.18);
-  color: #d4606f;
+  background: rgba(244, 114, 182, 0.20);
+  color: #F9A8D4;
 }
 
 /* ── Main content ──────────────────────────────────────────────── */
@@ -168,22 +182,23 @@
   align-items: center;
   gap: 10px;
   padding: 8px 18px;
-  background: rgba(255,255,255,0.8);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: var(--ph-panel);
+  backdrop-filter: var(--ph-panel-blur);
+  -webkit-backdrop-filter: var(--ph-panel-blur);
   border-radius: 99px;
   box-shadow:
-    0 2px 4px rgba(0,0,0,0.04),
-    0 1px 0 rgba(255,255,255,0.8) inset;
-  border: 1px solid rgba(255,255,255,0.4);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+    0 2px 8px rgba(0, 0, 0, 0.30),
+    0 1px 0 rgba(255, 255, 255, 0.05) inset;
+  border: 1px solid var(--ph-panel-border);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .chip:hover {
   transform: translateY(-1px);
+  border-color: var(--ph-panel-border-strong);
   box-shadow:
-    0 4px 8px rgba(0,0,0,0.06),
-    0 1px 0 rgba(255,255,255,0.8) inset;
+    0 6px 16px rgba(0, 0, 0, 0.40),
+    0 1px 0 rgba(255, 255, 255, 0.06) inset;
 }
 
 .chipIcon {
@@ -239,16 +254,16 @@
   gap: 40px;
   padding: 32px 24px;
   background:
-    radial-gradient(ellipse at 30% 50%, rgba(255,203,107,0.1) 0%, transparent 55%),
-    radial-gradient(ellipse at 70% 50%, rgba(201,168,255,0.08) 0%, transparent 55%),
-    rgba(255,255,255,0.5);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+    radial-gradient(ellipse at 28% 45%, var(--ph-aura-gold) 0%, transparent 55%),
+    radial-gradient(ellipse at 72% 55%, var(--ph-aura-epic) 0%, transparent 55%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+  backdrop-filter: var(--ph-panel-blur);
+  -webkit-backdrop-filter: var(--ph-panel-blur);
   border-radius: 24px;
-  border: 1px solid rgba(255,255,255,0.5);
+  border: 1px solid var(--ph-panel-border);
   box-shadow:
-    0 4px 6px rgba(0,0,0,0.03),
-    0 12px 28px rgba(196,154,108,0.1);
+    0 1px 0 rgba(255, 255, 255, 0.05) inset,
+    0 16px 40px rgba(0, 0, 0, 0.40);
   overflow: hidden;
   min-height: 200px;
 }
@@ -362,6 +377,117 @@
   font-weight: 400;
 }
 
+/* ── Hatch rarity odds strip ────────────────────────────────────── */
+.hatchOdds {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.oddsLabel {
+  font: 600 12px/1.2 var(--ph-font-display);
+  color: var(--ph-text-muted);
+  letter-spacing: 0.01em;
+}
+
+.oddsRow {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.oddChip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 6px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--ph-panel-border);
+  min-width: 78px;
+}
+
+.oddRarity {
+  font: 700 12px/1.2 'Baloo 2', var(--ph-font-display);
+}
+
+.oddPct {
+  font: 800 17px/1.1 'Baloo 2', var(--ph-font-display);
+  color: var(--ph-text-primary);
+}
+
+.oddMult {
+  font-size: 10px;
+  color: var(--ph-text-muted);
+  font-weight: 600;
+}
+
+/* Tier accents — common→mythic gets progressively richer to signal the upside.
+   On the dark shell each chip is tinted with its tier token (--tier-*-rgb) so
+   the odds strip shares the card color system. */
+.odd_common { border-color: rgba(var(--tier-common-rgb), 0.30); }
+.odd_common .oddRarity { color: var(--tier-common); }
+.odd_uncommon {
+  border-color: rgba(var(--tier-uncommon-rgb), 0.35);
+  background: rgba(var(--tier-uncommon-rgb), 0.08);
+}
+.odd_uncommon .oddRarity { color: var(--tier-uncommon); }
+.odd_rare {
+  border-color: rgba(var(--tier-rare-rgb), 0.45);
+  background: linear-gradient(135deg, rgba(var(--tier-rare-rgb), 0.16), rgba(var(--tier-rare-rgb), 0.06));
+  box-shadow: 0 0 16px rgba(var(--tier-rare-rgb), 0.20);
+}
+.odd_rare .oddRarity { color: var(--tier-rare); }
+.odd_epic {
+  border-color: rgba(var(--tier-epic-rgb), 0.50);
+  background: linear-gradient(135deg, rgba(var(--tier-epic-rgb), 0.18), rgba(var(--tier-epic-rgb), 0.07));
+  box-shadow: 0 0 18px rgba(var(--tier-epic-rgb), 0.24);
+}
+.odd_epic .oddRarity { color: var(--tier-epic); }
+.odd_legendary {
+  border-color: rgba(var(--tier-legendary-rgb), 0.55);
+  background: linear-gradient(135deg, rgba(var(--tier-legendary-rgb), 0.18), rgba(var(--tier-legendary-rgb), 0.07));
+  box-shadow: 0 0 20px rgba(var(--tier-legendary-rgb), 0.26);
+}
+.odd_legendary .oddRarity { color: var(--tier-legendary); }
+.odd_mythic {
+  border-color: rgba(var(--tier-mythic-rgb), 0.55);
+  background: linear-gradient(135deg, rgba(var(--tier-mythic-rgb), 0.20), rgba(var(--tier-mythic-rgb), 0.08));
+  box-shadow: 0 0 24px rgba(var(--tier-mythic-rgb), 0.30);
+}
+.odd_mythic .oddRarity { color: var(--tier-mythic); }
+
+.oddsHint {
+  font-size: 11px;
+  color: var(--ph-text-muted);
+  font-weight: 500;
+}
+
+/* ── Free-to-start path line ────────────────────────────────────── */
+.freePath {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 4px 0 0;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px dashed rgba(var(--tier-legendary-rgb), 0.30);
+  font: 500 12px/1.4 var(--ph-font-display);
+  color: var(--ph-text-muted);
+}
+
+.freeBadge {
+  padding: 2px 8px;
+  border-radius: 99px;
+  background: linear-gradient(135deg, #34D399, #10B981);
+  color: #fff;
+  font-weight: 700;
+  font-size: 11px;
+}
+
 /* ── Connect option stack (landing) ────────────────────────────── */
 .connectRow {
   display: flex;
@@ -379,11 +505,11 @@
   align-items: center;
   gap: 8px;
   padding: 12px 28px;
-  border: 1.5px solid var(--ph-border-soft);
+  border: 1.5px solid var(--ph-panel-border-strong);
   border-radius: 99px;
-  background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: var(--ph-panel);
+  backdrop-filter: var(--ph-panel-blur);
+  -webkit-backdrop-filter: var(--ph-panel-blur);
   font: 600 15px/1 var(--ph-font-body);
   color: var(--ph-text-primary);
   cursor: pointer;
@@ -395,8 +521,8 @@
 
 .connectSecondary:hover:not(:disabled) {
   transform: translateY(-1px);
-  border-color: var(--ph-color-lavender);
-  box-shadow: 0 6px 16px rgba(176, 123, 232, 0.18);
+  border-color: rgba(var(--tier-epic-rgb), 0.7);
+  box-shadow: 0 6px 20px rgba(var(--tier-epic-rgb), 0.25);
 }
 
 .connectSecondary:active:not(:disabled) {
@@ -435,12 +561,12 @@
   display: flex;
   gap: 8px;
   padding: 6px;
-  background: rgba(255, 255, 255, 0.55);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: var(--ph-panel);
+  backdrop-filter: var(--ph-panel-blur);
+  -webkit-backdrop-filter: var(--ph-panel-blur);
   border-radius: 99px;
-  border: 1px solid rgba(255, 255, 255, 0.45);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--ph-panel-border);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.30);
   width: fit-content;
 }
 
@@ -460,13 +586,13 @@
 
 .tabBtn:hover:not(.tabActive) {
   color: var(--ph-text-primary);
-  background: rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .tabActive {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.10);
   color: var(--ph-text-primary);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.30), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
 }
 
 /* ── Creature grid ─────────────────────────────────────────────── */
@@ -475,6 +601,15 @@
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 20px;
   justify-items: center;
+  /* Dark-navy gallery backdrop so the dark collector cards read as intended
+     (Poppy · 2026-07-16 — matches the dark-card redesign). */
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(59, 130, 246, 0.08) 0%, transparent 60%),
+    linear-gradient(180deg, #0C1020 0%, #090C16 100%);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 24px;
+  padding: 24px 20px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 10px 30px rgba(0, 0, 0, 0.25);
 }
 
 .emptyState {
@@ -484,14 +619,14 @@
   gap: 10px;
   padding: 48px 24px;
   text-align: center;
-  background: rgba(255,255,255,0.4);
+  background: var(--ph-panel);
   border-radius: 20px;
-  border: 2px dashed rgba(196,154,108,0.2);
+  border: 2px dashed var(--ph-panel-border-strong);
 }
 
 .emptyIcon {
   font-size: 44px;
-  opacity: 0.3;
+  opacity: 0.4;
 }
 
 .emptyText {
@@ -509,36 +644,37 @@
 
 .quickBtn {
   padding: 10px 22px;
-  background: rgba(255,255,255,0.7);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(235,220,196,0.4);
+  background: var(--ph-panel);
+  backdrop-filter: var(--ph-panel-blur);
+  -webkit-backdrop-filter: var(--ph-panel-blur);
+  border: 1px solid var(--ph-panel-border);
   border-radius: 99px;
   font: 600 14px/1 var(--ph-font-body);
   color: var(--ph-text-primary);
   cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
   transition: all 0.15s ease;
 }
 
 .quickBtn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-  background: rgba(255,255,255,0.9);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.40);
+  background: var(--ph-panel-raised);
+  border-color: var(--ph-panel-border-strong);
 }
 
 .quickBtn:disabled {
-  opacity: 0.55;
+  opacity: 0.5;
   cursor: not-allowed;
   transform: none;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
 }
 
 /* Claimed state — soft green tint to signal "done" */
 .quickBtnClaimed {
-  background: rgba(34, 197, 94, 0.12);
-  border-color: rgba(34, 197, 94, 0.25);
-  color: #15803D;
+  background: rgba(34, 197, 94, 0.14);
+  border-color: rgba(34, 197, 94, 0.30);
+  color: #4ADE80;
 }
 
 .quickBtnClaimed:disabled {
@@ -553,6 +689,118 @@
   font-weight: 400;
   display: block;
   margin-top: 1px;
+}
+
+/* Accumulated EGG headline on the Harvest button — the number is the star. */
+.harvestValue {
+  display: block;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+/* "Not earning" / idle hint — greyed so it reads as a muted, secondary state. */
+.quickIdle {
+  color: var(--ph-text-muted, #94908a);
+  opacity: 0.9;
+}
+
+/* ── Daily harvest quota ───────────────────────────────────────────
+   Makes "how much of today's EGG ceiling is spent" readable at a glance so a
+   full quota reads as an achievement with a countdown, not a broken 0. Same
+   glass panel as the rest of the dark shell. */
+.harvestQuota {
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  background: var(--ph-panel);
+  backdrop-filter: var(--ph-panel-blur);
+  -webkit-backdrop-filter: var(--ph-panel-blur);
+  border: 1px solid var(--ph-panel-border);
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+/* Quota spent — warm golden edge reads as "goal hit", never as an error. */
+.harvestQuota[data-cap-reached='1'] {
+  border-color: var(--ph-color-golden-65);
+  background: var(--ph-aura-gold);
+}
+
+.quotaHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 9px;
+}
+
+.quotaTitle {
+  margin: 0;
+  font: 700 14px/1 var(--ph-font-body);
+  color: var(--ph-text-primary);
+}
+
+.quotaCount {
+  font: 700 14px/1 var(--ph-font-body);
+  color: var(--ph-text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.quotaCountLabel {
+  font-weight: 400;
+  color: var(--ph-text-muted);
+}
+
+.quotaTrack {
+  height: 8px;
+  border-radius: 99px;
+  background: var(--ph-surface-sunken);
+  border: 1px solid var(--ph-border-soft);
+  overflow: hidden;
+}
+
+.quotaFill {
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, var(--ph-color-mint), var(--ph-color-meadow));
+  transition: width 0.4s ease;
+}
+
+/* At the ceiling the bar turns golden to match the panel's "goal hit" edge. */
+.harvestQuota[data-cap-reached='1'] .quotaFill {
+  background: linear-gradient(90deg, var(--ph-color-golden), var(--ph-color-golden-light));
+}
+
+.quotaNote {
+  margin: 9px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.quotaDone {
+  font: 600 13px/1.35 var(--ph-font-body);
+  color: var(--ph-color-golden-light);
+}
+
+.quotaLeft {
+  font: 600 13px/1.35 var(--ph-font-body);
+  color: var(--ph-color-mint);
+}
+
+/* The "earning is real, the cap is just today's ceiling" explainer. */
+.quotaExplain {
+  font: 400 12px/1.45 var(--ph-font-body);
+  color: var(--ph-text-muted);
+}
+
+.quotaCooldown {
+  margin: 9px 0 0;
+  padding-top: 9px;
+  border-top: 1px solid var(--ph-border-soft);
+  font: 500 12px/1.35 var(--ph-font-body);
+  color: var(--ph-text-muted);
 }
 
 /* ── Toast ─────────────────────────────────────────────────────── */
@@ -598,11 +846,9 @@
   padding: 48px 24px;
   min-height: 100svh;
   background:
-    radial-gradient(ellipse at 50% 30%, rgba(245,158,11,0.12) 0%, transparent 60%),
-    radial-gradient(ellipse at 50% 70%, rgba(167,139,250,0.08) 0%, transparent 50%),
-    linear-gradient(175deg,
-      #BAE6FD 0%, #D1FAE5 20%, #FFF7ED 45%, #FEF3C7 70%, #FDE6D0 100%
-    );
+    radial-gradient(ellipse 80% 60% at 50% 22%, rgba(var(--tier-rare-rgb), 0.18) 0%, transparent 60%),
+    radial-gradient(ellipse 70% 50% at 50% 78%, rgba(var(--tier-epic-rgb), 0.12) 0%, transparent 55%),
+    linear-gradient(180deg, #131836 0%, #0C1022 45%, #080A14 100%);
 }
 
 .landingCard {
@@ -613,14 +859,14 @@
   align-items: center;
   gap: 22px;
   padding: 48px 40px;
-  background: rgba(255,255,255,0.8);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.03));
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border-radius: 28px;
-  border: 1px solid rgba(255,255,255,0.5);
+  border: 1px solid var(--ph-panel-border);
   box-shadow:
-    0 4px 6px rgba(0,0,0,0.03),
-    0 16px 40px rgba(196,154,108,0.12);
+    0 1px 0 rgba(255, 255, 255, 0.06) inset,
+    0 24px 60px rgba(0, 0, 0, 0.50);
   max-width: 460px;
   width: 100%;
 }
@@ -636,7 +882,8 @@
 .landingTitle {
   margin: 0;
   font: 700 36px/1.2 'Baloo 2', 'Fredoka', var(--ph-font-display);
-  background: linear-gradient(135deg, #1E1B4B 0%, #7C3AED 50%, #F59E0B 100%);
+  /* Bright sky→lavender→gold so it glows on the dark landing. */
+  background: linear-gradient(135deg, #93C5FD 0%, #C4B5FD 50%, #FBBF24 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -948,4 +1195,149 @@
 
 .signCancel:hover {
   background: rgba(255, 255, 255, 0.04);
+}
+
+/* ── Season Reward panel ──────────────────────────────────────────
+   Same surface language as .harvestQuota — the two panels are siblings that
+   answer the same question for their own currency ("what does this tap pay,
+   and why not more"). Claimable earns the golden border; locked stays quiet. */
+.claimPanel {
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  background: var(--ph-panel);
+  backdrop-filter: var(--ph-panel-blur);
+  -webkit-backdrop-filter: var(--ph-panel-blur);
+  border: 1px solid var(--ph-panel-border);
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.claimPanel[data-claimable='1'] {
+  border-color: var(--ph-color-golden-65);
+  background: var(--ph-aura-gold);
+}
+
+.claimHeadline {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.claimAmount {
+  font: 700 22px/1.2 var(--ph-font-display);
+  color: var(--ph-text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.claimPanel[data-claimable='1'] .claimAmount {
+  color: var(--ph-color-golden-light);
+}
+
+.claimAmountSub {
+  font: 400 12px/1.45 var(--ph-font-body);
+  color: var(--ph-text-muted);
+}
+
+/* The blocker line — the one reason the chain would refuse the claim. */
+.claimBlocked {
+  margin: 9px 0 0;
+  padding: 8px 10px;
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  font: 500 12px/1.45 var(--ph-font-body);
+  color: var(--ph-text-primary);
+  background: var(--ph-surface-sunken);
+  border: 1px solid var(--ph-border-soft);
+  border-radius: 10px;
+}
+
+.claimBlockIcon {
+  flex: none;
+  line-height: 1.45;
+}
+
+.claimReady {
+  margin: 9px 0 0;
+  font: 600 13px/1.35 var(--ph-font-body);
+  color: var(--ph-color-mint);
+}
+
+.claimPool {
+  color: var(--ph-color-golden-light);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Collection search ───────────────────────────────────────────── */
+.searchRow {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 12px;
+  font-size: 13px;
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 9px 34px 9px 34px;
+  font: 400 13px/1.4 var(--ph-font-body);
+  color: var(--ph-text-primary);
+  background: var(--ph-surface-sunken);
+  border: 1px solid var(--ph-border-soft);
+  border-radius: var(--ph-radius-pill);
+}
+
+.searchInput::placeholder {
+  color: var(--ph-text-muted);
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--ph-border-focus);
+}
+
+/* Kill the WebKit default so the clear button isn't drawn twice. */
+.searchInput::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.searchClear {
+  position: absolute;
+  right: 10px;
+  border: 0;
+  background: transparent;
+  color: var(--ph-text-muted);
+  font-size: 12px;
+  line-height: 1;
+  padding: 4px;
+  cursor: pointer;
+  border-radius: var(--ph-radius-pill);
+}
+
+.searchClear:hover {
+  color: var(--ph-text-primary);
+}
+
+.searchClear:focus-visible {
+  outline: 2px solid var(--ph-border-focus);
+  outline-offset: 1px;
+}
+
+.sectionCountLabel {
+  color: var(--ph-color-golden-light);
+}
+
+/* Shown only when the daemon didn't store a nickname/pin — never silently drop one. */
+.prefsWarn {
+  margin: 0 0 12px;
+  font: 500 12px/1.45 var(--ph-font-body);
+  color: var(--ph-color-golden-light);
 }
