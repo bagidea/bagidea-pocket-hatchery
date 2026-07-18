@@ -158,6 +158,16 @@
   filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.45)) brightness(1.04) saturate(1.06);
 }
 
+/* Baked static sprite (collection grid at rest) — same footprint + shadow as the
+   live SVG so a hover swap doesn't shift or re-tone the creature. */
+.staticSprite {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.45)) brightness(1.04) saturate(1.06);
+}
+
 @keyframes creatureFloat {
   0%   { transform: translateY(0)    rotate(0deg)   scale(1.00); }
   30%  { transform: translateY(-5px) rotate(0.6deg) scale(1.02); }

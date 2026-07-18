@@ -3,6 +3,7 @@ import { useGameActions, hatchOddsFromConfig, type ConnectMode, type LastAction,
 import { getActiveNetwork, isPlayable } from './network'
 import { CreatureCard, type Creature } from './components/CreatureCard'
 import { BreedingPage } from './components/BreedingPage'
+import { FarmScene } from './components/FarmScene'
 import { useDemoGame } from './demoGame'
 import { openWaxwingPanel } from './waxwing'
 import { speciesIdFromGene } from './geneDecoder'
@@ -582,7 +583,9 @@ function ConnectedDashboard() {
     speciesName: 'Foxling',
   })
   const [toast, setToast] = useState<LastAction | null>(null)
-  const [tab, setTab] = useState<'creatures' | 'breeding'>('creatures')
+  // The farm is the home view: a connected player lands on their living habitat,
+  // not on a list. The collection is one click away for acting on a creature.
+  const [tab, setTab] = useState<'creatures' | 'farm' | 'breeding'>('farm')
   // Live collection filter — matches nickname / asset id / species / tier.
   const [query, setQuery] = useState('')
   // Nicknames + pins live plugin-side (prefs.ts) — the contract can't hold them yet.
@@ -855,6 +858,12 @@ function ConnectedDashboard() {
         {/* Dashboard tabs */}
         <div className={styles.tabBar}>
           <button
+            className={`${styles.tabBtn} ${tab === 'farm' ? styles.tabActive : ''}`}
+            onClick={() => setTab('farm')}
+          >
+            🌾 Farm
+          </button>
+          <button
             className={`${styles.tabBtn} ${tab === 'creatures' ? styles.tabActive : ''}`}
             onClick={() => setTab('creatures')}
           >
@@ -868,7 +877,11 @@ function ConnectedDashboard() {
           </button>
         </div>
 
-        {tab === 'creatures' ? (
+        {tab === 'farm' ? (
+          // Clicking a creature in the farm hands the player back to its card —
+          // the farm is where you SEE them, the collection is where you act.
+          <FarmScene creatures={game.creatures} onSelect={() => setTab('creatures')} />
+        ) : tab === 'creatures' ? (
           <>
             {/* Creature inventory */}
             <section>
@@ -952,6 +965,7 @@ function ConnectedDashboard() {
                       onRename={(name) => setNickname(c.assetId, name)}
                       pinned={prefs.pins.includes(c.assetId)}
                       onTogglePin={() => togglePin(c.assetId)}
+                      staticSprite
                     />
                   ))}
                 </div>
@@ -1273,6 +1287,7 @@ function DemoDashboard() {
                   onFeed={() => demo.feed(c.assetId)}
                   onWake={() => demo.wake(c.assetId)}
                   onEvolve={() => demo.evolve(c.assetId)}
+                  staticSprite
                 />
               ))}
             </div>
