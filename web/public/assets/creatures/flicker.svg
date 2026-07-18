@@ -259,13 +259,22 @@
       <animate attributeName="r" values="1.2;1.6;1.2;1.9;1.2" dur="2.8s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1" begin="0.5s"/>
       <animate attributeName="opacity" values="0.75;0.90;0.75;1.0;0.75" dur="2.8s" repeatCount="indefinite" begin="0.5s"/>
     </circle>
-    <!-- ── EYELID BLINK (body-matching orange, covers eye) ── -->
-    <ellipse cx="87" cy="116" rx="10.5" ry="0" fill="#FF6B35">
-      <animate attributeName="ry" values="0;0;11.5;0;0" keyTimes="0;0.72;0.77;0.83;1" dur="6s" repeatCount="indefinite" calcMode="linear"/>
-    </ellipse>
-    <ellipse cx="113" cy="116" rx="10.5" ry="0" fill="#FF6B35">
-      <animate attributeName="ry" values="0;0;11.5;0;0" keyTimes="0;0.72;0.77;0.83;1" dur="6s" repeatCount="indefinite" calcMode="linear" begin="0.06s"/>
-    </ellipse>
+    <!-- ── BLINK: swap the OPEN eye for a CLOSED-EYE state (no scaling). ──
+         Body-coloured lid + downward lash crease, toggled via OPACITY for a
+         brief snap ~every 6s (staggered 60ms). Replaces the old centre-growing
+         ellipse that read as a circle popping up mid-eye. -->
+    <g opacity="0">
+      <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.72;0.745;0.775;0.80;1" dur="6s" repeatCount="indefinite" calcMode="linear"/>
+      <ellipse cx="87" cy="116" rx="10.5" ry="11.5" fill="#FF6B35"/>
+      <path d="M78.5,115 Q87,122 95.5,115" fill="none" stroke="#1A0500" stroke-width="1.6" stroke-linecap="round"/>
+      <path d="M79,117.5 l-2.3,2.1 M87,119.2 l0,2.8 M95,117.5 l2.3,2.1" fill="none" stroke="#1A0500" stroke-width="1.05" stroke-linecap="round"/>
+    </g>
+    <g opacity="0">
+      <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.72;0.745;0.775;0.80;1" dur="6s" repeatCount="indefinite" calcMode="linear" begin="0.06s"/>
+      <ellipse cx="113" cy="116" rx="10.5" ry="11.5" fill="#FF6B35"/>
+      <path d="M104.5,115 Q113,122 121.5,115" fill="none" stroke="#1A0500" stroke-width="1.6" stroke-linecap="round"/>
+      <path d="M105,117.5 l-2.3,2.1 M113,119.2 l0,2.8 M121,117.5 l2.3,2.1" fill="none" stroke="#1A0500" stroke-width="1.05" stroke-linecap="round"/>
+    </g>
 
     <!-- Blush cheeks -->
     <circle cx="72" cy="124" r="9.5" fill="#FF5577" opacity="0.38"/>

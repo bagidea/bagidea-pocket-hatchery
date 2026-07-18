@@ -1,5 +1,12 @@
 # Changelog — Pocket Hatchery
 
+## 0.3.1 (2026-07-18) — web render polish
+Frontend-only (no contract change). Plugin bundle → 0.2.8.
+
+- **Blink bug fixed** — the eye blink was scaling an `<ellipse>` eyelid `ry` 0→12 from the eye centre, which read as a coloured bar/circle popping in the middle of the eye. Replaced with a proper closed-eye state (eyelid fill + closed lid curve + lashes) toggled by opacity — no scaling. Affects the 2 blinking species (foxling, flicker).
+- **Farm 60fps** — 21 live filter-heavy SVGs re-rasterised every frame → baked each creature to a bitmap once (`rasterizeCreatureBitmap`), farm renders `<img>`. Single-creature view stays full SVG.
+- **Collection grid smooth** — grid cards default to the baked bitmap; live sparkle SVG only on hover/focus/pin (labs stay live).
+
 ## 0.2.0 (2026-07-09 — deployed)
 **code_hash**: `d8733d5dda8c24619492cf822c0bd832613c33fd66b818aed45f9cd315297181`
 **Network**: wax-testnet · **Contract**: `phgamecreatr`

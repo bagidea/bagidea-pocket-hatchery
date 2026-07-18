@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { decodeGeneCSS, decodeGeneRender } from '../geneDecoder'
-import { fetchSpeciesSvg, renderCreatureCached } from '../creatureRender'
+import { fetchSpeciesSvg, renderCreatureCached, rasterizeCreatureBitmap } from '../creatureRender'
 import { SatietyMeter } from './SatietyMeter'
 import { AwakenMeter } from './AwakenMeter'
 import type { SatietyConfig } from '../satiety'
@@ -70,6 +70,12 @@ interface CreatureCardProps {
   pinned?: boolean
   /** Toggle the pin. Omit to hide the pin control. */
   onTogglePin?: () => void
+  /**
+   * Collection-grid mode: render the sprite as a baked static bitmap and only
+   * animate (live SVG) on hover/focus, or when pinned. Keeps a grid of many
+   * cards smooth. Omit for single/preview cards, which stay fully live.
+   */
+  staticSprite?: boolean
 }
 
 // ── Visual constants ───────────────────────────────────────────────────
@@ -198,7 +204,7 @@ function decodeGeneForDisplay(genetics: string): string[] | null {
 // a gene palette re-mapped into the artist's own gradients, markings, contact
 // shadow, AO, rim light, tier accessory, and a deterministic pose seeded from the
 // asset id. Same creature → byte-identical sprite, every render.
-export function CreatureSprite({ genetics, species, assetId, rarity, anim }: {
+export function CreatureSprite({ genetics, species, assetId, rarity, anim, bakeUntilActive, active }: {
   genetics: string
   species: string
   /** seeds the deterministic pose/marking layout. Falls back to the gene alone. */
@@ -206,8 +212,19 @@ export function CreatureSprite({ genetics, species, assetId, rarity, anim }: {
   /** on-chain rarity name — drives the tier accessory. */
   rarity?: string
   anim?: 'feed' | 'evolve' | null
+  /**
+   * Grid perf: bake this sprite to a static PNG and show that instead of the
+   * live filter+SMIL SVG. A collection grid renders N sprites at once; N live
+   * animated+filtered SVGs pin the raster worker and the grid stutters. The
+   * baked bitmap is a cached GPU texture (zero raster). The live SVG is swapped
+   * back in only when the card is `active` (hover/focus/pin) or reacting (anim).
+   */
+  bakeUntilActive?: boolean
+  /** Card is hovered/focused/pinned → paint the live animated SVG. */
+  active?: boolean
 }) {
   const [svgContent, setSvgContent] = useState<string | null>(null)
+  const [bitmap, setBitmap] = useState<string | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -216,12 +233,21 @@ export function CreatureSprite({ genetics, species, assetId, rarity, anim }: {
     const loadFromGenetics = async () => {
       const { speciesId } = decodeGeneRender(genetics)
       const text = await fetchSpeciesSvg(BASE, speciesId)
-      const svg = renderCreatureCached(text, {
+      const opts = {
         assetId: assetId ?? genetics.slice(0, 12),
         genetics,
         rarity: rarityIdx >= 0 ? rarityIdx : undefined,
-      })
-      if (!cancelled) setSvgContent(svg)
+      }
+      const svg = renderCreatureCached(text, opts)
+      if (cancelled) return
+      setSvgContent(svg)
+      // Bake once for the grid's default (static) view. A bake failure just
+      // leaves the live SVG in place — a creature is never blanked.
+      if (bakeUntilActive) {
+        rasterizeCreatureBitmap(svg, opts)
+          .then((url) => { if (!cancelled) setBitmap(url) })
+          .catch(() => {})
+      }
     }
 
     const loadFromSpecies = async () => {
@@ -240,10 +266,21 @@ export function CreatureSprite({ genetics, species, assetId, rarity, anim }: {
     return () => {
       cancelled = true
     }
-  }, [genetics, species, assetId, rarity])
+  }, [genetics, species, assetId, rarity, bakeUntilActive])
 
   if (!svgContent) return null
-  return <div className={styles.svgWrap} data-anim={anim ?? undefined} dangerouslySetInnerHTML={{ __html: svgContent }} />
+
+  // Live SVG when: not in grid-bake mode, the card is active, a reaction is
+  // playing, or the bake hasn't landed yet. Otherwise the cheap static bitmap.
+  const showLive = !bakeUntilActive || active || !!anim || !bitmap
+  if (showLive) {
+    return <div className={styles.svgWrap} data-anim={anim ?? undefined} dangerouslySetInnerHTML={{ __html: svgContent }} />
+  }
+  return (
+    <div className={styles.svgWrap}>
+      <img className={styles.staticSprite} src={bitmap} alt="" draggable={false} />
+    </div>
+  )
 }
 
 // ── Gene dots row ──────────────────────────────────────────────────────
@@ -279,8 +316,13 @@ export function CreatureCard({
   onRename,
   pinned = false,
   onTogglePin,
+  staticSprite = false,
 }: CreatureCardProps) {
   const [confirmingBurn, setConfirmingBurn] = useState(false)
+  // Grid perf: the sprite is a static bitmap at rest and goes live on
+  // hover/focus. Pinned favourites stay live so they always shimmer.
+  const [hovered, setHovered] = useState(false)
+  const spriteLive = !staticSprite || hovered || pinned
   // Inline rename: null = not editing. Opening seeds the field with the current
   // nickname so an edit is a tweak, not a retype.
   const [draftName, setDraftName] = useState<string | null>(null)
@@ -330,6 +372,10 @@ export function CreatureCard({
         className={`${styles.card} ${styles[rarity] || styles.common} ${asleep ? styles.asleep : ''}`}
         data-rarity={rarity}
         data-asleep={asleep ? '1' : '0'}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        onFocusCapture={() => setHovered(true)}
+        onBlurCapture={() => setHovered(false)}
       >
         {/* ── Top bar: rarity icon + asset ID ── */}
         <div className={styles.topBar}>
@@ -367,6 +413,8 @@ export function CreatureCard({
             assetId={creature.assetId}
             rarity={rarity}
             anim={creatureAnim}
+            bakeUntilActive={staticSprite}
+            active={spriteLive}
           />
           {/* Sparkle particles — Rare only, visible on light bg */}
           {SPARKLE_COUNTS[rarity] && (
