@@ -6,6 +6,12 @@
 #define MAX_GROWTH (UINT64_MAX / 2)
 #define HATCH_SYM  symbol("HATCH", 4)
 
+// Schema inside cfg.collection that holds wearable cosmetics. Hardcoded on
+// purpose: putting it in config_row would grow the row, and the configv3 byte
+// layout was just proven field-by-field against the live chain — not worth the
+// risk for one name. Move it into config the next time the row changes anyway.
+#define COSMETIC_SCHEMA "cosmetics"_n
+
 // ─── Internal helpers ───────────────────────────────────────────────────
 
 static std::string attr_hex(const checksum256& cs) {
@@ -305,6 +311,21 @@ bool pockethatch::nft_exists(name collection, name owner, uint64_t asset_id) con
     return (it != aa.end() && it->collection_name == collection);
 }
 
+// Read an asset's current mutable map so an action can edit ONE attribute and
+// hand the rest straight back (aa_mutdata.hpp explains why that is mandatory).
+// The schema lookup is what makes the tagless byte stream readable at all.
+ATTR_MAP pockethatch::read_mutable_data(name collection, name owner, uint64_t asset_id) const {
+    aa_assets_t aa("atomicassets"_n, owner.value);
+    auto a_it = aa.find(asset_id);
+    check(a_it != aa.end(), "NFT not found");
+
+    aa_schemas_t schemas("atomicassets"_n, collection.value);
+    auto s_it = schemas.find(a_it->schema_name.value);
+    check(s_it != schemas.end(), "NFT schema not found");
+
+    return aa_decode_map(a_it->mutable_serialized_data, s_it->format);
+}
+
 uint64_t pockethatch::mint_creature(name owner, uint64_t template_id,
                                     const checksum256& genetics, uint32_t born_at)
 {
@@ -555,10 +576,12 @@ void pockethatch::evolve(name owner, uint64_t asset_id) {
     // Mirror to NFT (NFT required — reject if not found)
     check(nft_exists(cfg.collection, owner, asset_id), "evolve requires the NFT to be held by player");
     {
-        ATTR_MAP new_mut = {
-            {"stage",  ATOM_ATTR((uint32_t)new_stage)},
-            {"growth", ATOM_ATTR(g)}
-        };
+        // Merge, never rebuild: setassetdata replaces the whole map, so a fresh
+        // {stage,growth} would wipe the player's `name` and their bought
+        // `cosmetic` on every evolve.
+        ATTR_MAP new_mut = read_mutable_data(cfg.collection, owner, asset_id);
+        aa_set_attr(new_mut, "stage",  ATOM_ATTR((uint32_t)new_stage));
+        aa_set_attr(new_mut, "growth", ATOM_ATTR(g));
         action(
             permission_level{get_self(), "active"_n},
             "atomicassets"_n,
@@ -870,6 +893,16 @@ void pockethatch::accelerate(name owner, uint64_t asset_id, asset amount) {
     check(sp_it != sps.end(), "species not found");
 
     uint32_t now = current_time_point().sec_since_epoch();
+
+    // ── Feed v2: a hungry creature can't be accelerated either ──
+    // Same gate as evolve. Without it, paying HATCH was a way to buy growth
+    // straight past the satiety economy — the one thing feeding is meant to
+    // pace.
+    {
+        uint32_t fed_until = c_it->last_fed + fed_duration_for(cfg, sp_it->egg_type);
+        check(now < fed_until, "creature is hungry — feed before accelerating");
+    }
+
     auto c = *c_it;
     sync(c, *sp_it, now);
 
@@ -889,7 +922,7 @@ void pockethatch::accelerate(name owner, uint64_t asset_id, asset amount) {
 
 void pockethatch::setname(name owner, uint64_t asset_id, const std::string& new_name) {
     require_auth(owner);
-    check(new_name.size() <= 32, "name too long (max 32 chars)");
+    check(new_name.size() <= 32, "name too long (max 32 bytes)");
 
     creatures_t crs(get_self(), get_self().value);
     auto c_it = crs.find(asset_id);
@@ -901,11 +934,14 @@ void pockethatch::setname(name owner, uint64_t asset_id, const std::string& new_
     // Mirror to NFT (NFT required — reject if not found)
     check(nft_exists(cfg.collection, owner, asset_id), "setname requires the NFT to be held by player");
     {
-        ATTR_MAP new_mut = {
-            {"stage",  ATOM_ATTR((uint32_t)c_it->stage)},
-            {"growth", ATOM_ATTR(c_it->growth_base + c_it->fed_growth)},
-            {"name",   ATOM_ATTR(new_name)}
-        };
+        // Merge (see evolve): rebuilding the map here dropped `cosmetic`.
+        // stage/growth are still re-stated from the creature row — that row is
+        // the source of truth for both and the NFT is only a mirror.
+        ATTR_MAP new_mut = read_mutable_data(cfg.collection, owner, asset_id);
+        aa_set_attr(new_mut, "stage",  ATOM_ATTR((uint32_t)c_it->stage));
+        aa_set_attr(new_mut, "growth", ATOM_ATTR(c_it->growth_base + c_it->fed_growth));
+        if (new_name.empty()) aa_erase_attr(new_mut, "name");
+        else                  aa_set_attr(new_mut, "name", ATOM_ATTR(new_name));
         action(
             permission_level{get_self(), "active"_n},
             "atomicassets"_n,
@@ -931,16 +967,6 @@ void pockethatch::burncreature(name owner, uint64_t asset_id) {
     auto sp_it = sps.find(c_it->template_id);
     uint64_t egg_type = (sp_it != sps.end()) ? sp_it->egg_type : 0;
 
-    // ── Resilient burn: skip burnasset if NFT is already gone ──
-    if (nft_exists(cfg.collection, owner, asset_id)) {
-        action(
-            permission_level{owner, "active"_n},
-            "atomicassets"_n,
-            "burnasset"_n,
-            aa_burn{owner, asset_id}
-        ).send();
-    }
-
     // ── HATCH payout from reward pool ──
     // formula: base × stage_mult × rarity_mult
     //   stage_mult:   0→0.2, 1→0.5, 2→1, 3→2, 4→5, 5→10
@@ -954,10 +980,27 @@ void pockethatch::burncreature(name owner, uint64_t asset_id) {
                         * rarity_mul[idx_r] / 10;
     asset payout = asset(payout_raw, HATCH_SYM);
 
-    // Pay from reward pool (same pattern as claimreward)
+    // ── Fail closed: price the payout BEFORE destroying anything ──
+    // The old order burned the NFT first and only paid `if (pool.balance >=
+    // payout)`. An empty pool therefore ate the creature and paid nothing, with
+    // no way back. Now a pool that can't cover the quote reverts the whole
+    // action — the player keeps the NFT and can burn it later.
     rewardpool_t pt(get_self(), get_self().value);
     auto pool = _pool();
-    if (payout.amount > 0 && pool.balance >= payout) {
+    check(pool.balance >= payout, "reward pool too low to buy back this creature — try later");
+
+    // ── Resilient burn: skip burnasset if NFT is already gone ──
+    if (nft_exists(cfg.collection, owner, asset_id)) {
+        action(
+            permission_level{owner, "active"_n},
+            "atomicassets"_n,
+            "burnasset"_n,
+            aa_burn{owner, asset_id}
+        ).send();
+    }
+
+    // Pay from reward pool (same pattern as claimreward)
+    if (payout.amount > 0) {
         pool.balance -= payout;
         pool.lifetime_paid += payout;
         pt.set(pool, get_self());
@@ -995,14 +1038,17 @@ void pockethatch::unlockslot(name owner, uint8_t slot_index) {
     auto p_it = ps.find(owner.value);
     check(p_it != ps.end(), "player not initialized");
 
-    // Cost staircase: slot 4=500, 5=1200, 6=2500
-    uint64_t slot_cost;
-    if      (slot_index == 4) slot_cost = 500;
-    else if (slot_index == 5) slot_cost = 1200;
-    else if (slot_index == 6) slot_cost = 2500;
-    else                      slot_cost = 2500 * (1ULL << (slot_index - 6));
-
+    // Range first — slot 7+ shifts by (slot_index - 6), so a stray low index
+    // must never reach the shift below.
     check(slot_index >= 4 && slot_index <= 20, "invalid slot index");
+
+    // Cost staircase from config (defaults 4=500, 5=1200, 6=2500)
+    uint64_t slot_cost;
+    if      (slot_index == 4) slot_cost = cfg.slot_cost;
+    else if (slot_index == 5) slot_cost = cfg.slot_cost_5;
+    else if (slot_index == 6) slot_cost = cfg.slot_cost_6;
+    else                      slot_cost = cfg.slot_cost_6 * (1ULL << (slot_index - 6));
+
     check(p_it->egg_balance >= slot_cost, "insufficient EGG to unlock slot");
 
     ps.modify(p_it, same_payer, [&](auto& r) {
@@ -1019,23 +1065,38 @@ void pockethatch::equipcosmetic(name owner, uint64_t asset_id, uint64_t cosmetic
     auto c_it = crs.find(asset_id);
     check(c_it != crs.end() && c_it->owner == owner, "not your creature");
 
-    players_t ps(get_self(), get_self().value);
-    auto p_it = ps.find(owner.value);
-    check(p_it != ps.end(), "player not initialized");
-    check(p_it->egg_balance >= cfg.cosmetic_cost, "insufficient EGG for cosmetic");
+    // ── Anti-cheat: only real, in-game cosmetics can be worn ──
+    // Without this the action trusted the caller's uint64 outright, so a player
+    // could push equipcosmetic with any number and end up wearing a costume the
+    // game never minted. Taking one off (tmpl 0) stays open and free — it can
+    // only ever remove an attribute, and charging to undo is hostile anyway.
+    if (cosmetic_tmpl != 0) {
+        check(cosmetic_tmpl <= (uint64_t)INT32_MAX, "invalid cosmetic template");
+        aa_templates_t tmpls(name("atomicassets"), cfg.collection.value);
+        auto t_it = tmpls.find(cosmetic_tmpl);
+        check(t_it != tmpls.end(), "cosmetic template not found in collection");
+        check(t_it->schema_name == COSMETIC_SCHEMA, "template is not a cosmetic");
 
-    ps.modify(p_it, same_payer, [&](auto& r) {
-        r.egg_balance -= cfg.cosmetic_cost;
-    });
+        players_t ps(get_self(), get_self().value);
+        auto p_it = ps.find(owner.value);
+        check(p_it != ps.end(), "player not initialized");
+        check(p_it->egg_balance >= cfg.cosmetic_cost, "insufficient EGG for cosmetic");
+
+        ps.modify(p_it, same_payer, [&](auto& r) {
+            r.egg_balance -= cfg.cosmetic_cost;
+        });
+    }
 
     // Mirror to NFT (NFT required — reject if not found)
     check(nft_exists(cfg.collection, owner, asset_id), "equipcosmetic requires the NFT to be held by player");
     {
-        ATTR_MAP new_mut = {
-            {"stage",    ATOM_ATTR((uint32_t)c_it->stage)},
-            {"growth",   ATOM_ATTR(c_it->growth_base + c_it->fed_growth)},
-            {"cosmetic", ATOM_ATTR((uint64_t)cosmetic_tmpl)}
-        };
+        // Merge (see evolve): rebuilding the map here dropped the player's `name`.
+        ATTR_MAP new_mut = read_mutable_data(cfg.collection, owner, asset_id);
+        aa_set_attr(new_mut, "stage",    ATOM_ATTR((uint32_t)c_it->stage));
+        aa_set_attr(new_mut, "growth",   ATOM_ATTR(c_it->growth_base + c_it->fed_growth));
+        // tmpl 0 = unequip: drop the key entirely, don't leave a written `0`
+        if (cosmetic_tmpl == 0) aa_erase_attr(new_mut, "cosmetic");
+        else                    aa_set_attr(new_mut, "cosmetic", ATOM_ATTR((uint64_t)cosmetic_tmpl));
         action(
             permission_level{get_self(), "active"_n},
             "atomicassets"_n,

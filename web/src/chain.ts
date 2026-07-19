@@ -32,13 +32,20 @@ export interface ChainConfig {
   schema_name: string
   fee_account: string
   paused: number
-  // EGG costs are uint64 (raw counts); only breed/name are asset strings.
+  // EGG costs are uint64 (raw counts); only breed_cost is an asset string.
   hatch_cost: number
   evolve_cost: number
   breed_cost: string
   feed_cost: number
   slot_cost?: number
   cosmetic_cost?: number
+  // Slot-unlock staircase. These two sit in the byte slot the retired
+  // `name_cost` (asset) used to occupy — a pre-slotcfg chain returns
+  // `name_cost` instead, hence both stay optional.
+  slot_cost_5?: number
+  slot_cost_6?: number
+  /** @deprecated retired in slotcfg — renaming is free; kept so an
+   *  un-upgraded contract still type-checks. */
   name_cost?: string
   install_cap_bonus?: number
   feed_cd: number
@@ -179,8 +186,12 @@ export interface ClaimRow {
   claimed_season: number  // season index that claim was made in (0 = never claimed)
 }
 
-// One creature species/template. thresh_1..4 are the growth totals needed to
-// reach stage 1..4; yield_0..4 is the EGG/hr rate (×10⁴) at each stage.
+// One creature species/template. thresh_1..5 are the growth totals needed to
+// reach stage 1..5; yield_0..5 is the EGG/hr rate (×10⁴), but note the contract's
+// OWN off-by-one: harvest() reads `yield_for(stage − 1)`, so stage 1 pays yield_0
+// … stage 5 pays yield_4 (yield_5 is unreachable — it would need a stage 6).
+// max_stage is the TERMINAL stage number, not a count: evolve() checks
+// `cur_stage < max_stage`, so max_stage = 5 means stage 5 IS reachable.
 export interface SpeciesRow {
   template_id: number
   growth_rate: number
@@ -188,11 +199,13 @@ export interface SpeciesRow {
   thresh_2: number
   thresh_3: number
   thresh_4: number
+  thresh_5: number
   yield_0: number
   yield_1: number
   yield_2: number
   yield_3: number
   yield_4: number
+  yield_5: number
   max_stage: number
   egg_weight: number
   egg_type: number
@@ -211,6 +224,8 @@ export interface GameState {
    *  reset (effectiveDailyCounters). Falls back to the client clock only if the
    *  head-time read fails on every node. */
   now: number
+  /** assetId → the NFT's on-chain mutable `name` (setname). Absent = never named. */
+  nftNames: Record<string, string>
 }
 
 // POST to the chain, trying each endpoint in turn with a hard timeout per try.
@@ -364,7 +379,182 @@ export async function getTokenBalance(
   return Number(arr[0].split(' ')[0]) || 0
 }
 
-export async function fetchGameState(account: string): Promise<GameState> {
+// ── NFT names (AtomicAssets mutable data) ────────────────────────────────────
+//
+// `setname` on the game contract does NOT store the name in a contract table —
+// it forwards to atomicassets::setassetdata and writes it into the NFT's own
+// MUTABLE data, so the name travels with the asset when it is traded. That makes
+// the NFT the single source of truth for a creature's name, and the only way to
+// read it back is to decode the asset row ourselves.
+//
+// We read it straight off the RPC node (atomicassets `assets`, scope = owner)
+// rather than through an AtomicAssets indexer API: the game already polls this
+// node for every other table, and an indexer lags a block or two behind — which
+// is exactly the window a "did my rename land?" poll runs in.
+
+const ATOMICASSETS = 'atomicassets'
+
+/**
+ * AtomicAssets reserves attribute ids 0–3 in its serialization format, so a
+ * schema field's wire id is its index in `schema.format` PLUS 4. (Verified
+ * against a live row: the `creatures` schema is
+ * [genetics, stage, growth, name, rarity, cosmetic] and the mutable blob for
+ * a renamed asset is `05 01 | 06 <varuint growth> | 07 02 'T' 'K'` — 5=stage,
+ * 6=growth, 7=name, i.e. index+4.)
+ */
+const AA_RESERVED_IDS = 4
+
+interface AtomicSchemaRow {
+  schema_name: string
+  format: { name: string; type: string }[]
+}
+
+interface AtomicAssetRow {
+  asset_id: string
+  collection_name: string
+  schema_name: string
+  mutable_serialized_data: number[]
+}
+
+// Schema formats never change after creation, so one read per session is enough.
+const schemaFormatCache = new Map<string, AtomicSchemaRow['format']>()
+
+async function getSchemaFormat(
+  collection: string,
+  schema: string,
+): Promise<AtomicSchemaRow['format'] | null> {
+  const key = `${collection}/${schema}`
+  const hit = schemaFormatCache.get(key)
+  if (hit) return hit
+  const data = await rpc<TableRowsResponse<AtomicSchemaRow>>('/v1/chain/get_table_rows', {
+    code: ATOMICASSETS,
+    scope: collection,
+    table: 'schemas',
+    json: true,
+    lower_bound: schema,
+    upper_bound: schema,
+    limit: 1,
+  })
+  const format = data.rows[0]?.format
+  if (!format) return null
+  schemaFormatCache.set(key, format)
+  return format
+}
+
+/** LEB128 varuint. Uses multiplication, not `<<`, so values past 2^31 stay sane. */
+function readVaruint(bytes: number[], at: { i: number }): number {
+  let value = 0
+  let scale = 1
+  for (;;) {
+    const b = bytes[at.i++]
+    if (b === undefined) throw new Error('truncated attribute')
+    value += (b & 0x7f) * scale
+    if ((b & 0x80) === 0) return value
+    scale *= 128
+  }
+}
+
+function readAtomicString(bytes: number[], at: { i: number }): string {
+  const len = readVaruint(bytes, at)
+  const slice = bytes.slice(at.i, at.i + len)
+  at.i += len
+  // The name is player-supplied UTF-8; decode it properly so a non-ASCII name
+  // doesn't come back as mojibake.
+  return new TextDecoder().decode(new Uint8Array(slice))
+}
+
+/**
+ * Advance past one attribute value without interpreting it. We only care about
+ * `name`, but AtomicAssets writes attributes back-to-back with no length prefix,
+ * so every field before it has to be skipped by type. Throws on a type we don't
+ * know how to size — the caller then gives up on that asset rather than
+ * returning a name decoded from misaligned bytes.
+ */
+function skipAtomicValue(type: string, bytes: number[], at: { i: number }): void {
+  if (type.endsWith('[]')) {
+    const count = readVaruint(bytes, at)
+    for (let n = 0; n < count; n++) skipAtomicValue(type.slice(0, -2), bytes, at)
+    return
+  }
+  switch (type) {
+    case 'string':
+    case 'image':
+    case 'ipfs':
+    case 'bytes': {
+      // Read the length into its own binding first: `at.i += readVaruint(...)`
+      // would capture at.i BEFORE the read advanced it, and skip short.
+      const len = readVaruint(bytes, at)
+      at.i += len
+      return
+    }
+    case 'bool':
+      at.i += 1
+      return
+    case 'float':
+      at.i += 4
+      return
+    case 'double':
+      at.i += 8
+      return
+    default:
+      // uint8/16/32/64 and int8/16/32/64 are all varint-encoded (ints zigzagged,
+      // which does not change their byte length).
+      if (/^u?int(8|16|32|64)$/.test(type)) {
+        readVaruint(bytes, at)
+        return
+      }
+      throw new Error(`unknown AtomicAssets attribute type: ${type}`)
+  }
+}
+
+/** Pull the `name` attribute out of one serialized AtomicAssets data blob. */
+function decodeAssetName(bytes: number[], format: AtomicSchemaRow['format']): string {
+  const at = { i: 0 }
+  while (at.i < bytes.length) {
+    const field = format[readVaruint(bytes, at) - AA_RESERVED_IDS]
+    if (!field) throw new Error('attribute id outside the schema format')
+    if (field.name === 'name' && field.type === 'string') return readAtomicString(bytes, at)
+    skipAtomicValue(field.type, bytes, at)
+  }
+  return ''
+}
+
+/**
+ * Every game NFT this account holds, mapped assetId → its on-chain `name`.
+ *
+ * Assets with no name set are simply absent from the map (the UI then falls back
+ * to the species name). A decode failure on one asset drops that asset only.
+ */
+export async function getNftNames(
+  owner: string,
+  collection: string = CONTRACT_ACCOUNT,
+): Promise<Record<string, string>> {
+  const data = await rpc<TableRowsResponse<AtomicAssetRow>>('/v1/chain/get_table_rows', {
+    code: ATOMICASSETS,
+    scope: owner,
+    table: 'assets',
+    json: true,
+    limit: 1000,
+  })
+  const mine = data.rows.filter((r) => r.collection_name === collection)
+  const names: Record<string, string> = {}
+  for (const row of mine) {
+    try {
+      const format = await getSchemaFormat(collection, row.schema_name)
+      if (!format) continue
+      const name = decodeAssetName(row.mutable_serialized_data ?? [], format)
+      if (name) names[row.asset_id] = name
+    } catch (err) {
+      console.warn(`[chain] could not decode the name of asset ${row.asset_id}:`, String(err))
+    }
+  }
+  return names
+}
+
+export async function fetchGameState(
+  account: string,
+  collection?: string,
+): Promise<GameState> {
   // Read every table in parallel, but DON'T let one failure sink the whole
   // dashboard. A 3060003 "Table X is not specified in the ABI" (e.g. after a
   // contract redeploy that renames/drops a table) would otherwise reject the
@@ -380,6 +570,7 @@ export async function fetchGameState(account: string): Promise<GameState> {
     species: getSpecies(),
     claim: getClaim(account),
     now: getChainTime(),
+    nftNames: getNftNames(account, collection),
   } as const
   const keys = Object.keys(reads) as (keyof typeof reads)[]
   const settled = await Promise.allSettled(Object.values(reads))
@@ -408,5 +599,6 @@ export async function fetchGameState(account: string): Promise<GameState> {
     // Fall back to the client clock only if EVERY node failed the head-time read
     // (the reset then degrades to Date.now(); the contract still enforces truth).
     now: or<number>(6, Math.floor(Date.now() / 1000)),
+    nftNames: or<Record<string, string>>(7, {}),
   }
 }

@@ -12,20 +12,10 @@ using namespace eosio;
 
 // ─── Minimal AtomicAssets types for inline actions ──────────────────────
 
-// Must match AtomicAssets ATOMIC_ATTRIBUTE order EXACTLY (indices must align)
-typedef std::variant<
-    int8_t, int16_t, int32_t, int64_t,
-    uint8_t, uint16_t, uint32_t, uint64_t,
-    float, double, std::string,
-    std::vector<int8_t>, std::vector<int16_t>,
-    std::vector<int32_t>, std::vector<int64_t>,
-    std::vector<uint8_t>, std::vector<uint16_t>,
-    std::vector<uint32_t>, std::vector<uint64_t>,
-    std::vector<float>, std::vector<double>,
-    std::vector<std::string>
-> ATOM_ATTR;
-
-typedef std::vector<std::pair<std::string, ATOM_ATTR>> ATTR_MAP;
+// ATOM_ATTR / ATTR_MAP + the mutable-data decoder live here so the decode path
+// can also be compiled and tested natively (see test/test_mutdata.cpp). Include
+// after `using namespace eosio;` — the header calls check() unqualified.
+#include "aa_mutdata.hpp"
 
 // ─── AtomicAssets table row (for reading asset_id after mint) ───────────
 // MUST match the on-chain atomicassets `assets_s` row EXACTLY. Live-verified
@@ -70,6 +60,44 @@ struct aa_config_row {
     std::vector<extended_symbol>                     supported_tokens;
 };
 typedef singleton<"config"_n, aa_config_row> aa_config_t;
+
+// ─── AtomicAssets schema row (for MERGING mutable data instead of clobbering it) ──
+// `setassetdata` REPLACES the whole mutable map — it is not a patch. To keep the
+// attributes an action doesn't own (a player's `name`, a bought `cosmetic`) we
+// have to read the asset's current mutable_serialized_data back and re-emit it.
+// Those bytes carry no type tags: each attribute is [varuint id][value], and the
+// value's encoding is only knowable from the collection's schema `format`, which
+// lives here (scope = collection_name). FORMAT on chain is {string name; string
+// type;} — wire-identical to pair<string,string>, same trick as collection_format.
+struct aa_schema_row {
+    name      schema_name;
+    AA_FORMAT format;
+
+    uint64_t primary_key() const { return schema_name.value; }
+};
+typedef multi_index<"schemas"_n, aa_schema_row> aa_schemas_t;
+
+// ─── AtomicAssets template row (anti-cheat: cosmetic whitelist) ─────────
+// `equipcosmetic` used to trust whatever uint64 the player sent, so anyone
+// could wear a costume that does not exist in the game. We now look the
+// template up in atomicassets `templates` (scope = collection) and require it
+// to live in the cosmetic schema. Live-verified against the deployed
+// atomicassets ABI: template_id is **int32**, and the trailing immutable blob
+// is opaque bytes (never an ATTR_MAP — see aa_asset_row for why that matters).
+struct aa_template_row {
+    int32_t              template_id;
+    name                 schema_name;
+    bool                 transferable;
+    bool                 burnable;
+    uint32_t             max_supply;
+    uint32_t             issued_supply;
+    std::vector<uint8_t> immutable_serialized_data;
+
+    // Same cast atomicassets itself uses — the key must match byte-for-byte
+    // or find() silently misses.
+    uint64_t primary_key() const { return (uint64_t)template_id; }
+};
+typedef multi_index<"templates"_n, aa_template_row> aa_templates_t;
 
 // ─── Inline action wrappers ─────────────────────────────────────────────
 
@@ -139,7 +167,13 @@ struct [[eosio::table("configv3")]] config_row {
     uint64_t    feed_cost        = 0;       // EGG per feed (v2: free feeding, CEO locked)
     uint64_t    slot_cost        = 500;     // EGG — 4th slot unlock
     uint64_t    cosmetic_cost    = 100;     // EGG — cosmetic reroll
-    asset       name_cost        = asset(10000, symbol("HATCH", 4));  // 1.0000 HATCH rename
+    // Slot-unlock staircase (EGG). slot 7+ = slot_cost_6 × 2^(index-6).
+    // ⚠️ ตำแหน่งนี้จงใจ: เดิมเป็น `asset name_cost` (16 B) ซึ่งถูกถอดออก
+    // (CEO ล็อก: rename ฟรี) — วาง uint64 สองตัวทับที่เดิมพอดี 8+8=16 B
+    // ทุกฟิลด์ตั้งแต่ install_cap_bonus ลงไปจึงมี offset เท่าเดิม แถว configv3
+    // เก่าอ่านด้วย struct ใหม่จะเพี้ยนแค่ 2 ฟิลด์นี้ ไม่ลามทั้งแถว
+    uint64_t    slot_cost_5      = 1200;    // EGG — 5th slot unlock
+    uint64_t    slot_cost_6      = 2500;    // EGG — 6th slot unlock
     uint64_t    install_cap_bonus = 72;     // +72 EGG cap after install
 
     uint32_t    feed_cd          = 21600;       // 6h cooldown per creature (v2)
@@ -413,6 +447,9 @@ private:
     uint64_t predict_asset_id() const;
     uint64_t mint_creature(name owner, uint64_t template_id, const checksum256& genetics, uint32_t born_at);
     bool nft_exists(name collection, name owner, uint64_t asset_id) const;
+    // Current mutable map of an asset, ready to edit + hand back to setassetdata
+    // (see aa_mutdata.hpp for why every write has to merge).
+    ATTR_MAP read_mutable_data(name collection, name owner, uint64_t asset_id) const;
     asset sweepableHatch() const;
 
     config_row _cfg() const;
