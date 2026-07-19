@@ -5,8 +5,9 @@
 // private keys never leave it and this script never sees a password. The wallet
 // must be UNLOCKED first — unlock it in the waxwing panel, then:
 //
-//   node contract/pockethatch/test/onchain-anticheat.mjs --deploy   # deploy + test
-//   node contract/pockethatch/test/onchain-anticheat.mjs            # test only
+//   node contract/pockethatch/test/onchain-anticheat.mjs --setcode-only  # setcode + test
+//   node contract/pockethatch/test/onchain-anticheat.mjs --deploy        # setcode+setabi+setconfig + test
+//   node contract/pockethatch/test/onchain-anticheat.mjs                 # test only
 //
 // Every negative case asserts the transaction FAILED and that the error text is
 // the specific guard we added — "it reverted" alone is worthless, a typo in the
@@ -24,10 +25,13 @@ const WAXWING = "http://127.0.0.1:8787/plugin/wax-wallet/cmd";
 const CONTRACT = "phgamecreatr";
 const PLAYER = "phtestclaimr"; // a real player account in the keystore
 
-const WASM = path.join(ROOT, "contract/pockethatch/build/pockethatch.slotcfg.wasm");
+const WASM = path.join(ROOT, "contract/pockethatch/build/pockethatch.rules.wasm");
 const ABI = path.join(ROOT, "contract/pockethatch/build/pockethatch.slotcfg.deploy.abi");
 const CFG = path.join(ROOT, "deploy/args-setconfig-phgamecreatr.json");
 const EXPECTED_WASM_SHA = "ae75ce303706d7ce4cacd64751f021b9b8969d963f8080d2795fe2f7a3253998";
+// The build that is on chain right now — so a read-only run can say "still the
+// previous build" instead of just "hash doesn't match".
+const PREV_WASM_SHA = "ee7a150f91f0a1a463c836999d5cd889b71402d953910803a0f9b2203d5105f2";
 
 let ran = 0, failures = 0;
 const ok = (pred, what, detail = "") => {
@@ -79,6 +83,32 @@ async function main() {
   const status = await wax({ cmd: "status" });
   const SIGNING = !!status?.status?.unlocked;
   if (!SIGNING) console.log("⚠ waxwing is LOCKED — running READ-ONLY checks; every signing case will be skipped.\n");
+
+  // `rules` ships the SAME abi as the build on chain (build/pockethatch.rules.abi
+  // and build/pockethatch.slotcfg.abi are byte-identical), so it deploys with
+  // setcode alone. Do NOT hand setabi the generated abi here — CDT 4.1.1 emits it
+  // with `tables: []`, which is what blanked every get_table_rows last time.
+  if (process.argv.includes("--setcode-only")) {
+    if (!SIGNING) { console.error("✗ --setcode-only needs an unlocked wallet. Unlock it in the waxwing panel first."); process.exit(1); }
+    console.log("D. deploy — setcode ONLY (abi unchanged, config untouched)");
+
+    const live = await rpc("get_code", { account_name: CONTRACT, code_as_wasm: 1 });
+    if (live.code_hash !== PREV_WASM_SHA) {
+      console.error(`✗ live code_hash is ${live.code_hash}, expected the known previous build ${PREV_WASM_SHA}`);
+      console.error("  someone else touched the contract — stopping before setcode.");
+      process.exit(1);
+    }
+    console.log(`      live code_hash ${live.code_hash.slice(0, 8)}… (previous build) ✓`);
+
+    const r = await wax({
+      cmd: "pushaction", from: CONTRACT, contract: "eosio", action: "setcode",
+      data: { account: CONTRACT, vmtype: 0, vmversion: 0, code: wasm.toString("hex") },
+    });
+    ok(!!r?.ok && !!r.txId, "setcode broadcast", r?.txId || String(r?.error).slice(0, 300));
+    if (!r?.ok) { console.log(`\n${ran - failures}/${ran} passed`); process.exit(1); }
+    console.log(`      tx ${r.txId}`);
+    await new Promise((s) => setTimeout(s, 3000)); // let it make it into a block
+  }
 
   if (process.argv.includes("--deploy")) {
     if (!SIGNING) { console.error("✗ --deploy needs an unlocked wallet. Unlock it in the waxwing panel first."); process.exit(1); }
