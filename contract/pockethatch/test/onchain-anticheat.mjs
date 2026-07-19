@@ -74,13 +74,14 @@ async function main() {
     process.exit(1);
   }
 
+  // Signing needs an unlocked waxwing. Read-only checks don't, so a locked
+  // wallet degrades to the positive half rather than telling you nothing.
   const status = await wax({ cmd: "status" });
-  if (!status?.status?.unlocked) {
-    console.error("✗ waxwing is LOCKED — unlock it in the panel first (this script never handles the password).");
-    process.exit(1);
-  }
+  const SIGNING = !!status?.status?.unlocked;
+  if (!SIGNING) console.log("⚠ waxwing is LOCKED — running READ-ONLY checks; every signing case will be skipped.\n");
 
   if (process.argv.includes("--deploy")) {
+    if (!SIGNING) { console.error("✗ --deploy needs an unlocked wallet. Unlock it in the waxwing panel first."); process.exit(1); }
     console.log("D. deploy — setcode + setabi + setconfig, ONE transaction");
     const abi = JSON.parse(fs.readFileSync(ABI, "utf8"));
     const tables = (abi.tables || []).map((t) => t.name);
@@ -119,6 +120,12 @@ async function main() {
     ok(cfg.cosmetic_cost === 100, "cosmetic_cost still 100 (row did not shift)", String(cfg.cosmetic_cost));
     ok(!("name_cost" in cfg), "name_cost is gone from configv3");
     ok(cfg.paused === 0 || cfg.paused === false, "game is not paused", String(cfg.paused));
+  }
+
+  if (!SIGNING) {
+    console.log(`\n${ran - failures}/${ran} read-only checks passed — SKIPPED every case that needs a signature.`);
+    console.log("  Unlock waxwing and re-run to get P2 / N / N2 / N3 / N4.");
+    process.exit(failures ? 1 : 2);
   }
 
   console.log("\nP2. positive — setname + equipcosmetic(0) still work and don't clobber each other");
