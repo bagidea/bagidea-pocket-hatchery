@@ -17,6 +17,11 @@ using namespace eosio;
 // after `using namespace eosio;` — the header calls check() unqualified.
 #include "aa_mutdata.hpp"
 
+// The anti-cheat predicates (satiety gate, cosmetic id range, burn quote) — pure
+// arithmetic, kept out of the actions so test/test_anticheat.cpp can pin them
+// down exactly. See ph_rules.hpp.
+#include "ph_rules.hpp"
+
 // ─── AtomicAssets table row (for reading asset_id after mint) ───────────
 // MUST match the on-chain atomicassets `assets_s` row EXACTLY. Live-verified
 // against the deployed atomicassets ABI (WAX testnet): the last two fields are

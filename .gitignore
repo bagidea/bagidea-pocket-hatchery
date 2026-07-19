@@ -25,3 +25,8 @@ _live_abi.json
 # ─── Editor / OS ────────────────────────────────────────────────────────
 .DS_Store
 *.log
+
+# ─── Scratch payloads from manual cleos/curl pushes (never source) ──────
+_*.json
+.deploy-tmp/
+.claude/

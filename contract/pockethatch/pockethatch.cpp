@@ -526,10 +526,8 @@ void pockethatch::evolve(name owner, uint64_t asset_id) {
     uint32_t now = current_time_point().sec_since_epoch();
 
     // ── Feed v2: a hungry creature can't evolve (satiety gate) ──
-    {
-        uint32_t fed_until = c_it->last_fed + fed_duration_for(cfg, sp_it->egg_type);
-        check(now < fed_until, "creature is hungry — feed before evolving");
-    }
+    check(ph_rules::is_sated(now, c_it->last_fed, fed_duration_for(cfg, sp_it->egg_type)),
+          "creature is hungry — feed before evolving");
 
     // Sync
     auto c = *c_it;
@@ -898,10 +896,8 @@ void pockethatch::accelerate(name owner, uint64_t asset_id, asset amount) {
     // Same gate as evolve. Without it, paying HATCH was a way to buy growth
     // straight past the satiety economy — the one thing feeding is meant to
     // pace.
-    {
-        uint32_t fed_until = c_it->last_fed + fed_duration_for(cfg, sp_it->egg_type);
-        check(now < fed_until, "creature is hungry — feed before accelerating");
-    }
+    check(ph_rules::is_sated(now, c_it->last_fed, fed_duration_for(cfg, sp_it->egg_type)),
+          "creature is hungry — feed before accelerating");
 
     auto c = *c_it;
     sync(c, *sp_it, now);
@@ -971,14 +967,9 @@ void pockethatch::burncreature(name owner, uint64_t asset_id) {
     // formula: base × stage_mult × rarity_mult
     //   stage_mult:   0→0.2, 1→0.5, 2→1, 3→2, 4→5, 5→10
     //   rarity_mult:  common×1, uncommon×3, rare×10, epic×25, legendary×60, mythic×150
-    uint64_t stage_mul[] = {2, 5, 10, 20, 50, 100};   // ×0.1 → real multiplier
-    uint64_t rarity_mul[] = {10, 30, 100, 250, 600, 1500}; // ×0.1 → real multiplier
-    uint64_t idx_s = std::min((int)stage, 5);
-    uint64_t idx_r = std::min((int)egg_type, 5);
-    uint64_t payout_raw = (uint64_t)cfg.burn_base_hatch.amount
-                        * stage_mul[idx_s] / 10
-                        * rarity_mul[idx_r] / 10;
-    asset payout = asset(payout_raw, HATCH_SYM);
+    asset payout = asset(
+        ph_rules::burn_payout_raw((uint64_t)cfg.burn_base_hatch.amount, stage, egg_type),
+        HATCH_SYM);
 
     // ── Fail closed: price the payout BEFORE destroying anything ──
     // The old order burned the NFT first and only paid `if (pool.balance >=
@@ -1071,7 +1062,7 @@ void pockethatch::equipcosmetic(name owner, uint64_t asset_id, uint64_t cosmetic
     // game never minted. Taking one off (tmpl 0) stays open and free — it can
     // only ever remove an attribute, and charging to undo is hostile anyway.
     if (cosmetic_tmpl != 0) {
-        check(cosmetic_tmpl <= (uint64_t)INT32_MAX, "invalid cosmetic template");
+        check(ph_rules::cosmetic_tmpl_in_range(cosmetic_tmpl), "invalid cosmetic template");
         aa_templates_t tmpls(name("atomicassets"), cfg.collection.value);
         auto t_it = tmpls.find(cosmetic_tmpl);
         check(t_it != tmpls.end(), "cosmetic template not found in collection");
