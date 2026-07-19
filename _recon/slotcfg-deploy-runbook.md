@@ -56,6 +56,18 @@ old row read with new struct — differences:
 | `contract/pockethatch/build/pockethatch.slotcfg.deploy.abi` | 18,438 B (→ 3,917 B binary) | live ABI สลับเฉพาะ `config_row` |
 | `deploy/args-setconfig-phgamecreatr.json` | 64 ฟิลด์ | gen จากแถว `configv3` จริงบนเชน |
 
+ตรวจว่า artifact บนดิสก์ยังตรงกับที่อยู่บนเชน (ดึง wasm จริงมาเทียบไบต์):
+
+```sh
+cd contract/pockethatch && node build/verify-onchain-wasm.cjs
+# → local/chain 162,692 B  ee7a150f…  ✅ byte-identical
+```
+
+⚠️ ซอร์สที่ HEAD **ใหม่กว่า** ของบนเชนแล้ว — commit `17cebf8` ย้ายกฎ anti-cheat ไป
+`ph_rules.hpp` (+ กัน uint32 wrap ใน `is_sated`) build ได้ `ae75ce30…` / 162,761 B เก็บไว้
+เป็น `build/pockethatch.rules.wasm` **ยังไม่ deploy** — build ของ slotcfg ต้อง checkout
+`1eaad85` ถึงจะได้ `ee7a150f…` (ยืนยันแล้ว: build ซ้ำใน worktree สะอาด = byte-identical)
+
 ⚠️ hash เดิมที่เคยรายงานไว้ (`f5aaa759…`) **ใช้ไม่ได้** — เป็นไฟล์ค้างจากบิลด์ก่อนหน้า
 (layout เก่า) เพราะ `cdt-cpp` ที่ `-o` ชื่อไม่ตรง contract class จะ error ที่ abigen
 แล้ว **ไม่เขียนไฟล์ทับ** ต้องใส่ `-contract=pockethatch` เสมอ — ดู `build/BUILD.md`
