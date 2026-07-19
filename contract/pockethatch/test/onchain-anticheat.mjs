@@ -9,6 +9,10 @@
 //   node contract/pockethatch/test/onchain-anticheat.mjs --deploy        # setcode+setabi+setconfig + test
 //   node contract/pockethatch/test/onchain-anticheat.mjs                 # test only
 //
+// Add --pool-guard to also prove N5 (burncreature on a pool that can't pay). It
+// is opt-in because it briefly raises burn_base_hatch in live config and puts it
+// back — see poolGuardCase() for why there is no way to trip that guard without.
+//
 // Every negative case asserts the transaction FAILED and that the error text is
 // the specific guard we added — "it reverted" alone is worthless, a typo in the
 // action name reverts too.
@@ -65,6 +69,10 @@ async function mustRevert(label, needle, actor, contract, action, data) {
   if (r.ok) { ok(false, label, `NOT reverted — broadcast as ${r.txId}`); return; }
   ok(r.error.includes(needle), label, `"${needle}" ${r.error.includes(needle) ? "✓" : `NOT in: ${r.error.slice(0, 200)}`}`);
 }
+
+// HATCH is 4-decimal — compare quotes in raw units so nothing rounds away.
+const rawOf = (assetStr) => BigInt(String(assetStr).split(" ")[0].replace(".", ""));
+const fmt = (raw) => `${raw / 10000n}.${String(raw % 10000n).padStart(4, "0")} HATCH`;
 
 const eggOf = async (account) =>
   Number((await rows("players")).find((p) => p.account === account)?.egg_balance ?? -1);
@@ -154,7 +162,7 @@ async function main() {
 
   if (!SIGNING) {
     console.log(`\n${ran - failures}/${ran} read-only checks passed — SKIPPED every case that needs a signature.`);
-    console.log("  Unlock waxwing and re-run to get P2 / N / N2 / N3 / N4.");
+    console.log("  Unlock waxwing and re-run to get P2 / N / N2 / N3 / N4 / N5.");
     process.exit(failures ? 1 : 2);
   }
 
@@ -217,16 +225,108 @@ async function main() {
   }
 
   console.log("\nN4. negative — satiety gate on accelerate");
+  // Satiety runs out after fed_dur_<rarity>, not a flat 48h — reading the live
+  // config is the only way to know whether a creature is actually hungry to the
+  // contract (a mythic stays fed for 14 days).
+  const cfgNow = (await rows("configv3"))[0];
+  const speciesNow = await rows("spccfgv2");
+  const fedDur = (c) => {
+    const sp = speciesNow.find((s) => Number(s.template_id) === Number(c.template_id));
+    const field = ["fed_dur_common", "fed_dur_uncommon", "fed_dur_rare",
+      "fed_dur_epic", "fed_dur_legendary", "fed_dur_mythic"][Math.min(sp ? Number(sp.egg_type) : 0, 5)];
+    return Number(cfgNow[field]);
+  };
   const hungry = (await rows("creatrsv2")).filter((c) => c.owner === PLAYER)
-    .find((c) => Math.floor(Date.now() / 1000) >= c.last_fed + 172800);
-  if (!hungry) console.log("  SKIP  no hungry creature owned by the player right now (all recently fed)");
+    .find((c) => Math.floor(Date.now() / 1000) >= c.last_fed + fedDur(c));
+  // Not a SKIP: this is one of the guards the deploy has to prove, so "there was
+  // nothing to test with" is a failed run, not a quiet pass.
+  if (!hungry) ok(false, "a hungry creature to test the gate with", `every creature ${PLAYER} owns is still sated`);
   else {
     await mustRevert("accelerate a hungry creature", "hungry",
       PLAYER, CONTRACT, "accelerate", { owner: PLAYER, asset_id: hungry.asset_id, amount: "0.1000 HATCH" });
   }
 
+  console.log("\nN5. negative — burncreature refuses when the pool can't cover the quote");
+  await poolGuardCase();
+
   console.log(`\n${ran - failures}/${ran} passed`);
   process.exit(failures ? 1 : 0);
+}
+
+// ── N5 ────────────────────────────────────────────────────────────────────
+// The guard is `pool.balance >= payout` checked BEFORE burnasset, so proving it
+// needs a quote the pool cannot pay. On this testnet it can't happen by itself:
+// burn_base_hatch is 10 HATCH and the dearest creature alive quotes 500, against
+// a pool holding ~149,931 — there is no creature to pick that trips it.
+//
+// So the run raises burn_base_hatch far enough that the quote outgrows the pool,
+// fires burncreature, and puts the old config straight back. That is a real
+// (reversible) write to live config, so it is opt-in: --pool-guard. Without the
+// flag this counts as a FAILURE, never a silent skip — Director asked for this
+// case and "we didn't run it" must not read as "it passed".
+async function poolGuardCase() {
+  if (!process.argv.includes("--pool-guard")) {
+    ok(false, "burncreature on an empty pool reverts",
+      "NOT RUN — needs --pool-guard (temporarily raises burn_base_hatch; see the comment in this file)");
+    return;
+  }
+
+  const mine = (await rows("creatrsv2")).filter((c) => c.owner === PLAYER);
+  if (!mine.length) { ok(false, "a creature to quote a buy-back for", `${PLAYER} owns none`); return; }
+  const c = mine[0];
+
+  const before = await rows("configv3");
+  const cfg0 = before[0];
+  if (!cfg0) { ok(false, "configv3 readable before touching it"); return; }
+  const pool = (await rows("rewardpool"))[0];
+
+  const species = (await rows("spccfgv2")).find((s) => Number(s.template_id) === Number(c.template_id));
+  const eggType = species ? Number(species.egg_type) : 0;
+  const poolRaw = rawOf(pool.balance);
+
+  // Same arithmetic as ph_rules::burn_payout_raw — integer, same truncation order.
+  const quote = (baseRaw) => {
+    const stageMul = [2n, 5n, 10n, 20n, 50n, 100n][Math.min(Number(c.stage), 5)];
+    const rarityMul = [10n, 30n, 100n, 250n, 600n, 1500n][Math.min(eggType, 5)];
+    return ((BigInt(baseRaw) * stageMul) / 10n * rarityMul) / 10n;
+  };
+
+  ok(quote(rawOf(cfg0.burn_base_hatch)) <= poolRaw, "the pool covers this creature at today's config",
+    `quote ${fmt(quote(rawOf(cfg0.burn_base_hatch)))} ≤ pool ${cfg0 && pool.balance}`);
+
+  // Pick a base whose quote clears the pool with room to spare, so the revert
+  // can only be the pool guard and not a rounding accident.
+  let baseRaw = 10n ** 4n;
+  while (quote(baseRaw) <= poolRaw * 2n) baseRaw *= 10n;
+  const rescue = () => wax({ cmd: "pushaction", from: CONTRACT, contract: CONTRACT, action: "setconfig", data: { cfg: cfg0 } });
+
+  const raised = await push(CONTRACT, CONTRACT, "setconfig", { cfg: { ...cfg0, burn_base_hatch: fmt(baseRaw) } });
+  ok(raised.ok, "raise burn_base_hatch so the quote outgrows the pool", raised.txId || raised.error.slice(0, 200));
+  if (!raised.ok) return; // nothing was written — nothing to put back
+
+  try {
+    await new Promise((s) => setTimeout(s, 2500));
+    const live = (await rows("configv3"))[0];
+    ok(rawOf(live.burn_base_hatch) === baseRaw, "chain shows the raised base", live.burn_base_hatch);
+    ok(quote(baseRaw) > rawOf(pool.balance), "quote now exceeds the pool",
+      `${fmt(quote(baseRaw))} > ${pool.balance}`);
+
+    await mustRevert("burncreature with a quote the pool can't pay", "reward pool too low to buy back this creature",
+      PLAYER, CONTRACT, "burncreature", { owner: PLAYER, asset_id: c.asset_id });
+
+    // Fail-closed means the creature is still there — the old order burned first.
+    const still = (await rows("creatrsv2")).some((r) => String(r.asset_id) === String(c.asset_id));
+    ok(still, "the creature survived the rejected burn", c.asset_id);
+  } finally {
+    // Always put the config back, even if an assertion above threw.
+    const back = await rescue();
+    await new Promise((s) => setTimeout(s, 2500));
+    const after = (await rows("configv3"))[0];
+    ok(!!back?.ok && after && rawOf(after.burn_base_hatch) === rawOf(cfg0.burn_base_hatch),
+      "burn_base_hatch restored to what it was", `${after?.burn_base_hatch} (was ${cfg0.burn_base_hatch})`);
+    const drifted = Object.keys(cfg0).filter((k) => String(after?.[k]) !== String(cfg0[k]));
+    ok(drifted.length === 0, "no other config field drifted", drifted.join(", ") || "clean");
+  }
 }
 
 // Pack an ABI JSON into the hex blob setabi expects, using the same eosjs
