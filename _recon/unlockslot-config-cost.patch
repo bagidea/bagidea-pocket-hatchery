@@ -1,0 +1,50 @@
+# Patch: Use cfg.slot_cost in unlockslot (was hardcoded)
+# ==============================================================================
+# File:   contract/pockethatch/pockethatch.cpp
+# Action: unlockslot() — line 989-1011
+# Status: UN-APPLIED — awaiting CEO approval before setcode
+# Date:   2026-07-19
+#
+# WHAT:  Replace hardcoded cost staircase (500/1200/2500…) with cfg.slot_cost
+#        as the base. Ratios preserved exactly — only the base is configurable.
+#
+# WHY:   slot_cost was a GHOST FIELD — config says 500 but unlockslot ignored it
+#        completely and used hardcoded literals. Admin changing slot_cost in config
+#        had ZERO effect on actual gameplay.
+#
+# MATH:  Original ratios against base=500:
+#          slot 4 = 500   = base × 1
+#          slot 5 = 1200  = base × 12/5
+#          slot 6 = 2500  = base × 5
+#          slot 7+        = base × 5 × 2^(slot-6)
+#        With cfg.slot_cost as base, all ratios preserved; admin can adjust base.
+#
+# RISK:  Minimal — behavior identical when cfg.slot_cost==500 (current live).
+#        Only difference: admin can now change the base cost via setconfig.
+# ==============================================================================
+
+--- a/contract/pockethatch/pockethatch.cpp
++++ b/contract/pockethatch/pockethatch.cpp
+@@ -995,17 +995,16 @@ void pockethatch::unlockslot(name owner, uint8_t slot_index) {
+     auto p_it = ps.find(owner.value);
+     check(p_it != ps.end(), "player not initialized");
+
+-    // Cost staircase: slot 4=500, 5=1200, 6=2500
++    // Cost staircase: base from config, ratios preserved from original hardcoded 500/1200/2500
++    uint64_t base = cfg.slot_cost;
+     uint64_t slot_cost;
+-    if      (slot_index == 4) slot_cost = 500;
+-    else if (slot_index == 5) slot_cost = 1200;
+-    else if (slot_index == 6) slot_cost = 2500;
+-    else                      slot_cost = 2500 * (1ULL << (slot_index - 6));
++    if      (slot_index == 4) slot_cost = base;
++    else if (slot_index == 5) slot_cost = base * 12 / 5;
++    else if (slot_index == 6) slot_cost = base * 5;
++    else                      slot_cost = base * 5 * (1ULL << (slot_index - 6));
+
+     check(slot_index >= 4 && slot_index <= 20, "invalid slot index");
+     check(p_it->egg_balance >= slot_cost, "insufficient EGG to unlock slot");
+
+     ps.modify(p_it, same_payer, [&](auto& r) {
+         r.egg_balance -= slot_cost;
+     });

@@ -8,6 +8,7 @@ import {
   MOCK_SATIETY_CONFIG,
   type SatietyConfig,
 } from '../satiety'
+import { secondsToDailyReset, fmtDuration } from '../actionGates'
 import type { Rarity } from './CreatureCard'
 import styles from './SatietyMeter.module.css'
 
@@ -47,6 +48,14 @@ interface SatietyMeterProps {
    */
   earnFull?: number
   earnMult?: number
+  /**
+   * Account-wide feed quota for today (players.feeds_today / configv3.feed_daily_cap,
+   * day-reset already applied by chain.ts). The cap is per PLAYER, not per creature,
+   * so it is shown on every card: three feeds a day is the whole account's budget.
+   * Omitted (demo/preview) → the quota line and its gate are hidden entirely.
+   */
+  feedsToday?: number
+  feedDailyCap?: number
 }
 
 /** Format seconds into a short countdown (mirrors App.tsx's formatCooldown). */
@@ -71,6 +80,8 @@ export function SatietyMeter({
   feedCdSec,
   earnFull,
   earnMult,
+  feedsToday,
+  feedDailyCap,
 }: SatietyMeterProps) {
   // 1s tick → the bar decays and the cooldown counts down on screen.
   const [now, setNow] = useState(() => Math.floor(Date.now() / 1000))
@@ -99,8 +110,18 @@ export function SatietyMeter({
       : reading.state === 'hungry' ? styles.hungry
         : styles.starving
 
-  // The Feed button is blocked while an action is running or the cooldown is up.
-  const feedBlocked = disabled || cd.onCooldown
+  // Account-wide daily feed quota (configv3.feed_daily_cap = 3). The contract
+  // asserts `feeds_today < feed_daily_cap` AFTER the cooldown check, so a player
+  // who has spent the quota must not be able to fire the tx at all — that is the
+  // exact path that answered with a raw "feed daily cap reached" assertion.
+  const hasQuota = feedDailyCap != null && feedDailyCap > 0 && feedsToday != null
+  const capReached = hasQuota && feedsToday! >= feedDailyCap!
+  const feedsLeft = hasQuota ? Math.max(0, feedDailyCap! - feedsToday!) : 0
+  const resetIn = secondsToDailyReset(now)
+
+  // The Feed button is blocked while an action is running, the cooldown is up, or
+  // today's account-wide feed quota is spent.
+  const feedBlocked = disabled || cd.onCooldown || capReached
   // A just-woken creature (stage 0→1) inherits last_fed = born_at, so the 6h feed
   // cooldown fires while it is actually FULL (fed_until = last_fed + fed_dur is
   // days out). Showing "Feed on cooldown" there reads like the game is broken, so
@@ -151,13 +172,34 @@ export function SatietyMeter({
         )}
       </div>
 
+      {/* ── Daily feed quota (account-wide) ──
+          The number the chain actually asserts on. Shown before the button so a
+          player reads "3/3 used" first and never taps into an assertion. */}
+      {hasQuota && (
+        <div className={styles.quotaRow} data-cap-reached={capReached ? 1 : 0}>
+          <span className={styles.quotaLabel} title="Feeds are capped per account per day, not per creature">
+            Feeds today
+          </span>
+          <span className={styles.quotaCount} data-testid="feed-quota">
+            {feedsToday}/{feedDailyCap}
+          </span>
+          <span className={styles.quotaReset}>
+            {capReached ? `resets in ${fmtDuration(resetIn)}` : `${feedsLeft} left · resets in ${fmtDuration(resetIn)}`}
+          </span>
+        </div>
+      )}
+
       {/* ── Feed button (stateful) ── */}
       <button
         className={`${styles.feedBtn} ${stateClass}`}
         onClick={onFeed}
         disabled={feedBlocked}
+        title={capReached ? `You have used all ${feedDailyCap} feeds for today across your account. The quota resets at UTC midnight.` : undefined}
+        data-testid="feed-btn"
       >
-        {cd.onCooldown ? (
+        {capReached ? (
+          <>🚫 Daily feed limit {feedsToday}/{feedDailyCap} — resets in {fmt(resetIn)}</>
+        ) : cd.onCooldown ? (
           stillFed ? (
             <>😋 Full — feed again in {fmt(cd.secondsLeft)}</>
           ) : (
@@ -176,7 +218,15 @@ export function SatietyMeter({
           next step — it would only error on chain. Point the player at what
           actually pays out: the Harvest button. Only shown while genuinely fed
           and on the feed cooldown, so it never competes with a real Feed prompt. */}
-      {cd.onCooldown && stillFed && reading.percent > 0 && (
+      {capReached && (
+        <span className={styles.nextStep} data-testid="feed-cap-note">
+          🚫 All {feedDailyCap} of today&apos;s feeds are used — the quota is shared by
+          every creature you own and resets at UTC midnight. Your fed creatures keep
+          earning EGG in the meantime.
+        </span>
+      )}
+
+      {!capReached && cd.onCooldown && stillFed && reading.percent > 0 && (
         <span className={styles.nextStep}>
           🌾 Fed &amp; earning — collect EGG with Harvest below
         </span>

@@ -1,0 +1,278 @@
+/* FarmScene — the living farm stage.
+   Uses the existing dark shell glass + tier tokens only; no new colour system.
+   Placeholder scene dressing (sky/ground) is token-derived so Flamingo's art can
+   drop in behind .layer without touching any of the agent styling. */
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ph-space-3);
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--ph-space-3);
+}
+
+.title {
+  font: var(--ph-text-h2);
+  font-weight: var(--ph-weight-heavy);
+  color: var(--ph-text-primary);
+  margin: 0;
+}
+
+.count {
+  font: var(--ph-text-caption);
+  color: var(--ph-text-muted);
+}
+
+.stage {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: var(--ph-radius-xl);
+  border: 1px solid var(--ph-panel-border);
+  background: var(--ph-surface-sunken);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+  /* The scene layer is scaled from its top-left corner by the component. */
+  contain: layout paint;
+}
+
+/* Fallback backdrop — pure token gradients, kept UNDER the painted scene so a
+   layer that fails to load leaves a dusk sky over ground rather than a hole. */
+.sky {
+  position: absolute;
+  inset: 0 0 52% 0;
+  background: linear-gradient(180deg, var(--ph-shell-bg-top), var(--ph-shell-bg-mid));
+}
+
+.ground {
+  position: absolute;
+  inset: 40% 0 0 0;
+  background:
+    radial-gradient(120% 80% at 50% 0%, var(--ph-aura-rare), transparent 70%),
+    linear-gradient(180deg, var(--ph-shell-bg-mid), var(--ph-shell-bg-bottom));
+  border-top: 1px solid var(--ph-panel-border);
+}
+
+/* A painted band (the layers behind the cast, or the ones in front of it). The
+   bands and the creature layer are siblings in DOM order — back, cast, front —
+   so plain paint order separates them and the creatures' own z-index (0…1000)
+   stays sealed inside .layer's stacking context, where it belongs. Never give a
+   band a z-index: that would put it back into the same race. */
+.band {
+  position: absolute;
+  inset: 0;
+  /* Art is never a click target — the creatures underneath are. */
+  pointer-events: none;
+}
+
+.sceneLayer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  /* All six layers share scene.json's 1600×900 viewBox, so they self-align.
+     The stage is locked to that ratio by the component; cover only guards a
+     sub-pixel rounding gap, it must never be asked to fix a wrong aspect. */
+  object-fit: cover;
+  display: block;
+}
+
+.layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+}
+
+/* Static scenery standing in the band. Anchored bottom-centre and depth-scaled
+   exactly like a creature (farm.ts depthFor), because it shares their y-sort. */
+.prop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 50% 100%;
+  pointer-events: none;
+}
+
+/* One creature. The frame loop writes `transform` + `z-index` here every frame;
+   everything else about it is static so the browser keeps its layer cached.
+   The box holds two children: the ground shadow and the .pose that carries the
+   sprite — the shadow lives outside .pose so a sleeper's tilt can't lift it. */
+.agent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 50% 100%;
+  will-change: transform;
+  cursor: pointer;
+}
+
+/* The upright creature. Fills the box; the frame-loop transform on .agent moves
+   and depth-scales it, and the asleep tilt below rotates only THIS, so the shadow
+   underneath stays flat on the ground. */
+.pose {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+/* Contact shadow: a soft ellipse painted with a radial-gradient — deliberately
+   NOT a box-shadow, which would force a blur repaint on every one of the 21
+   creatures each frame. The gradient IS the soft edge, so the shadow rides the
+   agent's GPU transform with nothing to re-rasterize. Anchored at the feet
+   (bottom-centre of the box); depth scale + facing come free from .agent, so a
+   far creature's shadow is small and a near one's is large with no extra code. */
+.shadow {
+  position: absolute;
+  left: 50%;
+  bottom: 4.5%;
+  width: 60%;
+  height: 15%;
+  /* translate only — no box-shadow. Rides the agent's GPU transform, so a walker's
+     shadow tracks its feet and a still back-creature's stays put, both for free. */
+  transform: translate(-50%, 50%);
+  border-radius: 50%;
+  /* Overhead-front scene light: darkest at the rear of the footprint (50% 35%),
+     softening forward. Vertical bias only, so a facing flip (scale x = -1) never
+     throws the shadow to the wrong side. The gradient IS the soft edge. */
+  background: radial-gradient(
+    ellipse at 50% 35%,
+    rgba(6, 14, 10, 0.62) 0%,
+    rgba(6, 14, 10, 0.3) 52%,
+    rgba(6, 14, 10, 0.1) 72%,
+    transparent 82%
+  );
+  opacity: 0.95;
+  pointer-events: none;
+}
+
+.sprite,
+.spriteFallback {
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.sprite :global(svg) {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.spriteFallback {
+  display: grid;
+  place-items: center;
+  font-size: 44px;
+}
+
+/* Mood is legible without reading a meter: a hungry creature is dimmer and less
+   saturated, a starving one visibly drained, a sleeper dimmed and settled. */
+.agent[data-mood='hungry'] .sprite {
+  filter: saturate(0.72) brightness(0.9);
+}
+
+.agent[data-mood='starving'] .sprite {
+  filter: saturate(0.42) brightness(0.76);
+}
+
+.agent[data-mood='asleep'] .sprite {
+  filter: saturate(0.6) brightness(0.7);
+}
+
+/* Sleepers lie down rather than stand — the pose, not just the dimming, is what
+   reads as "asleep" from across the scene. Rotate/scale are separate properties
+   from `transform`, which the frame loop owns, so they compose instead of fighting
+   (the loop's transform applies first on .agent, then this settles the sprite onto
+   its side). It lives on .pose, not .agent, so the ground shadow beneath stays a
+   flat ellipse instead of tipping over with the creature. */
+.agent[data-mood='asleep'] .pose {
+  rotate: -18deg;
+  scale: 1 0.9;
+}
+
+/* A resting creature presses a slightly softer, tighter shadow into the grass. */
+.agent[data-mood='asleep'] .shadow {
+  opacity: 0.82;
+  width: 54%;
+}
+
+.zzz {
+  position: absolute;
+  top: 2px;
+  right: 8px;
+  font: var(--ph-text-caption);
+  font-weight: var(--ph-weight-heavy);
+  color: var(--tier-rare);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+  /* The one perpetually-running animation on the stage; its keyframes touch only
+     transform + opacity, so hint the compositor to keep it off the main thread. */
+  animation: zzzFloat 2.6s ease-in-out infinite;
+  will-change: transform, opacity;
+  pointer-events: none;
+}
+
+@keyframes zzzFloat {
+  0%   { opacity: 0;   transform: translateY(4px)  scale(0.8); }
+  35%  { opacity: 0.9; }
+  100% { opacity: 0;   transform: translateY(-14px) scale(1.25); }
+}
+
+/* Name plate — only on hover, so a busy farm stays a scene and not a list. */
+.tag {
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  /* scaleX(--face) cancels the agent's facing flip (FarmScene sets --face to -1
+     when the creature walks left). Without it the name reads backwards — which
+     nobody noticed while every tag was a species name and half of them were
+     symmetrical enough to look like a font quirk. */
+  transform: translateX(-50%) scaleX(var(--face, 1));
+  padding: 2px 8px;
+  border-radius: var(--ph-radius-pill);
+  background: var(--ph-scrim);
+  border: 1px solid var(--ph-panel-border);
+  font: var(--ph-text-caption);
+  color: var(--ph-text-primary);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity var(--ph-dur-fast) var(--ph-ease-standard);
+  pointer-events: none;
+}
+
+.agent:hover .tag {
+  opacity: 1;
+}
+
+.empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  font: var(--ph-text-body);
+  color: var(--ph-text-muted);
+  /* Above the foreground band — an empty farm's one instruction must not be
+     read through blurred grass. */
+  z-index: 1;
+}
+
+.legend {
+  margin: 0;
+  font: var(--ph-text-caption);
+  color: var(--ph-text-muted);
+}
+
+/* Honor the OS setting: no bob, no z's, no drifting — just a placed scene. */
+@media (prefers-reduced-motion: reduce) {
+  .zzz {
+    animation: none;
+    opacity: 0.8;
+  }
+}

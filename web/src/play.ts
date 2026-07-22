@@ -20,7 +20,7 @@ import { speciesNameFromGene } from './geneDecoder'
  * This is PURE LOGIC — no JSX, no CSS, no layout. Monanisa owns presentation; she
  * calls these functions and renders the returned state. Keep that seam clean.
  *
- * Contract: pockethatch1 @ wax-testnet (RPC eosphere.io), table configv2. The
+ * Contract: phgamecreatr @ wax-testnet (RPC eosphere.io), table configv3. The
  * active network follows ?network= (default wax-testnet). ABI-verified 2026-07-02
  * — every action signature matches the deployed ABI exactly. Live proof in
  * scripts/verify-play.mjs (WCW shape) + scripts/verify-waxwing-connect.mjs
@@ -50,6 +50,13 @@ import {
 } from './chain'
 import { fedDurFor, BASE_EARN_BY_STAGE } from './satiety'
 import { awakenDurFor, waxWhole } from './awaken'
+import {
+  computeFeedGate,
+  computeEvolveGate,
+  feedBlockMessage,
+  evolveBlockMessage,
+  clampCreatureName,
+} from './actionGates'
 
 export type ConnectMode = 'wcw' | 'waxwing'
 
@@ -81,6 +88,14 @@ export interface Resources {
   poolBalance: number
   /** Whether the game is halted on chain (configv3.paused) — every action is refused. */
   paused: boolean
+  /** Feeds already spent today, account-wide (players.feeds_today, day-reset applied). */
+  feedsToday: number
+  /** configv3.feed_daily_cap — the account-wide feed ceiling per UTC day. */
+  feedDailyCap: number
+  /** configv3.evolve_cost — base EGG per evolve; the chain charges × (stage + 1). NOT HATCH. */
+  evolveCost: number
+  /** Chain head time (unix seconds) from the last read — authoritative for day boundaries. */
+  now: number
 }
 
 // On-chain rarity = speciescfg.egg_type (0–5). Six tiers.
@@ -90,6 +105,15 @@ export type Rarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'my
 export interface Creature {
   assetId: string
   name: string
+  /**
+   * The player-given name, read from the NFT's own MUTABLE data (what `setname`
+   * writes via atomicassets::setassetdata) — NOT a local preference. Absent =
+   * never named; every surface then falls back to `name` (the species).
+   *
+   * Because it lives on the asset, it is the same on the card, in the farm, in a
+   * wallet, and on a marketplace listing — and it follows the creature on trade.
+   */
+  nickname?: string
   species: string
   stage: number
   maxStage: number
@@ -155,8 +179,10 @@ const ACTION_LABEL: Record<string, string> = {
   harvest: 'Harvest EGG',
   claimreward: 'Claim HATCH Reward',
   burncreature: 'Burn Creature',
+  setname: 'Rename Creature (on chain)',
   transfer: 'Wake Creature (WAX)',
 }
+
 
 /**
  * What a gameplay action resolves to. Every action calls `run(...)`, which returns
@@ -182,6 +208,10 @@ export interface GameActions {
   accelerate: (assetId: string, amount: string) => Promise<ActionResult>
   /** Permanently destroy a creature (burncreature). Irreversible — gate behind a UI confirm. */
   burn: (assetId: string) => Promise<ActionResult>
+  /** Write a creature's name into its NFT mutable data on chain (setname). '' clears it. */
+  rename: (assetId: string, newName: string) => Promise<ActionResult>
+  /** assetId whose rename tx is in flight (signing + post-action poll), else null. */
+  renamingId: string | null
   harvest: () => Promise<ActionResult>
   claimReward: () => Promise<ActionResult>
   refresh: () => Promise<void>
@@ -202,7 +232,7 @@ export interface GameActions {
   hatchOdds: HatchOdds[]
 }
 
-const EMPTY_RESOURCES: Resources = { egg: 0, energy: 0, maxEnergy: 0, hatch: 0, lastHarvest: 0, lastClaimed: 0, harvestCd: 0, claimedSeason: 0, currentSeason: 0, offlineCapH: 0, dailyEggCap: 0, capScalesRarity: false, eggHarvestedToday: 0, poolBalance: 0, paused: false }
+const EMPTY_RESOURCES: Resources = { egg: 0, energy: 0, maxEnergy: 0, hatch: 0, lastHarvest: 0, lastClaimed: 0, harvestCd: 0, claimedSeason: 0, currentSeason: 0, offlineCapH: 0, dailyEggCap: 0, capScalesRarity: false, eggHarvestedToday: 0, poolBalance: 0, paused: false, feedsToday: 0, feedDailyCap: 0, evolveCost: 0, now: 0 }
 
 // speciescfg.egg_type (0–5) → display rarity. Matches CreatureCard's union.
 const RARITY_BY_EGG_TYPE: Rarity[] = ['common', 'uncommon', 'rare', 'epic', 'legendary', 'mythic']
@@ -338,6 +368,9 @@ function earnMultBp(cfg: ChainConfig | null, rarity: Rarity): number {
  */
 function earnFromChain(sp: SpeciesRow | undefined, stage: number, cfg: ChainConfig | null, rarity: Rarity): { earnFull: number; earnMult: number } {
   if (!sp || stage <= 0) return { earnFull: 0, earnMult: RARITY_MULT_FALLBACK[rarity] }
+  // harvest() does `idx_yield = stage − 1; yield_for(idx_yield)`, so stage 1 pays
+  // yield_0 … stage 5 pays yield_4. sp.yield_5 is deliberately NOT in this array:
+  // it would only ever be read at stage 6, which max_stage = 5 forbids.
   const yields = [sp.yield_0, sp.yield_1, sp.yield_2, sp.yield_3, sp.yield_4]
   const stageYield = yields[Math.min(stage, yields.length) - 1] ?? 0 // stage 1 → yield_0
   const earnFull = (stageYield * earnMultBp(cfg, rarity)) / 10000
@@ -359,9 +392,12 @@ function readableError(err: unknown): string {
 }
 
 // ── Mapping: on-chain rows → UI shapes ────────────────────────────────────────
+// Mirrors species_row::threshold_for(idx) — the growth needed to leave `stage`
+// for stage+1. idx 0 → thresh_1 … idx 4 → thresh_5, so a stage-4 creature needs
+// thresh_5 (NOT thresh_4) to reach its terminal stage 5.
 function thresholdForStage(sp: SpeciesRow | undefined, stage: number): number {
   if (!sp) return 0
-  const thresholds = [sp.thresh_1, sp.thresh_2, sp.thresh_3, sp.thresh_4]
+  const thresholds = [sp.thresh_1, sp.thresh_2, sp.thresh_3, sp.thresh_4, sp.thresh_5]
   return thresholds[Math.min(stage, thresholds.length - 1)] ?? 0
 }
 
@@ -370,15 +406,16 @@ function toCreature(
   species: SpeciesRow[],
   breedCd: number,
   cfg: ChainConfig | null,
+  nftName?: string,
 ): Creature {
   const sp = species.find((s) => s.template_id === row.template_id)
   const growth = row.growth_base + row.fed_growth
-  // max_stage on chain = stage COUNT (e.g. 5 → stages 0‑4), so the highest
-  // reachable stage number is max_stage − 1. The contract's evolve() checks
-  // stage < max_stage, which means evolving FROM stage 4 would hit stage 5 =
-  // overflow. We reflect that here so the UI disables the button at the right
-  // boundary and evolve()'s own guard matches the contract.
-  const isMax = sp ? row.stage >= sp.max_stage - 1 : false
+  // max_stage on chain is the TERMINAL stage NUMBER, not a count: evolve()
+  // guards with `check(cur_stage < max_stage)`, so with max_stage = 5 a stage-4
+  // creature can still evolve and stage 5 is the real ceiling (thresh_5/yield_5
+  // exist on chain for exactly that). Treating it as a count showed MAX one
+  // stage early and cost the player their last evolve.
+  const isMax = sp ? row.stage >= sp.max_stage : false
   // Real species name from the gene's species_id (bits 0–3), falling back to
   // the chain's speciescfg.family or the old hardcoded default.
   const name = speciesNameFromGene(row.genetics)
@@ -388,9 +425,10 @@ function toCreature(
   return {
     assetId: row.asset_id,
     name,
+    nickname: nftName || undefined,
     species: sp?.family ?? name,
     stage: row.stage,
-    maxStage: Math.max(0, (sp?.max_stage ?? 5) - 1),
+    maxStage: Math.max(0, sp?.max_stage ?? 5),
     rarity,
     growth,
     // At max stage the progress UI is hidden; keep growthToNext sane otherwise.
@@ -408,6 +446,16 @@ function toCreature(
     earnFull: earn.earnFull,
     earnMult: earn.earnMult,
   }
+}
+
+/**
+ * The clock the action gates run on: chain head time from the last read (refreshed
+ * on the 20s poll, so at most ~20s stale) and only the device clock when nothing
+ * has been read yet. Head time is authoritative for the UTC day boundary that
+ * decides today's feed quota — a device clock set a day forward must not unlock it.
+ */
+function chainNow(r: Resources): number {
+  return r.now > 0 ? r.now : Math.floor(Date.now() / 1000)
 }
 
 /**
@@ -429,12 +477,18 @@ function parseAssetAmount(asset: string | undefined): number {
  * evolve bumps stage, harvest bumps last_harvest, hatch adds a creature), and the
  * HATCH balance (claimreward). Creatures are sorted by asset_id so ordering from
  * the RPC never changes the signature.
+ *
+ * NFT names are in here too: `setname` writes ONLY to the NFT's mutable data and
+ * touches no contract table, so without them a rename moves nothing in this
+ * signature and the post-action poll would spin out its whole budget on every
+ * rename instead of stopping the moment the node catches up.
  */
 function stateSignature(
   creatures: CreatureRow[],
   player: PlayerRow | null,
   claim: ClaimRow | null,
   hatch: number,
+  nftNames: Record<string, string>,
 ): string {
   const p = player
     ? [
@@ -453,7 +507,10 @@ function stateSignature(
   const cs = creatures
     .slice()
     .sort((a, b) => (a.asset_id < b.asset_id ? -1 : a.asset_id > b.asset_id ? 1 : 0))
-    .map((c) => `${c.asset_id}:${c.stage}:${c.growth_base}:${c.fed_growth}:${c.born_at}:${c.last_fed}:${c.last_bred}`)
+    .map(
+      (c) =>
+        `${c.asset_id}:${c.stage}:${c.growth_base}:${c.fed_growth}:${c.born_at}:${c.last_fed}:${c.last_bred}:${nftNames[c.asset_id] ?? ''}`,
+    )
     .join('|')
   return `${creatures.length}#${p}#${cs}#${hatch}`
 }
@@ -492,6 +549,10 @@ function toResources(
     eggHarvestedToday,
     poolBalance: rewardPool ? parseAssetAmount(rewardPool.balance) : 0,
     paused: !!cfg?.paused,
+    feedsToday,
+    feedDailyCap: cap,
+    evolveCost: cfg?.evolve_cost ?? 0,
+    now,
   }
 }
 
@@ -523,6 +584,9 @@ export function useGameActions(): GameActions {
   const [animating, setAnimating] = useState(false)
   const [lastAction, setLastAction] = useState<LastAction | null>(null)
   const [pendingSign, setPendingSign] = useState<PendingSign | null>(null)
+  // The creature whose setname tx is in flight — the card shows "Saving on chain…"
+  // until the read node returns the new NFT name (not merely until it broadcasts).
+  const [renamingId, setRenamingId] = useState<string | null>(null)
   const [breedCost, setBreedCost] = useState<number | null>(null)
   const [hatchCost, setHatchCost] = useState<number | null>(null)
   const [hatchOdds, setHatchOdds] = useState<HatchOdds[]>(() => hatchOddsFromConfig(null))
@@ -569,7 +633,10 @@ export function useGameActions(): GameActions {
     const actor = currentActor()
     if (!actor) return
     try {
-      const state = await fetchGameState(actor)
+      // Pass the collection we already know (if any) so the NFT-name read filters
+      // to OUR assets; on the very first read it falls back to the contract account,
+      // which is the collection this game deployed under.
+      const state = await fetchGameState(actor, configRef.current?.collection)
       const token = state.config?.token_contract ?? 'hatchtokens1'
       const hatch = await getTokenBalance(token, actor, 'HATCH')
       if (state.config) {
@@ -583,10 +650,20 @@ export function useGameActions(): GameActions {
       }
       setResources(toResources(state.config, state.player, state.claim, state.rewardPool, hatch, state.now))
       const breedCd = state.config?.breed_cd ?? 86400
-      setCreatures(state.creatures.map((c) => toCreature(c, state.species, breedCd, state.config)))
+      setCreatures(
+        state.creatures.map((c) =>
+          toCreature(c, state.species, breedCd, state.config, state.nftNames[c.asset_id]),
+        ),
+      )
       // Record the on-chain signature so a post-action poll can detect when the
       // read node has advanced past the pre-action state.
-      stateSigRef.current = stateSignature(state.creatures, state.player, state.claim, hatch)
+      stateSigRef.current = stateSignature(
+        state.creatures,
+        state.player,
+        state.claim,
+        hatch,
+        state.nftNames,
+      )
     } catch (err) {
       // A read hiccup must not crash the dashboard; surface it softly.
       setLastAction({ ok: false, label: 'Refresh', error: readableError(err) })
@@ -795,8 +872,30 @@ export function useGameActions(): GameActions {
     [run],
   )
   const feed = useCallback(
-    (assetId: string) =>
-      run('Feed', async (s) => {
+    (assetId: string) => {
+      // Mirror the contract's feed() pre-checks (actionGates.ts) BEFORE broadcasting.
+      // Without this the player taps a live button and the chain answers with a raw
+      // "assertion failure with message: feed daily cap reached".
+      const c = creaturesRef.current.find((c) => c.assetId === assetId)
+      if (!c) {
+        setLastAction({ ok: false, label: 'Feed', error: 'Creature not found' })
+        return Promise.resolve()
+      }
+      const r = resourcesRef.current
+      const gate = computeFeedGate({
+        now: chainNow(r),
+        lastFed: c.lastFed,
+        feedCd: c.feedCd,
+        stage: c.stage,
+        feedsToday: r.feedsToday,
+        feedDailyCap: r.feedDailyCap,
+        paused: r.paused,
+      })
+      if (!gate.allowed) {
+        setLastAction({ ok: false, label: 'Feed', error: feedBlockMessage(gate) })
+        return Promise.resolve()
+      }
+      return run('Feed', async (s) => {
         // Optimistically bump the creature's growth so the green bar drops
         // immediately, and reset its satiety clock (lastFed → now) so the Feed-v2
         // meter refills at once; refresh() reconciles with on-chain truth after.
@@ -809,7 +908,8 @@ export function useGameActions(): GameActions {
           ),
         )
         return s.push('feed', { owner: s.actor, asset_id: assetId })
-      }),
+      })
+    },
     [run],
   )
   // Awaken — wake a sleeping (stage 0) creature EARLY by paying WAX. This is NOT
@@ -857,16 +957,24 @@ export function useGameActions(): GameActions {
         setLastAction({ ok: false, label: 'Evolve', error: 'Creature not found' })
         return Promise.resolve()
       }
-      if (c.stage >= c.maxStage) {
-        setLastAction({ ok: false, label: 'Evolve', error: 'Already at max stage — cannot evolve further' })
-        return Promise.resolve()
-      }
-      if (c.growth < c.growthToNext) {
-        setLastAction({
-          ok: false,
-          label: 'Evolve',
-          error: `Need ${c.growthToNext} growth (have ${c.growth}) — feed first`,
-        })
+      // Mirror every evolve() check the contract runs (actionGates.ts) — including
+      // the EGG cost, which scales as evolve_cost × (stage + 1) and is paid in EGG,
+      // not HATCH. Blocking here is what keeps a raw chain assertion off the screen.
+      const r = resourcesRef.current
+      const gate = computeEvolveGate({
+        now: chainNow(r),
+        stage: c.stage,
+        maxStage: c.maxStage,
+        growth: c.growth,
+        growthToNext: c.growthToNext,
+        lastFed: c.lastFed,
+        fedDur: c.fedDur,
+        egg: r.egg,
+        evolveCost: r.evolveCost,
+        paused: r.paused,
+      })
+      if (!gate.allowed) {
+        setLastAction({ ok: false, label: 'Evolve', error: evolveBlockMessage(gate) })
         return Promise.resolve()
       }
       return run('Evolve', (s) => s.push('evolve', { owner: s.actor, asset_id: assetId }))
@@ -888,6 +996,40 @@ export function useGameActions(): GameActions {
         return Promise.resolve()
       }
       return run('Burn', (s) => s.push('burncreature', { owner: s.actor, asset_id: assetId }))
+    },
+    [run],
+  )
+
+  /**
+   * Rename a creature ON CHAIN (`setname`). The contract writes the name into the
+   * NFT's mutable data via atomicassets::setassetdata, so it is not a local label
+   * — it ships with the asset and shows up wherever the NFT is read.
+   *
+   * `''` clears the name back to the species default. `renamingId` drives the
+   * card's "Saving on chain…" state; it stays set through run()'s post-action
+   * poll, so it only clears once the read node actually returns the new name.
+   *
+   * NOTE (deliberate): configv3 carries a `name_cost` (1 HATCH) but the deployed
+   * contract does NOT charge it — a verified rename left the balance untouched.
+   * So the UI charges nothing either. Deducting here would put the HUD out of
+   * step with the chain; if the fee is ever enforced, the balance read picks it
+   * up on the next refresh with no change needed here.
+   */
+  const rename = useCallback(
+    (assetId: string, newName: string) => {
+      const clean = clampCreatureName(newName.trim())
+
+      const c = creaturesRef.current.find((c) => c.assetId === assetId)
+      if (!c) {
+        setLastAction({ ok: false, label: 'Rename', error: 'Creature not found' })
+        return Promise.resolve()
+      }
+      // Nothing to sign — don't make the player pay CPU for a no-op.
+      if (clean === (c.nickname ?? '')) return Promise.resolve()
+      setRenamingId(assetId)
+      return run('Rename', (s) =>
+        s.push('setname', { owner: s.actor, asset_id: assetId, new_name: clean }),
+      ).finally(() => setRenamingId(null))
     },
     [run],
   )
@@ -1016,6 +1158,8 @@ export function useGameActions(): GameActions {
     breed,
     accelerate,
     burn,
+    rename,
+    renamingId,
     harvest,
     claimReward,
     refresh,

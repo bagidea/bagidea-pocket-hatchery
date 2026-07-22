@@ -156,6 +156,46 @@
   color: #F9A8D4;
 }
 
+/* ── How to Play button (header) ──────────────────────────────── */
+.helpBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  font: 600 12px/1 'Nunito', var(--ph-font-body), sans-serif;
+  color: rgba(147, 197, 253, 0.85);
+  background: rgba(99, 102, 241, 0.10);
+  border: 1px solid rgba(99, 102, 241, 0.20);
+  border-radius: 99px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+
+.helpBtn:hover {
+  background: rgba(99, 102, 241, 0.22);
+  color: #93C5FD;
+  border-color: rgba(99, 102, 241, 0.38);
+}
+
+/* ── How to Play link (landing card) ──────────────────────────── */
+.helpBtnLink {
+  border: none;
+  background: none;
+  color: rgba(147, 197, 253, 0.60);
+  font: 600 12px/1 'Nunito', var(--ph-font-body), sans-serif;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: color 0.15s, background 0.15s;
+  margin-top: 4px;
+}
+
+.helpBtnLink:hover {
+  color: #93C5FD;
+  background: rgba(99, 102, 241, 0.10);
+}
+
 /* ── Main content ──────────────────────────────────────────────── */
 .main {
   flex: 1;
@@ -232,6 +272,18 @@
   text-transform: uppercase;
   letter-spacing: 0.6px;
   line-height: 1;
+}
+
+/* What this currency/quota actually buys. Kept tiny and muted so the number
+   still leads, but present so EGG is never mistaken for $HATCH. */
+.chipNote {
+  margin-top: 2px;
+  font-size: 9.5px;
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--ph-text-muted);
+  letter-spacing: 0.2px;
+  opacity: 0.85;
 }
 
 .chipValue {

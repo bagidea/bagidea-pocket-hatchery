@@ -344,6 +344,39 @@
   outline: none;
 }
 
+/* "Saving name on chain…" — a rename is a real transaction, so it gets an
+   explicit in-flight line rather than the silent optimistic swap a local
+   preference used to get. Sits under the name and above the species line. */
+.nameSaving {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  color: var(--ph-text-muted, #9FB0C7);
+}
+
+.nameSavingDot {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ph-border-focus, #60A5FA);
+  animation: nameSavingPulse 1s ease-in-out infinite;
+}
+
+@keyframes nameSavingPulse {
+  0%, 100% { opacity: 0.25; transform: scale(0.8); }
+  50%      { opacity: 1;    transform: scale(1); }
+}
+
+/* A player who asked for no motion still gets the state, just without the pulse. */
+@media (prefers-reduced-motion: reduce) {
+  .nameSavingDot { animation: none; opacity: 1; }
+}
+
 .topBarRight {
   display: flex;
   align-items: center;
@@ -544,6 +577,20 @@
   z-index: 3;
 }
 .evolveFull { grid-column: 1 / -1; }
+
+/* Why Evolve is locked — sits directly under the disabled button so the reason
+   is read in the same glance as the block. Amber = "your input is needed",
+   matching the Sign sheet and the daily-quota language elsewhere. */
+.evolveHint {
+  grid-column: 1 / -1;
+  margin-top: -2px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: #FBBF24;
+  letter-spacing: 0.01em;
+}
 
 .btn {
   display: inline-flex;

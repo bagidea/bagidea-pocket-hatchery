@@ -1,4 +1,5 @@
 {
+  "_deprecated": "2026-07-19 — pockethatch1 is DEAD. This file targets the OLD pre-6-tier contract. The live config is on phgamecreatr (configv3, season 4). Do NOT use for new deploys. See MEMORY.md.",
   "_note": "configv3 setconfig payload for pockethatch1 (the account actually deployed on WAX testnet, code_hash 3d16ac28, table configv2 pre-migration). Target = pockethatch1, NOT phgamecreatr. Auth: setconfig require_auth(get_self()) => must be signed by pockethatch1@active. season_index=1 written DIRECTLY here (setconfig sets the whole singleton); do NOT also run newseason — newseason does season_index+=1 and would push it to 2. Run ONLY after setcode(ccbadced)+setabi(configv3) so the ABI can encode the new fields. season_started is a placeholder epoch — regenerate to head-block time at deploy.",
   "_boss_locked": "fed_dur 48/72/120h · feed_cost 12 · feed_cd 6h(21600) · feed_daily_cap 3 · earn_mult x1/1.5/2.5 · rarity_w 100/65/22 (3-tier).",
   "cfg": {

@@ -1,0 +1,25 @@
+{
+  "_purpose": "AtomicAssets createschema for creaturesv2 — adds img + backimg fields for card rendering on AtomicHub.",
+  "_status": "DRY-RUN ONLY — DO NOT BROADCAST until CEO greenlights. See deploy/creaturesv2-pipeline.sh for the full migration plan.",
+  "_date": "2026-07-19",
+  "_authorized_creator_note": "phgamecreatr is in authorized_accounts of collection phgamecreatr (verified on-chain 2026-07-19).",
+  "payload": {
+    "authorized_creator": "phgamecreatr",
+    "collection_name": "phgamecreatr",
+    "schema_name": "creaturesv2",
+    "schema_format": [
+      {"name": "genetics", "type": "string"},
+      {"name": "stage",    "type": "uint32"},
+      {"name": "growth",   "type": "uint64"},
+      {"name": "name",     "type": "string"},
+      {"name": "rarity",   "type": "uint64"},
+      {"name": "cosmetic", "type": "uint64"},
+      {"name": "img",      "type": "image"},
+      {"name": "backimg",  "type": "image"}
+    ]
+  },
+  "_fields_added": {
+    "img":     {"type": "image", "purpose": "หน้าการ์ด — front card art (IPFS CID)"},
+    "backimg": {"type": "image", "purpose": "หลังการ์ด — back card art (IPFS CID)"}
+  }
+}

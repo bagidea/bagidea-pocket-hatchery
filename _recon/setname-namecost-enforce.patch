@@ -1,0 +1,92 @@
+# Patch: Enforce name_cost in setname
+# ==============================================================================
+# File:   contract/pockethatch/pockethatch.cpp
+# Action: setname() — line 890-916
+# Status: UN-APPLIED — awaiting CEO approval before setcode
+# Date:   2026-07-19
+#
+# WHAT:  Add HATCH token burn to enforce `cfg.name_cost` in setname action.
+#        Currently setname charges ZERO HATCH despite config saying 1.0000 HATCH.
+#
+# WHY:   CEO audit revealed name_cost is a ghost field — config says 1 HATCH but
+#        setname ignores it entirely. Fix uses burn_hatch() helper which:
+#          1. Transfers cfg.name_cost from player → contract (inline transfer)
+#          2. Funds the reward pool with the burnt tokens
+#          3. Tracks burn stats on player row
+#        This is the SAME pattern used by accelerate() at line 877.
+#
+# GUARD: The burn_hatch() pattern sends from=player → to=get_self() (contract),
+#        so fee_account ≠ get_self() guard is NOT triggered — the transfer is
+#        always player→contract, never contract→fee_account. This avoids the
+#        "cannot transfer to self" bug that hit on_wax_transfer (where the wake
+#        forward was contract→fee_account and fee_account==get_self()).
+#
+#        If CEO prefers to ALSO forward to fee_account when fee_account≠self:
+#        see OPTION B in comments below the patch.
+#
+# RISK:  Minimal — single-action change, no table migration, no ABI change.
+#        Existing rename-NFT logic untouched. Only adds cost enforcement.
+# ==============================================================================
+
+--- a/contract/pockethatch/pockethatch.cpp
++++ b/contract/pockethatch/pockethatch.cpp
+@@ -896,8 +896,17 @@ void pockethatch::setname(name owner, uint64_t asset_id, const std::string& new_
+     check(c_it->owner == owner, "not your creature");
+
+     config_row cfg = _cfg();
+
++    // 🔥 Deduct name_cost HATCH from player (v3 patch — was ghost field)
++    if (cfg.name_cost.amount > 0) {
++        // burn_hatch sends player→contract→reward_pool.
++        // Safe: from=owner≠get_self() — no "cannot transfer to self" risk.
++        burn_hatch(owner, cfg.name_cost, "setname:" + std::to_string(asset_id));
++    }
++
+     // Mirror to NFT (NFT required — reject if not found)
+     check(nft_exists(cfg.collection, owner, asset_id), "setname requires the NFT to be held by player");
+     {
+         ATTR_MAP new_mut = {
+             {"stage",  ATOM_ATTR((uint32_t)c_it->stage)},
+             {"growth", ATOM_ATTR(c_it->growth_base + c_it->fed_growth)},
+             {"name",   ATOM_ATTR(new_name)}
+
+
+# ==============================================================================
+# OPTION B (alternative): Transfer to fee_account instead of burning
+# ==============================================================================
+# If CEO prefers the fee to go to fee_account (not burned into reward pool),
+# replace the burn_hatch block above with:
+#
+#    // 🔥 Collect name_cost HATCH → fee_account
+#    if (cfg.name_cost.amount > 0) {
+#        if (cfg.fee_account != get_self()) {
+#            // fee_account is external → transfer directly
+#            action(
+#                permission_level{owner, "active"_n},
+#                cfg.token_contract,
+#                "transfer"_n,
+#                token_transfer{owner, cfg.fee_account, cfg.name_cost,
+#                               "setname:" + std::to_string(asset_id)}
+#            ).send();
+#        } else {
+#            // fee_account == get_self() → transfer would be from=owner to=get_self()
+#            // This is ALWAYS safe (from≠to). No "cannot transfer to self" here.
+#            // But to be consistent, either burn it or just let it sit.
+#            burn_hatch(owner, cfg.name_cost, "setname:" + std::to_string(asset_id));
+#        }
+#    }
+#
+# The guard `fee_account != get_self()` here is DEFENSE IN DEPTH — it protects
+# against a future refactor where someone changes the transfer `from` to get_self().
+# In the current code, `from=owner` so it's inherently safe, but the guard ensures
+# this won't break silently if a future dev changes the authorization pattern.
+
+
+# ==============================================================================
+# VERIFICATION NOTES
+# ==============================================================================
+# After setcode:
+#  1. Push setname with a test asset → confirm HATCH balance decreases by 1.0000
+#  2. Verify fee destination: reward pool (Option A) or fee_account (Option B)
+#  3. Verify NFT mutable data still updated correctly
+#  4. Verify no regression: rename without sufficient HATCH should revert

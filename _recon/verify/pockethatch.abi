@@ -1,0 +1,747 @@
+{
+    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT ",
+    "version": "eosio::abi/1.2",
+    "types": [],
+    "structs": [
+        {
+            "name": "accelerate",
+            "base": "",
+            "fields": [
+                {
+                    "name": "owner",
+                    "type": "name"
+                },
+                {
+                    "name": "asset_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "amount",
+                    "type": "asset"
+                }
+            ]
+        },
+        {
+            "name": "breed",
+            "base": "",
+            "fields": [
+                {
+                    "name": "owner",
+                    "type": "name"
+                },
+                {
+                    "name": "parent_a",
+                    "type": "uint64"
+                },
+                {
+                    "name": "parent_b",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "burncreature",
+            "base": "",
+            "fields": [
+                {
+                    "name": "owner",
+                    "type": "name"
+                },
+                {
+                    "name": "asset_id",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "claimreward",
+            "base": "",
+            "fields": [
+                {
+                    "name": "owner",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "clearconfig",
+            "base": "",
+            "fields": []
+        },
+        {
+            "name": "clearpool",
+            "base": "",
+            "fields": []
+        },
+        {
+            "name": "clearspecies",
+            "base": "",
+            "fields": []
+        },
+        {
+            "name": "config_row",
+            "base": "",
+            "fields": [
+                {
+                    "name": "token_contract",
+                    "type": "name"
+                },
+                {
+                    "name": "collection",
+                    "type": "name"
+                },
+                {
+                    "name": "schema_name",
+                    "type": "name"
+                },
+                {
+                    "name": "fee_account",
+                    "type": "name"
+                },
+                {
+                    "name": "paused",
+                    "type": "bool"
+                },
+                {
+                    "name": "hatch_cost",
+                    "type": "uint64"
+                },
+                {
+                    "name": "evolve_cost",
+                    "type": "uint64"
+                },
+                {
+                    "name": "breed_cost",
+                    "type": "asset"
+                },
+                {
+                    "name": "feed_cost",
+                    "type": "uint64"
+                },
+                {
+                    "name": "slot_cost",
+                    "type": "uint64"
+                },
+                {
+                    "name": "cosmetic_cost",
+                    "type": "uint64"
+                },
+                {
+                    "name": "name_cost",
+                    "type": "asset"
+                },
+                {
+                    "name": "install_cap_bonus",
+                    "type": "uint64"
+                },
+                {
+                    "name": "feed_cd",
+                    "type": "uint32"
+                },
+                {
+                    "name": "harvest_cd",
+                    "type": "uint32"
+                },
+                {
+                    "name": "breed_cd",
+                    "type": "uint32"
+                },
+                {
+                    "name": "feed_daily_cap",
+                    "type": "uint32"
+                },
+                {
+                    "name": "daily_egg_cap",
+                    "type": "uint64"
+                },
+                {
+                    "name": "offline_cap_h",
+                    "type": "uint32"
+                },
+                {
+                    "name": "tap_egg_cap",
+                    "type": "uint64"
+                },
+                {
+                    "name": "feed_boost",
+                    "type": "uint64"
+                },
+                {
+                    "name": "season_index",
+                    "type": "uint16"
+                },
+                {
+                    "name": "season_started",
+                    "type": "uint32"
+                },
+                {
+                    "name": "rng_oracle",
+                    "type": "name"
+                },
+                {
+                    "name": "rarity_w_common",
+                    "type": "uint16"
+                },
+                {
+                    "name": "rarity_w_uncommon",
+                    "type": "uint16"
+                },
+                {
+                    "name": "rarity_w_rare",
+                    "type": "uint16"
+                },
+                {
+                    "name": "rarity_w_epic",
+                    "type": "uint16"
+                },
+                {
+                    "name": "rarity_w_legendary",
+                    "type": "uint16"
+                },
+                {
+                    "name": "rarity_w_mythic",
+                    "type": "uint16"
+                },
+                {
+                    "name": "burn_base_hatch",
+                    "type": "asset"
+                },
+                {
+                    "name": "fed_dur_common",
+                    "type": "uint32"
+                },
+                {
+                    "name": "fed_dur_uncommon",
+                    "type": "uint32"
+                },
+                {
+                    "name": "fed_dur_rare",
+                    "type": "uint32"
+                },
+                {
+                    "name": "fed_dur_epic",
+                    "type": "uint32"
+                },
+                {
+                    "name": "fed_dur_legendary",
+                    "type": "uint32"
+                },
+                {
+                    "name": "fed_dur_mythic",
+                    "type": "uint32"
+                },
+                {
+                    "name": "earn_mult_common",
+                    "type": "uint16"
+                },
+                {
+                    "name": "earn_mult_uncommon",
+                    "type": "uint16"
+                },
+                {
+                    "name": "earn_mult_rare",
+                    "type": "uint16"
+                },
+                {
+                    "name": "earn_mult_epic",
+                    "type": "uint16"
+                },
+                {
+                    "name": "earn_mult_legendary",
+                    "type": "uint16"
+                },
+                {
+                    "name": "earn_mult_mythic",
+                    "type": "uint16"
+                },
+                {
+                    "name": "cap_scales_rarity",
+                    "type": "uint8"
+                },
+                {
+                    "name": "awaken_dur_common",
+                    "type": "uint32"
+                },
+                {
+                    "name": "awaken_dur_uncommon",
+                    "type": "uint32"
+                },
+                {
+                    "name": "awaken_dur_rare",
+                    "type": "uint32"
+                },
+                {
+                    "name": "awaken_dur_epic",
+                    "type": "uint32"
+                },
+                {
+                    "name": "awaken_dur_legendary",
+                    "type": "uint32"
+                },
+                {
+                    "name": "awaken_dur_mythic",
+                    "type": "uint32"
+                },
+                {
+                    "name": "wax_contract",
+                    "type": "name"
+                },
+                {
+                    "name": "wake_cost_common",
+                    "type": "asset"
+                },
+                {
+                    "name": "wake_cost_uncommon",
+                    "type": "asset"
+                },
+                {
+                    "name": "wake_cost_rare",
+                    "type": "asset"
+                },
+                {
+                    "name": "wake_cost_epic",
+                    "type": "asset"
+                },
+                {
+                    "name": "wake_cost_legendary",
+                    "type": "asset"
+                },
+                {
+                    "name": "wake_cost_mythic",
+                    "type": "asset"
+                },
+                {
+                    "name": "burn_egg_common",
+                    "type": "uint64"
+                },
+                {
+                    "name": "burn_egg_uncommon",
+                    "type": "uint64"
+                },
+                {
+                    "name": "burn_egg_rare",
+                    "type": "uint64"
+                },
+                {
+                    "name": "burn_egg_epic",
+                    "type": "uint64"
+                },
+                {
+                    "name": "burn_egg_legendary",
+                    "type": "uint64"
+                },
+                {
+                    "name": "burn_egg_mythic",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "equipcosmetic",
+            "base": "",
+            "fields": [
+                {
+                    "name": "owner",
+                    "type": "name"
+                },
+                {
+                    "name": "asset_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "cosmetic_tmpl",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "evolve",
+            "base": "",
+            "fields": [
+                {
+                    "name": "owner",
+                    "type": "name"
+                },
+                {
+                    "name": "asset_id",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "feed",
+            "base": "",
+            "fields": [
+                {
+                    "name": "owner",
+                    "type": "name"
+                },
+                {
+                    "name": "asset_id",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "firsthatch",
+            "base": "",
+            "fields": [
+                {
+                    "name": "owner",
+                    "type": "name"
+                },
+                {
+                    "name": "egg_type",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "fundpool",
+            "base": "",
+            "fields": [
+                {
+                    "name": "amount",
+                    "type": "asset"
+                },
+                {
+                    "name": "source",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "harvest",
+            "base": "",
+            "fields": [
+                {
+                    "name": "owner",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "hatch",
+            "base": "",
+            "fields": [
+                {
+                    "name": "owner",
+                    "type": "name"
+                },
+                {
+                    "name": "egg_type",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "initplayer",
+            "base": "",
+            "fields": [
+                {
+                    "name": "owner",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "newseason",
+            "base": "",
+            "fields": [
+                {
+                    "name": "bootstrap_release",
+                    "type": "asset"
+                }
+            ]
+        },
+        {
+            "name": "rmspecies",
+            "base": "",
+            "fields": [
+                {
+                    "name": "template_id",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "setconfig",
+            "base": "",
+            "fields": [
+                {
+                    "name": "cfg",
+                    "type": "config_row"
+                }
+            ]
+        },
+        {
+            "name": "setname",
+            "base": "",
+            "fields": [
+                {
+                    "name": "owner",
+                    "type": "name"
+                },
+                {
+                    "name": "asset_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "new_name",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "setpaused",
+            "base": "",
+            "fields": [
+                {
+                    "name": "paused",
+                    "type": "bool"
+                }
+            ]
+        },
+        {
+            "name": "setspecies",
+            "base": "",
+            "fields": [
+                {
+                    "name": "sp",
+                    "type": "species_row"
+                }
+            ]
+        },
+        {
+            "name": "species_row",
+            "base": "",
+            "fields": [
+                {
+                    "name": "template_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "growth_rate",
+                    "type": "uint64"
+                },
+                {
+                    "name": "thresh_1",
+                    "type": "uint64"
+                },
+                {
+                    "name": "thresh_2",
+                    "type": "uint64"
+                },
+                {
+                    "name": "thresh_3",
+                    "type": "uint64"
+                },
+                {
+                    "name": "thresh_4",
+                    "type": "uint64"
+                },
+                {
+                    "name": "thresh_5",
+                    "type": "uint64"
+                },
+                {
+                    "name": "yield_0",
+                    "type": "uint64"
+                },
+                {
+                    "name": "yield_1",
+                    "type": "uint64"
+                },
+                {
+                    "name": "yield_2",
+                    "type": "uint64"
+                },
+                {
+                    "name": "yield_3",
+                    "type": "uint64"
+                },
+                {
+                    "name": "yield_4",
+                    "type": "uint64"
+                },
+                {
+                    "name": "yield_5",
+                    "type": "uint64"
+                },
+                {
+                    "name": "max_stage",
+                    "type": "uint8"
+                },
+                {
+                    "name": "egg_weight",
+                    "type": "uint16"
+                },
+                {
+                    "name": "egg_type",
+                    "type": "uint64"
+                },
+                {
+                    "name": "family",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "unlockslot",
+            "base": "",
+            "fields": [
+                {
+                    "name": "owner",
+                    "type": "name"
+                },
+                {
+                    "name": "slot_index",
+                    "type": "uint8"
+                }
+            ]
+        },
+        {
+            "name": "withdraw",
+            "base": "",
+            "fields": [
+                {
+                    "name": "token_contract",
+                    "type": "name"
+                },
+                {
+                    "name": "quantity",
+                    "type": "asset"
+                },
+                {
+                    "name": "to",
+                    "type": "name"
+                },
+                {
+                    "name": "memo",
+                    "type": "string"
+                }
+            ]
+        }
+    ],
+    "actions": [
+        {
+            "name": "accelerate",
+            "type": "accelerate",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "breed",
+            "type": "breed",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "burncreature",
+            "type": "burncreature",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "claimreward",
+            "type": "claimreward",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "clearconfig",
+            "type": "clearconfig",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "clearpool",
+            "type": "clearpool",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "clearspecies",
+            "type": "clearspecies",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "equipcosmetic",
+            "type": "equipcosmetic",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "evolve",
+            "type": "evolve",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "feed",
+            "type": "feed",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "firsthatch",
+            "type": "firsthatch",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "fundpool",
+            "type": "fundpool",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "harvest",
+            "type": "harvest",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "hatch",
+            "type": "hatch",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "initplayer",
+            "type": "initplayer",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "newseason",
+            "type": "newseason",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "rmspecies",
+            "type": "rmspecies",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "setconfig",
+            "type": "setconfig",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "setname",
+            "type": "setname",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "setpaused",
+            "type": "setpaused",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "setspecies",
+            "type": "setspecies",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "unlockslot",
+            "type": "unlockslot",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "withdraw",
+            "type": "withdraw",
+            "ricardian_contract": ""
+        }
+    ],
+    "tables": [],
+    "ricardian_clauses": [],
+    "variants": [],
+    "action_results": []
+}

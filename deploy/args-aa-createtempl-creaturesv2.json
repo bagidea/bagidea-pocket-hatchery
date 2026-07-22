@@ -1,0 +1,150 @@
+{
+  "_purpose": "AtomicAssets createtempl payloads for creaturesv2 schema — 7 templates (6 species migrated + 1 new mythic).",
+  "_status": "DRY-RUN ONLY — DO NOT BROADCAST until CEO greenlights + IPFS pin complete + CIDs filled.",
+  "_date": "2026-07-19",
+  "_note": "Art is tier-based: one front/back pair per rarity tier shared across all species of that tier. Replace CID_PLACEHOLDER_* with real IPFS CIDs after pinning. Each field is a simple string 'CID' — AtomicAssets renders it as IPFS image via the schema type definitions.",
+
+  "_cid_placeholder_map": {
+    "CID_PLACEHOLDER_COMMON_FRONT":     "→ nft-front-common.png    (334,706 bytes)",
+    "CID_PLACEHOLDER_COMMON_BACK":      "→ nft-back-common.png     (301,516 bytes)",
+    "CID_PLACEHOLDER_UNCOMMON_FRONT":   "→ nft-front-uncommon.png  (328,263 bytes)",
+    "CID_PLACEHOLDER_UNCOMMON_BACK":    "→ nft-back-uncommon.png   (359,558 bytes)",
+    "CID_PLACEHOLDER_RARE_FRONT":       "→ nft-front-rare.png      (333,639 bytes)",
+    "CID_PLACEHOLDER_RARE_BACK":        "→ nft-back-rare.png       (341,225 bytes)",
+    "CID_PLACEHOLDER_EPIC_FRONT":       "→ nft-front-epic.png      (356,790 bytes)",
+    "CID_PLACEHOLDER_EPIC_BACK":        "→ nft-back-epic.png       (365,138 bytes)",
+    "CID_PLACEHOLDER_LEGENDARY_FRONT":  "→ nft-front-legendary.png (350,762 bytes)",
+    "CID_PLACEHOLDER_LEGENDARY_BACK":   "→ nft-back-legendary.png  (359,506 bytes)",
+    "CID_PLACEHOLDER_MYTHIC_FRONT":     "→ nft-front-mythic.png    (441,893 bytes)",
+    "CID_PLACEHOLDER_MYTHIC_BACK":      "→ nft-back-mythic.png     (679,501 bytes)"
+  },
+
+  "_templates": [
+    {
+      "_species": "Emberling · Fire · Common (rarity 1)",
+      "_old_template_id": 662976,
+      "_card_art": "common tier",
+      "authorized_creator": "phgamecreatr",
+      "collection_name": "phgamecreatr",
+      "schema_name": "creaturesv2",
+      "transferable": true,
+      "burnable": true,
+      "max_supply": 0,
+      "immutable_data": [
+        {"key": "name",    "value": ["string", "Emberling"]},
+        {"key": "rarity",  "value": ["uint64", 1]},
+        {"key": "img",     "value": ["string", "CID_PLACEHOLDER_COMMON_FRONT"]},
+        {"key": "backimg", "value": ["string", "CID_PLACEHOLDER_COMMON_BACK"]}
+      ]
+    },
+    {
+      "_species": "Blazetail · Fire · Uncommon (rarity 2)",
+      "_old_template_id": 662977,
+      "_card_art": "uncommon tier",
+      "authorized_creator": "phgamecreatr",
+      "collection_name": "phgamecreatr",
+      "schema_name": "creaturesv2",
+      "transferable": true,
+      "burnable": true,
+      "max_supply": 0,
+      "immutable_data": [
+        {"key": "name",    "value": ["string", "Blazetail"]},
+        {"key": "rarity",  "value": ["uint64", 2]},
+        {"key": "img",     "value": ["string", "CID_PLACEHOLDER_UNCOMMON_FRONT"]},
+        {"key": "backimg", "value": ["string", "CID_PLACEHOLDER_UNCOMMON_BACK"]}
+      ]
+    },
+    {
+      "_species": "Drakember · Fire · Rare (rarity 3)",
+      "_old_template_id": 662978,
+      "_card_art": "rare tier",
+      "authorized_creator": "phgamecreatr",
+      "collection_name": "phgamecreatr",
+      "schema_name": "creaturesv2",
+      "transferable": true,
+      "burnable": true,
+      "max_supply": 0,
+      "immutable_data": [
+        {"key": "name",    "value": ["string", "Drakember"]},
+        {"key": "rarity",  "value": ["uint64", 3]},
+        {"key": "img",     "value": ["string", "CID_PLACEHOLDER_RARE_FRONT"]},
+        {"key": "backimg", "value": ["string", "CID_PLACEHOLDER_RARE_BACK"]}
+      ]
+    },
+    {
+      "_species": "Foxling · Leaf · Rare (rarity 3)",
+      "_old_template_id": 663046,
+      "_card_art": "rare tier (shared with Drakember)",
+      "authorized_creator": "phgamecreatr",
+      "collection_name": "phgamecreatr",
+      "schema_name": "creaturesv2",
+      "transferable": true,
+      "burnable": true,
+      "max_supply": 0,
+      "immutable_data": [
+        {"key": "name",    "value": ["string", "Foxling"]},
+        {"key": "rarity",  "value": ["uint64", 3]},
+        {"key": "img",     "value": ["string", "CID_PLACEHOLDER_RARE_FRONT"]},
+        {"key": "backimg", "value": ["string", "CID_PLACEHOLDER_RARE_BACK"]}
+      ]
+    },
+    {
+      "_species": "Foxling · Leaf · Epic (rarity 4)",
+      "_old_template_id": 663047,
+      "_card_art": "epic tier",
+      "authorized_creator": "phgamecreatr",
+      "collection_name": "phgamecreatr",
+      "schema_name": "creaturesv2",
+      "transferable": true,
+      "burnable": true,
+      "max_supply": 0,
+      "immutable_data": [
+        {"key": "name",    "value": ["string", "Foxling"]},
+        {"key": "rarity",  "value": ["uint64", 4]},
+        {"key": "img",     "value": ["string", "CID_PLACEHOLDER_EPIC_FRONT"]},
+        {"key": "backimg", "value": ["string", "CID_PLACEHOLDER_EPIC_BACK"]}
+      ]
+    },
+    {
+      "_species": "Foxling · Leaf · Legendary (rarity 5)",
+      "_old_template_id": 663048,
+      "_card_art": "legendary tier",
+      "authorized_creator": "phgamecreatr",
+      "collection_name": "phgamecreatr",
+      "schema_name": "creaturesv2",
+      "transferable": true,
+      "burnable": true,
+      "max_supply": 0,
+      "immutable_data": [
+        {"key": "name",    "value": ["string", "Foxling"]},
+        {"key": "rarity",  "value": ["uint64", 5]},
+        {"key": "img",     "value": ["string", "CID_PLACEHOLDER_LEGENDARY_FRONT"]},
+        {"key": "backimg", "value": ["string", "CID_PLACEHOLDER_LEGENDARY_BACK"]}
+      ]
+    },
+    {
+      "_species": "Foxling · Leaf · Mythic (rarity 6)",
+      "_old_template_id": null,
+      "_new": true,
+      "_note": "NEW — no old template on chain. Created because Monanisa delivered mythic-tier card art. Serves as the apex rarity for Foxling line.",
+      "_card_art": "mythic tier",
+      "authorized_creator": "phgamecreatr",
+      "collection_name": "phgamecreatr",
+      "schema_name": "creaturesv2",
+      "transferable": true,
+      "burnable": true,
+      "max_supply": 0,
+      "immutable_data": [
+        {"key": "name",    "value": ["string", "Foxling"]},
+        {"key": "rarity",  "value": ["uint64", 6]},
+        {"key": "img",     "value": ["string", "CID_PLACEHOLDER_MYTHIC_FRONT"]},
+        {"key": "backimg", "value": ["string", "CID_PLACEHOLDER_MYTHIC_BACK"]}
+      ]
+    }
+  ],
+
+  "_pending_species": [
+    "Flicker (Electric)", "Aquari (Water)", "Terradon (Earth)", "Zephyrix (Wind)", "Luminix (Light)"
+  ],
+  "_pending_species_note": "These species are designed but not yet on chain. Their card art will use the same tier-based front/back — just add templates referencing the existing tier CIDs when ready."
+}

@@ -19,11 +19,14 @@ RPC="${PH_RPC:-https://waxtestnet.greymass.com}"
 # Run cleos against the chosen RPC. Pass args normally:  c get account foo
 c() { cleos -u "$RPC" "$@"; }
 
+# DEPRECATED (2026-07-19): This script targets pockethatch1 — the OLD pre-6-tier
+# contract that is now DEAD. The live contract is phgamecreatr (code_hash 424eef18,
+# configv3). Do NOT use this for new deploys. See MEMORY.md § @deprecated:pockethatch1.
 # Contract account — must be exactly 12 chars (a free WAX name).
 # "pockethatch" is 11 chars = a premium name that needs a name-auction bid
-# (the original blocker: "no active bid for name"). So we deploy to pockethatch1
-# and use pockethatch1 as the collection_name too (one name everywhere).
-CONTRACT="pockethatch1"
+# (the original blocker: "no active bid for name"). So we originally deployed to
+# pockethatch1 and used pockethatch1 as the collection_name too.
+CONTRACT="pockethatch1"  # DEPRECATED — use phgamecreatr
 # ⚠️ IRON WALL (boss rule, reinforced 2026-06-30 review): NEVER hardcode or
 # persist a WIF on disk. The deploy key is injected IN-PROCESS only via the
 # PH_CONTRACT_PRIV env var, set in the interactive shell that runs deploy and
@@ -38,7 +41,7 @@ CONTRACT_PUB="${PH_CONTRACT_PUB:-EOS6u4i4jMNiaEY6h1BkqjGeWJRRmmdKqWKQkBaKJrmSqSN
 TOKEN_CONTRACT="hatchtokens1"
 
 # AtomicAssets collection + schema names (name type, NOT accounts → no bid needed).
-COLLECTION="pockethatch1"
+COLLECTION="pockethatch1"  # DEPRECATED — use phgamecreatr
 SCHEMA="creatures"
 
 # The player account that will run the growth loop (creator account doubles as player).

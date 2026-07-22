@@ -1,4 +1,8 @@
-// Live growth-loop prover for pockethatch1 on WAX testnet.
+// DEPRECATED (2026-07-19) — pockethatch1 is dead. This script targets the OLD
+// pre-6-tier contract. The live contract is phgamecreatr. Do NOT run this.
+// See MEMORY.md § @deprecated:pockethatch1.
+//
+// Live growth-loop prover for pockethatch1 on WAX testnet (HISTORICAL).
 // Signs locally with eosjs (waxwingsuper key) — bypasses keosd/get_required_keys.
 // Decrypts the waxwingsuper key straight from the waxwing keystore (no plaintext on disk).
 const fs = require("fs");

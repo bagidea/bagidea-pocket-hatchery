@@ -1,0 +1,15 @@
+{
+  "_purpose": "AtomicAssets setschematyp for creaturesv2 — tells AtomicHub that img/backimg are image fields (IPFS render).",
+  "_status": "DRY-RUN ONLY — DO NOT BROADCAST until CEO greenlights.",
+  "_date": "2026-07-19",
+  "_note": "Without this, AtomicHub won't know to render img/backimg as images in the card UI.",
+  "payload": {
+    "authorized_editor": "phgamecreatr",
+    "collection_name": "phgamecreatr",
+    "schema_name": "creaturesv2",
+    "schema_format_type": [
+      {"name": "img",     "mediatype": "image", "info": "Front card art"},
+      {"name": "backimg", "mediatype": "image", "info": "Back card art"}
+    ]
+  }
+}

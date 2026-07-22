@@ -3,8 +3,8 @@ import { decodeGeneCSS, decodeGeneRender } from '../geneDecoder'
 import { fetchSpeciesSvg, renderCreatureCached, rasterizeCreatureBitmap } from '../creatureRender'
 import { SatietyMeter } from './SatietyMeter'
 import { AwakenMeter } from './AwakenMeter'
-import type { SatietyConfig } from '../satiety'
-import { MAX_NICKNAME } from '../prefs'
+import { fedDurFor, type SatietyConfig } from '../satiety'
+import { computeEvolveGate, evolveBlockMessage, clampCreatureName } from '../actionGates'
 import styles from './CreatureCard.module.css'
 
 const BASE = import.meta.env.BASE_URL
@@ -62,10 +62,19 @@ interface CreatureCardProps {
   disabled?: boolean
   /** Feed-v2 decay clock override (preview uses a fast one). Defaults to MOCK. */
   satietyConfig?: SatietyConfig
-  /** Player-set nickname (prefs.ts). Empty/absent → the card shows the species name. */
+  /**
+   * The creature's on-chain name — the NFT's mutable `name` attribute, written by
+   * the contract's `setname`. Empty/absent → the card shows the species name.
+   */
   nickname?: string
-  /** Commit a nickname; '' clears it. Omit to hide the rename control. */
+  /**
+   * Commit a name to the chain; '' clears it back to the species name. This
+   * signs a `setname` transaction — it is not a local edit. Omit to hide the
+   * rename control.
+   */
   onRename?: (name: string) => void
+  /** A setname tx for this creature is in flight — the name shows a saving state. */
+  renaming?: boolean
   /** Whether this creature is pinned to the top of the collection. */
   pinned?: boolean
   /** Toggle the pin. Omit to hide the pin control. */
@@ -76,6 +85,19 @@ interface CreatureCardProps {
    * cards smooth. Omit for single/preview cards, which stay fully live.
    */
   staticSprite?: boolean
+  /**
+   * Live player-level numbers the contract checks before feed()/evolve() — the
+   * account-wide daily feed quota, the EGG balance, and configv3.evolve_cost.
+   * Omitted (demo/preview cards) → the card falls back to its old "always
+   * enabled" behaviour instead of inventing a gate off zeroes.
+   */
+  feedsToday?: number
+  feedDailyCap?: number
+  eggBalance?: number
+  /** configv3.evolve_cost — the base EGG cost; the chain charges × (stage + 1). */
+  evolveCost?: number
+  /** configv3.paused — the game is halted on chain and refuses every action. */
+  paused?: boolean
 }
 
 // ── Visual constants ───────────────────────────────────────────────────
@@ -314,9 +336,15 @@ export function CreatureCard({
   satietyConfig,
   nickname,
   onRename,
+  renaming = false,
   pinned = false,
   onTogglePin,
   staticSprite = false,
+  feedsToday,
+  feedDailyCap,
+  eggBalance,
+  evolveCost,
+  paused = false,
 }: CreatureCardProps) {
   const [confirmingBurn, setConfirmingBurn] = useState(false)
   // Grid perf: the sprite is a static bitmap at rest and goes live on
@@ -344,6 +372,35 @@ export function CreatureCard({
   }, [creature.growth, creature.growthToNext])
 
   const isMaxStage = creature.stage >= creature.maxStage
+
+  // Evolve gate — every check the contract's evolve() runs, in its own order
+  // (actionGates.ts). Recomputed each render; the dashboard re-renders on a 1s
+  // tick, so the satiety gate flips the moment the creature goes hungry.
+  // Demo/preview cards pass no chain numbers: they get cost 0 / unlimited EGG, so
+  // only the stage + growth + satiety gates apply, exactly as before.
+  const hasChainCost = evolveCost != null
+  const evolve = computeEvolveGate({
+    now: Math.floor(Date.now() / 1000),
+    stage: creature.stage,
+    maxStage: creature.maxStage,
+    growth: creature.growth,
+    growthToNext: creature.growthToNext,
+    lastFed: creature.lastFed ?? 0,
+    fedDur: creature.fedDur ?? fedDurFor(creature.rarity),
+    egg: eggBalance ?? Number.MAX_SAFE_INTEGER,
+    evolveCost: evolveCost ?? 0,
+    paused,
+  })
+  const evolveLabel = (): string => {
+    switch (evolve.reason) {
+      case 'max-stage': return '🏆 MAX LEVEL'
+      case 'paused': return '⏸️ Game paused'
+      case 'hungry': return '🍽️ Feed before evolving'
+      case 'growth': return `🌱 Needs ${evolve.growthNeeded.toLocaleString()} growth (have ${evolve.growth.toLocaleString()})`
+      case 'egg': return `🥚 Requires ${evolve.cost.toLocaleString()} EGG — you have ${evolve.eggBalance.toLocaleString()}`
+      case 'ok': return hasChainCost ? `✨ Evolve · ${evolve.cost.toLocaleString()} EGG` : '✨ Evolve'
+    }
+  }
   // Asleep = stage 0 (Awaken v2). The boss couldn't tell a sleeping egg apart from
   // an awake creature — so a stage-0 card gets a dimmed sprite + a "💤 Sleeping"
   // veil drawn over the art, making the sleep state obvious at a glance.
@@ -370,8 +427,10 @@ export function CreatureCard({
     <div className={styles.wrap}>
       <article
         className={`${styles.card} ${styles[rarity] || styles.common} ${asleep ? styles.asleep : ''}`}
+        data-testid={`creature-${creature.assetId}`}
         data-rarity={rarity}
         data-asleep={asleep ? '1' : '0'}
+        data-stage={creature.stage}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         onFocusCapture={() => setHovered(true)}
@@ -446,19 +505,23 @@ export function CreatureCard({
             {sm.emoji} {sm.word} · {stageSub}
           </span>
 
-          {/* Name — the player's nickname when set, else the species name. Renaming
-              is cosmetic and local (the contract has no setname yet), so it never
-              hides what the creature IS: the species line below always shows. */}
+          {/* Name — the creature's on-chain NFT name when set, else the species
+              name. Renaming signs `setname`, which writes the name into the NFT's
+              mutable data, so it is the same everywhere the asset is read (this
+              card, the farm, a wallet, a marketplace) and survives a trade. It
+              never hides what the creature IS: the species line below always shows. */}
           {draftName !== null ? (
             <input
               className={styles.nameInput}
               value={draftName}
               autoFocus
-              maxLength={MAX_NICKNAME}
               placeholder={defaultName}
-              aria-label={`Nickname for ${defaultName}`}
+              aria-label={`Name for ${defaultName}`}
               data-testid={`name-input-${creature.assetId}`}
-              onChange={(e) => setDraftName(e.target.value)}
+              /* Clamp by UTF-8 BYTES, not `maxLength` (UTF-16 units): the
+                 contract's 32 is a byte cap, so a Thai or emoji name that fits
+                 maxLength would still be rejected after the player signed. */
+              onChange={(e) => setDraftName(clampCreatureName(e.target.value))}
               onBlur={commitRename}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') commitRename()
@@ -468,31 +531,48 @@ export function CreatureCard({
           ) : (
             <h3 className={styles.name} data-testid={`name-${creature.assetId}`}>
               <span className={styles.nameText}>{displayName}</span>
-              {onRename && (
+              {/* Every rename control is hidden while a setname tx is in flight —
+                  a second signature over the same asset would just race the first. */}
+              {onRename && !renaming && (
                 <button
                   type="button"
                   className={styles.renameBtn}
                   onClick={() => setDraftName(nickname ?? '')}
                   aria-label={`Rename ${displayName}`}
-                  title="Give it a nickname"
+                  title="Name it on chain (writes to the NFT)"
                   data-testid={`rename-${creature.assetId}`}
                 >
                   ✏️
                 </button>
               )}
-              {nickname && (
+              {nickname && onRename && !renaming && (
                 <button
                   type="button"
                   className={styles.renameBtn}
-                  onClick={() => onRename?.('')}
-                  aria-label={`Clear nickname for ${displayName}`}
-                  title={`Clear the nickname (back to ${defaultName})`}
+                  onClick={() => onRename('')}
+                  aria-label={`Clear the name of ${displayName}`}
+                  title={`Clear the name on chain (back to ${defaultName})`}
                   data-testid={`clear-name-${creature.assetId}`}
                 >
                   ✕
                 </button>
               )}
             </h3>
+          )}
+
+          {/* Saving state — the rename is a real transaction, so the player is told
+              it is being written to the chain (and that it takes a moment) rather
+              than watching a name that looks committed but isn't. Stays up through
+              the post-tx poll, so it clears only once the chain read confirms it. */}
+          {renaming && (
+            <div
+              className={styles.nameSaving}
+              role="status"
+              data-testid={`name-saving-${creature.assetId}`}
+            >
+              <span className={styles.nameSavingDot} />
+              Saving name on chain…
+            </div>
           )}
 
           {/* Scientific name + elemental type (real chain family), inline */}
@@ -584,6 +664,8 @@ export function CreatureCard({
               feedCdSec={creature.feedCd}
               earnFull={creature.earnFull}
               earnMult={creature.earnMult}
+              feedsToday={feedsToday}
+              feedDailyCap={feedDailyCap}
             />
           )
         )}
@@ -593,10 +675,27 @@ export function CreatureCard({
           <button
             className={`${styles.btn} ${styles.evolveBtn} ${styles.evolveFull}`}
             onClick={() => { triggerAnim('evolve', 950); onEvolve?.() }}
-            disabled={disabled || isMaxStage || creature.growth < creature.growthToNext}
+            disabled={disabled || !evolve.allowed}
+            title={evolveBlockMessage(evolve)}
+            data-testid={`evolve-${creature.assetId}`}
+            data-evolve-reason={evolve.reason}
           >
-            {isMaxStage ? '🏆 MAX LEVEL' : '✨ Evolve · 50 HATCH'}
+            {evolveLabel()}
           </button>
+
+          {/* Why Evolve is locked — the ONE gate the chain would hit, in plain
+              English, so nobody has to guess (and nobody sees a raw assertion).
+              The EGG/$HATCH distinction is spelled out because they are separate
+              currencies: Evolve is paid in EGG, never in $HATCH. */}
+          {!evolve.allowed && evolve.reason !== 'max-stage' && (
+            <span className={styles.evolveHint} data-testid={`evolve-hint-${creature.assetId}`}>
+              {evolve.reason === 'egg'
+                // The button already states cost vs balance; the hint's job is the
+                // thing that actually confused people — which currency pays.
+                ? 'Evolve is paid in EGG, not $HATCH — harvest more EGG to afford it.'
+                : evolveBlockMessage(evolve)}
+            </span>
+          )}
 
           {onBurn && !confirmingBurn && (
             <button

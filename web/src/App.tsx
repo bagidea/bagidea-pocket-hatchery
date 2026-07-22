@@ -12,6 +12,7 @@ import { summarizeHarvest } from './harvest'
 import { computeClaim, type ClaimState } from './claim'
 import { useCreaturePrefs, matchesQuery, sortPinnedFirst } from './prefs'
 import styles from './App.module.css'
+import { HelpOverlay } from './HelpOverlay'
 
 // Production base path so raw-string <img src> resolves inside the plugin static dir.
 // Vite's `base` is set to `/plugin/pocket-hatchery/static/` in vite.config.ts.
@@ -273,7 +274,7 @@ function ArtVerifyLab() {
       name: 'Foxling',
       species: 'Fire',
       stage: 1,
-      maxStage: 4,
+      maxStage: 5,
       rarity: 'common',
       growth: 500,
       growthToNext: 4000,
@@ -285,7 +286,7 @@ function ArtVerifyLab() {
       name: 'Flicker',
       species: 'Fire',
       stage: 2,
-      maxStage: 4,
+      maxStage: 5,
       rarity: 'rare',
       growth: 8000,
       growthToNext: 15000,
@@ -354,12 +355,12 @@ function AwakenLab() {
   const AWAKEN_SEC = 30 // fast preview sleep clock
   const seed: Creature[] = [
     {
-      assetId: '2001', name: 'Foxling', species: 'Fire', stage: 0, maxStage: 4,
+      assetId: '2001', name: 'Foxling', species: 'Fire', stage: 0, maxStage: 5,
       rarity: 'common', growth: 0, growthToNext: 1000, genetics: GENE,
       lastFed: now, bornAt: now, awakenDur: AWAKEN_SEC, wakeCostWax: 3, // mid-sleep → Wake now
     },
     {
-      assetId: '2002', name: 'Dracling', species: 'Void', stage: 0, maxStage: 4,
+      assetId: '2002', name: 'Dracling', species: 'Void', stage: 0, maxStage: 5,
       rarity: 'rare', growth: 0, growthToNext: 1000, genetics: GENE,
       lastFed: now, bornAt: now - 40, awakenDur: AWAKEN_SEC, wakeCostWax: 10, // elapsed → ready/auto-awaken
     },
@@ -442,33 +443,33 @@ function FeedLab() {
   // flicker5 glimmer6 wisp7 fluffle8 shellby9 dracling10 buzzle11
   const seed: Creature[] = [
     {
-      assetId: '1001', name: 'Foxling', species: 'Fire', stage: 2, maxStage: 4,
+      assetId: '1001', name: 'Foxling', species: 'Fire', stage: 2, maxStage: 5,
       rarity: 'common', growth: 6000, growthToNext: 20000, genetics: labGene(0, 20, 200),
       lastFed: now, // full
     },
     {
-      assetId: '1002', name: 'Owlet', species: 'Air', stage: 3, maxStage: 4,
+      assetId: '1002', name: 'Owlet', species: 'Air', stage: 3, maxStage: 5,
       rarity: 'uncommon', growth: 22000, growthToNext: 100000, genetics: labGene(1, 150, 60),
       lastFed: now - 12, // ~40% → hungry soon (preview clock)
     },
     {
-      assetId: '1003', name: 'Dracling', species: 'Fire', stage: 3, maxStage: 4,
+      assetId: '1003', name: 'Dracling', species: 'Fire', stage: 3, maxStage: 5,
       rarity: 'rare', growth: 30000, growthToNext: 100000, genetics: labGene(10, 200, 90),
       lastFed: now - 24, // ~20% → starving
     },
     // Higher tiers — exercise the 6-tier CreatureCard visuals (icon/gradient/sparkle).
     {
-      assetId: '1004', name: 'Glimmer', species: 'Crystal', stage: 3, maxStage: 4,
+      assetId: '1004', name: 'Glimmer', species: 'Crystal', stage: 3, maxStage: 5,
       rarity: 'epic', growth: 40000, growthToNext: 100000, genetics: labGene(6, 210, 30),
       lastFed: now, // full
     },
     {
-      assetId: '1005', name: 'Wisp', species: 'Shadow', stage: 3, maxStage: 4,
+      assetId: '1005', name: 'Wisp', species: 'Shadow', stage: 3, maxStage: 5,
       rarity: 'legendary', growth: 55000, growthToNext: 100000, genetics: labGene(7, 180, 240),
       lastFed: now, // full
     },
     {
-      assetId: '1006', name: 'Fluffle', species: 'Air', stage: 3, maxStage: 4,
+      assetId: '1006', name: 'Fluffle', species: 'Air', stage: 3, maxStage: 5,
       rarity: 'mythic', growth: 70000, growthToNext: 100000, genetics: labGene(8, 120, 300),
       lastFed: now, // full
     },
@@ -586,10 +587,15 @@ function ConnectedDashboard() {
   // The farm is the home view: a connected player lands on their living habitat,
   // not on a list. The collection is one click away for acting on a creature.
   const [tab, setTab] = useState<'creatures' | 'farm' | 'breeding'>('farm')
+  const [showHelp, setShowHelp] = useState(false)
   // Live collection filter — matches nickname / asset id / species / tier.
   const [query, setQuery] = useState('')
-  // Nicknames + pins live plugin-side (prefs.ts) — the contract can't hold them yet.
-  const { prefs, persisted: prefsPersisted, setNickname, togglePin } = useCreaturePrefs(game.connectedAs)
+  // Pins ONLY. Names used to live here too, which is why renaming a creature moved
+  // the card and left the farm (and the NFT) showing the old one — a local pref can
+  // never be the truth for something the chain owns. Names now come from the NFT's
+  // mutable data via play.ts; prefs is down to the one thing that is genuinely a
+  // view preference and has no on-chain meaning.
+  const { prefs, persisted: prefsPersisted, togglePin } = useCreaturePrefs(game.connectedAs)
 
   // ── Cooldown timers (live-updating every 1s so the player sees the countdown
   //     tick down in the button subtitle without having to click first). ──────
@@ -702,6 +708,9 @@ function ConnectedDashboard() {
               </button>
             </div>
             <span className={styles.landingFooter}>Free to play · {NETWORK.label}</span>
+            <button className={styles.helpBtnLink} onClick={() => setShowHelp(true)}>
+              ❓ How to Play
+            </button>
           </div>
         </div>
       </div>
@@ -753,7 +762,7 @@ function ConnectedDashboard() {
   // filters. Filtering AFTER pinning keeps a pinned card first among the matches
   // rather than pinning only reordering the unfiltered list.
   const visibleCreatures = sortPinnedFirst(game.creatures, prefs.pins).filter((c) =>
-    matchesQuery(c, prefs.nicknames[c.assetId], query),
+    matchesQuery(c, c.nickname, query),
   )
 
   return (
@@ -766,12 +775,15 @@ function ConnectedDashboard() {
           <h1 className={styles.title}>Pocket Hatchery</h1>
         </div>
         <div className={styles.headerRight}>
+          <button className={styles.helpBtn} onClick={() => setShowHelp(true)} aria-label="How to Play">
+            ❓ How to Play
+          </button>
           <div className={styles.chainBadge}>
             <span className={styles.chainDot} />
             {NETWORK.label}
           </div>
-          {/* Which connect backend + account is live — needed to verify a waxwing
-              sign test uses the right account (switch OFF pockethatch1 before sign). */}
+          {/* Which connect backend + account is live — verify waxwing sign test
+              uses the correct account (switch to phgamecreatr before sign). */}
           {game.connectMode && (
             <div className={styles.walletPill} title={`Connected via ${game.connectMode}`}>
               <span className={styles.walletMode}>{game.connectMode === 'waxwing' ? '🪙' : '☁️'}</span>
@@ -800,29 +812,44 @@ function ConnectedDashboard() {
       </header>
 
       <main className={styles.main}>
-        {/* Resource chips */}
+        {/* Resource chips — EGG and $HATCH are two SEPARATE currencies and the
+            game charges different actions in each. Reading "268 $HATCH" next to a
+            "300" price with no unit is what made Evolve look affordable when it
+            was not, so every chip now names what it actually pays for. */}
         <div className={styles.resourceRow}>
-          <div className={styles.chip}>
+          <div className={styles.chip} title="EGG is the farm currency you harvest. It pays for Hatch and Evolve.">
             <div className={`${styles.chipIcon} ${styles.iconEgg}`}>🥚</div>
             <div>
               <div className={styles.chipLabel}>EGG</div>
-              <div className={styles.chipValue}>{r.egg.toLocaleString()}</div>
+              <div className={styles.chipValue} data-testid="chip-egg">{r.egg.toLocaleString()}</div>
+              <div className={styles.chipNote}>Hatch · Evolve</div>
             </div>
           </div>
-          <div className={styles.chip}>
+          <div className={styles.chip} title="Feeds are capped per account per day (configv3.feed_daily_cap) and reset at UTC midnight.">
             <div className={`${styles.chipIcon} ${styles.iconEnergy}`}>⚡</div>
             <div>
-              <div className={styles.chipLabel}>Energy</div>
-              <div className={styles.chipValue}>
+              <div className={styles.chipLabel}>Feeds Left</div>
+              <div className={styles.chipValue} data-testid="chip-feeds">
                 {r.energy}<span className={styles.chipMax}>/{r.maxEnergy}</span>
+              </div>
+              <div className={styles.chipNote}>
+                {r.maxEnergy > 0 && r.energy === 0
+                  ? `Used up · resets in ${formatCooldown(dailyResetLeft)}`
+                  : `Resets in ${formatCooldown(dailyResetLeft)}`}
               </div>
             </div>
           </div>
-          <div className={styles.chip}>
+          {/* What $HATCH actually buys, per the deployed contract: breed() burns
+              breed_cost and accelerate() burns the HATCH you send. Naming is NOT
+              on this list — configv3 carries a name_cost but setname never charges
+              it, so a rename is free and saying otherwise would scare players off
+              a free action. Evolve is EGG, never $HATCH. */}
+          <div className={styles.chip} title="$HATCH is the reward token you claim. It pays for Breed and Accelerate — never for Evolve. Naming a creature is free.">
             <div className={`${styles.chipIcon} ${styles.iconHatch}`}>💎</div>
             <div>
               <div className={styles.chipLabel}>$HATCH</div>
-              <div className={styles.chipValue}>{r.hatch.toLocaleString()}</div>
+              <div className={styles.chipValue} data-testid="chip-hatch">{r.hatch.toLocaleString()}</div>
+              <div className={styles.chipNote}>Breed · Accelerate</div>
             </div>
           </div>
         </div>
@@ -926,12 +953,13 @@ function ConnectedDashboard() {
                 </div>
               )}
 
-              {/* Prefs are cosmetic, but silently dropping a rename is still a lie —
-                  say when the daemon isn't storing them. */}
+              {/* Pins are a pure view preference and the only thing still stored
+                  off chain — names now live on the NFT itself, so they are never
+                  at the mercy of the daemon being reachable. */}
               {!prefsPersisted && game.creatures.length > 0 && (
                 <p className={styles.prefsWarn} data-testid="prefs-warn">
-                  ⚠️ Nicknames and pins can't be saved right now — they'll last for this
-                  session only.
+                  ⚠️ Pinned favourites can't be saved right now — they'll last for this
+                  session only. (Creature names are unaffected: they live on chain.)
                 </p>
               )}
 
@@ -961,11 +989,23 @@ function ConnectedDashboard() {
                       onWake={() => game.awaken(c.assetId)}
                       onEvolve={() => game.evolve(c.assetId)}
                       onBurn={() => game.burn(c.assetId)}
-                      nickname={prefs.nicknames[c.assetId]}
-                      onRename={(name) => setNickname(c.assetId, name)}
+                      /* Name comes from the NFT's own mutable data (play.ts reads
+                         it back off chain), and renaming signs setname — so the
+                         card, the farm and any wallet all show the same string. */
+                      nickname={c.nickname}
+                      onRename={(name) => void game.rename(c.assetId, name)}
+                      renaming={game.renamingId === c.assetId}
                       pinned={prefs.pins.includes(c.assetId)}
                       onTogglePin={() => togglePin(c.assetId)}
                       staticSprite
+                      /* Live chain numbers the card's Feed/Evolve gates need, so a
+                         blocked action reads its reason off the card instead of
+                         firing a tx that comes back as a raw chain assertion. */
+                      feedsToday={r.feedsToday}
+                      feedDailyCap={r.feedDailyCap}
+                      eggBalance={r.egg}
+                      evolveCost={r.evolveCost}
+                      paused={r.paused}
                     />
                   ))}
                 </div>
@@ -1189,6 +1229,7 @@ function ConnectedDashboard() {
         />
       )}
       {toast && <Toast action={toast} onDone={() => setToast(null)} />}
+      {showHelp && <HelpOverlay onClose={() => setShowHelp(false)} />}
     </div>
   )
 }
@@ -1197,6 +1238,7 @@ function ConnectedDashboard() {
 function DemoDashboard() {
   const demo = useDemoGame()
   const s = demo.state
+  const [showHelp, setShowHelp] = useState(false)
 
   return (
     <div className={styles.app}>
@@ -1206,6 +1248,9 @@ function DemoDashboard() {
           <h1 className={styles.title}>Pocket Hatchery</h1>
         </div>
         <div className={styles.headerRight}>
+          <button className={styles.helpBtn} onClick={() => setShowHelp(true)} aria-label="How to Play">
+            ❓ How to Play
+          </button>
           <div className={styles.chainBadge} style={{ background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.3)' }}>
             <span className={styles.chainDot} style={{ background: '#F59E0B' }} />
             🎮 Demo
@@ -1323,6 +1368,7 @@ function DemoDashboard() {
           </button>
         </div>
       </main>
+      {showHelp && <HelpOverlay onClose={() => setShowHelp(false)} />}
     </div>
   )
 }

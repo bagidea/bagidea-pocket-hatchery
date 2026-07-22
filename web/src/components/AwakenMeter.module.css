@@ -1,0 +1,139 @@
+/* AwakenMeter — Awaken v2 wake block. Shown INSTEAD of the SatietyMeter while a
+   creature is asleep (stage 0). Same slim-bar language as SatietyMeter, in an
+   indigo "sleep" palette so a dozing egg reads differently from a fed creature. */
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 18px 12px;
+  position: relative;
+  z-index: 3;
+}
+
+.barHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.barLabel {
+  font-size: 12px;
+  font-weight: 700;
+  color: #9AA4B4;
+  letter-spacing: 0.02em;
+}
+
+.stateBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+}
+
+.sleeping.stateBadge {
+  background: rgba(99, 102, 241, 0.18);
+  color: #A5B4FC;
+  border-color: rgba(99, 102, 241, 0.38);
+}
+.ready.stateBadge {
+  background: rgba(34, 197, 94, 0.16);
+  color: #4ade80;
+  border-color: rgba(34, 197, 94, 0.34);
+}
+
+.barPercent {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: 800;
+  color: #CBD5E1;
+  font-variant-numeric: tabular-nums;
+}
+
+.barTrack {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 999px;
+  overflow: hidden;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.barFill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 1s linear;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.35) inset;
+}
+.sleeping.barFill {
+  background: linear-gradient(90deg, #818cf8, #6366f1);
+}
+.ready.barFill {
+  background: linear-gradient(90deg, #22c55e, #16a34a);
+}
+
+/* ── Timer / hint row ── */
+.timerRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.timerLabel {
+  font-size: 11px;
+  font-weight: 800;
+  color: #94a3b8;
+  letter-spacing: 0.02em;
+}
+
+.timerValue {
+  font-size: 13px;
+  font-weight: 800;
+  color: #A5B4FC;
+  font-variant-numeric: tabular-nums;
+}
+
+.freeHint {
+  font-size: 12px;
+  font-weight: 800;
+  color: #4ade80;
+}
+
+/* ── Wake button ── */
+.wakeBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 100%;
+  padding: 10px 0;
+  border: none;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 800;
+  color: #ffffff;
+  cursor: pointer;
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  box-shadow: 0 2px 10px rgba(99, 102, 241, 0.28);
+  transition: box-shadow 0.2s ease, transform 0.1s ease, filter 0.2s ease;
+}
+.wakeBtn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.42);
+}
+.wakeBtn:active:not(:disabled) {
+  transform: translateY(0);
+}
+.wakeBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(0.3);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .barFill { transition: none; }
+}

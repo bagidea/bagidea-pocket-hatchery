@@ -44,16 +44,33 @@ function SelectableCard({
   const cooldownLeft = getCooldownLeft(creature)
   const ready = cooldownLeft === 0
   const rarity = (creature.rarity || 'common').toLowerCase()
+  // Grid perf: the selector renders one sprite per creature. N live filter+SMIL
+  // SVGs re-raster every frame and the grid stutters (same jank the collection
+  // grid had). Bake each to a static bitmap at rest and only paint the live
+  // animated SVG for the card the player is on (hover/focus) or has picked.
+  const [hovered, setHovered] = useState(false)
+  const spriteLive = hovered || selected
 
   return (
     <button
       type="button"
       className={`${styles.selectorCard} ${selected ? styles.selected : ''} ${styles[rarity] || styles.common}`}
       onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onFocus={() => setHovered(true)}
+      onBlur={() => setHovered(false)}
       aria-pressed={selected}
     >
       <div className={styles.selectorArt}>
-        <CreatureSprite genetics={creature.genetics} species={creature.name || creature.species} assetId={creature.assetId} rarity={creature.rarity} />
+        <CreatureSprite
+          genetics={creature.genetics}
+          species={creature.name || creature.species}
+          assetId={creature.assetId}
+          rarity={creature.rarity}
+          bakeUntilActive
+          active={spriteLive}
+        />
       </div>
       <div className={styles.selectorInfo}>
         <div className={styles.selectorName}>{creature.name || creature.species}</div>

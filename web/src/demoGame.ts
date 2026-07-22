@@ -9,8 +9,8 @@ import { AWAKEN_DUR_DEFAULT, WAKE_COST_WAX_DEFAULT } from './awaken'
  * claimreward`) is blocked on a contract deploy (ATTR_MAP fix) that needs the
  * owner's private key. So that a player can still feel the full loop today,
  * this hook mirrors the on-chain economy (constants pulled LIVE from the
- * `pockethatch1` configv2 + speciescfg tables on wax-testnet via Sahara's
- * chain research) in local React state. Nothing leaves the browser.
+ * `phgamecreatr` configv3 + spccfgv2 tables on wax-testnet) in local React state.
+ * Nothing leaves the browser.
  *
  * Loop it closes: Harvest EGG → Hatch Egg → Feed → Evolve → Claim Reward.
  *
@@ -18,7 +18,7 @@ import { AWAKEN_DUR_DEFAULT, WAKE_COST_WAX_DEFAULT } from './awaken'
  * App.tsx stays untouched — demo only runs while `?demo` is in the URL.
  */
 
-// ── Economy constants (live pockethatch1 configv2 @ wax-testnet) ─────────────
+// ── Economy constants (live phgamecreatr configv3 @ wax-testnet) ─────────────
 const DAILY_EGG_CAP = 240    // config.daily_egg_cap
 const TAP_EGG = 60           // config.tap_egg_cap — EGG per Harvest tap
 const FEED_DAILY_CAP = 100   // config.feed_daily_cap
@@ -30,25 +30,27 @@ const CLAIM_SCALE = [0, 0, 15, 25, 45, 85]
 const HATCH_EGG_COST = 150   // config.hatch_cost — EGG burned to Hatch one egg
 const STARTING_EGG = 0       // initplayer-style: must Harvest to farm first
 
-// Growth thresholds from speciescfg template 662644 (Fire family, the only
-// species deployed). Cumulative on-chain: thresh_1=1000, thresh_2=5000,
-// thresh_3=20000, thresh_4=100000. Demo uses incremental per-stage targets
-// (growth resets to 0 on evolve).
+// Growth thresholds from speciescfg template 662889 (Fire family). Cumulative
+// on-chain: thresh_1=1000, thresh_2=5000, thresh_3=20000, thresh_4=100000,
+// thresh_5=200000. Demo uses incremental per-stage targets (growth resets to 0
+// on evolve).
 const GROWTH_TO_NEXT: Record<number, number> = {
-  0: 1000,  // Egg  → Stage 1 (thresh_1)
-  1: 4000,  // Stg1 → Stage 2 (thresh_2 − thresh_1)
-  2: 15000, // Stg2 → Stage 3 (thresh_3 − thresh_2)
-  3: 80000, // Stg3 → Stage 4 (thresh_4 − thresh_3)
+  0: 1000,   // Egg  → Stage 1 (thresh_1)
+  1: 4000,   // Stg1 → Stage 2 (thresh_2 − thresh_1)
+  2: 15000,  // Stg2 → Stage 3 (thresh_3 − thresh_2)
+  3: 80000,  // Stg3 → Stage 4 (thresh_4 − thresh_3)
+  4: 100000, // Stg4 → Stage 5 (thresh_5 − thresh_4)
 }
 
-// pockethatch1 speciescfg max_stage = 5 → stages 0‑4 (max_stage is a COUNT).
+// phgamecreatr spccfgv2 max_stage = 5 = the TERMINAL stage NUMBER (evolve()
+// guards `cur_stage < max_stage`), so stages 0‑5 and stage 5 is the ceiling.
 const MAX_STAGE = 5
-const MAX_REACHABLE = MAX_STAGE - 1 // highest stage the contract actually allows
+const MAX_REACHABLE = MAX_STAGE // highest stage the contract actually allows
 
 // Demo flavor only (chain rarity is species-level, not stage-level). Three tiers
 // to match the on-chain model: common → uncommon → rare as a creature matures.
 const RARITY_BY_STAGE: Creature['rarity'][] = [
-  'common', 'common', 'uncommon', 'rare', 'rare',
+  'common', 'common', 'uncommon', 'rare', 'rare', 'epic',
 ]
 
 let demoAssetSeq = 9000 // local-only synthetic asset ids (off the real uint64 range)

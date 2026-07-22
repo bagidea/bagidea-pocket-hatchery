@@ -204,6 +204,48 @@
   letter-spacing: 0.01em;
 }
 
+/* ── Daily feed quota (account-wide) ──
+   Reads as a quiet stat row until the cap is hit, then turns amber so "3/3" is
+   the first thing the eye lands on above a disabled Feed button. */
+.quotaRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #9AA4B4;
+}
+
+.quotaLabel {
+  letter-spacing: 0.02em;
+  cursor: help;
+}
+
+.quotaCount {
+  font-weight: 900;
+  color: #CBD5E1;
+  font-variant-numeric: tabular-nums;
+}
+
+.quotaReset {
+  margin-left: auto;
+  font-weight: 600;
+  color: #7C8798;
+}
+
+.quotaRow[data-cap-reached='1'] .quotaCount,
+.quotaRow[data-cap-reached='1'] .quotaLabel,
+.quotaRow[data-cap-reached='1'] .quotaReset {
+  color: #FBBF24;
+}
+
+.quotaRow[data-cap-reached='1'] .quotaCount {
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: rgba(251, 191, 36, 0.14);
+  border: 1px solid rgba(251, 191, 36, 0.35);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .starving.feedBtn { animation: none; }
   .barFill { transition: none; }
