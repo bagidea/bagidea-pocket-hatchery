@@ -189,7 +189,10 @@ export function SatietyMeter({
         </div>
       )}
 
-      {/* ── Feed button (stateful) ── */}
+      {/* ── Feed button (stateful) ──
+          No onFeed (spectator/read-only card) → no button at all: the meter is
+          pure information and nothing on the card can reach a wallet. */}
+      {onFeed && (
       <button
         className={`${styles.feedBtn} ${stateClass}`}
         onClick={onFeed}
@@ -213,6 +216,7 @@ export function SatietyMeter({
           <>🍎 Feed · Free</>
         )}
       </button>
+      )}
 
       {/* When the creature is already fed (Feed correctly gated), Feed is NOT the
           next step — it would only error on chain. Point the player at what

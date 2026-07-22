@@ -21,11 +21,88 @@
 .legendary { --tier: #FBBF24; --tierRGB: 251, 191, 36; }
 .mythic    { --tier: #F472B6; --tierRGB: 244, 114, 182; }
 
+/* ── Flip container ────────────────────────────────────────
+   The card is two faces in a 3D flip: the collector front and the
+   per-rarity NFT card-back art (art/nft-cards/nft-back-<rarity>.png).
+   .wrap already carries the perspective; .flipInner rotates. */
+.flipInner {
+  position: relative;
+  width: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.flipped {
+  transform: rotateY(180deg);
+}
+
+/* Card-back face — the rarity's NFT back art. Absolutely overlays the
+   front so the flip container inherits the front's height. */
+.cardBack {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: none;
+  border-radius: 22px;
+  overflow: hidden;
+  cursor: pointer;
+  background: #0B0E16;
+  transform: rotateY(180deg);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  box-shadow:
+    0 14px 34px rgba(0, 0, 0, 0.45),
+    0 0 22px rgba(var(--tierRGB), 0.16);
+}
+.cardBackImg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.cardBackHint {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 10px;
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.55);
+  font-family: var(--ph-font-body, system-ui);
+  pointer-events: none;
+}
+
+/* Flip toggle button in the top bar */
+.flipBtn {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 13px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.flipBtn:hover {
+  background: rgba(var(--tierRGB), 0.18);
+  border-color: rgba(var(--tierRGB), 0.45);
+  color: #fff;
+}
+
 /* ── Card body — dark surface ─────────────────────────────── */
 .card {
   position: relative;
   display: flex;
   flex-direction: column;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
   background: linear-gradient(180deg, #1B1F2B 0%, #14171F 100%);
   border-radius: 22px;
   overflow: hidden;

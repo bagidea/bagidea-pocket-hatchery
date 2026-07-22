@@ -167,6 +167,14 @@ export interface CreatureRow {
   last_fed: number
   last_bred: number
   genetics: string
+  /**
+   * The creature's OWN rolled rarity (0–5), decoupled from the species template
+   * (contract: creatrsv2.egg_type, from roll_egg_type at hatch). This — NOT the
+   * template's egg_type — is the creature's rarity: one template can be minted at
+   * any tier. Optional so an un-upgraded ABI (no egg_type column) still decodes;
+   * toCreature falls back to the species template's egg_type when it's absent.
+   */
+  egg_type?: number
 }
 
 export interface RewardPoolRow {

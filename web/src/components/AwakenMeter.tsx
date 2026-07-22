@@ -90,8 +90,10 @@ export function AwakenMeter({
       {/* ── Wake button ──
           Sleeping → the paid "skip the timer" wake (WAX). Once the timer elapses
           the contract REJECTS a paid wake (harvest auto-awakens for free), so we
-          drop the WAX button entirely and show the free-harvest hint instead. */}
-      {reading.canAutoAwaken ? (
+          drop the WAX button entirely and show the free-harvest hint instead.
+          No onWake (spectator/read-only card) → no button: the sleep timer above
+          is the whole story and nothing here can reach a wallet. */}
+      {onWake && (reading.canAutoAwaken ? (
         <button className={styles.wakeBtn} disabled>
           🌅 Ready — tap Harvest to wake (free)
         </button>
@@ -104,7 +106,7 @@ export function AwakenMeter({
         >
           ⚡ Wake now · {cost} WAX · skip timer
         </button>
-      )}
+      ))}
     </div>
   )
 }

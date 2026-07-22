@@ -347,6 +347,8 @@ export function CreatureCard({
   paused = false,
 }: CreatureCardProps) {
   const [confirmingBurn, setConfirmingBurn] = useState(false)
+  // Flip to the per-rarity NFT card-back art (art/nft-cards/nft-back-<rarity>.png).
+  const [flipped, setFlipped] = useState(false)
   // Grid perf: the sprite is a static bitmap at rest and goes live on
   // hover/focus. Pinned favourites stay live so they always shimmer.
   const [hovered, setHovered] = useState(false)
@@ -424,7 +426,8 @@ export function CreatureCard({
   }
 
   return (
-    <div className={styles.wrap}>
+    <div className={`${styles.wrap} ${styles[rarity] || styles.common}`}>
+      <div className={`${styles.flipInner} ${flipped ? styles.flipped : ''}`}>
       <article
         className={`${styles.card} ${styles[rarity] || styles.common} ${asleep ? styles.asleep : ''}`}
         data-testid={`creature-${creature.assetId}`}
@@ -442,6 +445,17 @@ export function CreatureCard({
             {RARITY_ICON[rarity] || 'C'}
           </div>
           <div className={styles.topBarRight}>
+            {/* Flip — show the creature's per-rarity NFT card-back art. */}
+            <button
+              type="button"
+              className={styles.flipBtn}
+              onClick={() => setFlipped(true)}
+              aria-label={`Show the ${rarity} card back`}
+              title="Flip to the NFT card back"
+              data-testid={`flip-${creature.assetId}`}
+            >
+              🔄
+            </button>
             {/* Pin — lifts this creature to the top of the collection. Kept next to
                 the ID (not in the action row) so it never sits beside Burn. */}
             {onTogglePin && (
@@ -657,7 +671,9 @@ export function CreatureCard({
               lastFed={creature.lastFed ?? 0}
               rarity={rarity as Rarity}
               stage={creature.stage}
-              onFeed={() => { triggerAnim('feed', 750); onFeed?.() }}
+              /* Undefined onFeed (read-only card) propagates so the meter hides
+                 its button instead of rendering a dead one. */
+              onFeed={onFeed ? () => { triggerAnim('feed', 750); onFeed() } : undefined}
               disabled={disabled}
               config={satietyConfig}
               fedDurSec={creature.fedDur}
@@ -670,11 +686,14 @@ export function CreatureCard({
           )
         )}
 
-        {/* ── Actions ── */}
+        {/* ── Actions ──
+            Every control in this row keys off its handler being present — a
+            read-only card (spectator ?view) passes none and renders no buttons. */}
         <div className={styles.actions}>
+          {onEvolve && (
           <button
             className={`${styles.btn} ${styles.evolveBtn} ${styles.evolveFull}`}
-            onClick={() => { triggerAnim('evolve', 950); onEvolve?.() }}
+            onClick={() => { triggerAnim('evolve', 950); onEvolve() }}
             disabled={disabled || !evolve.allowed}
             title={evolveBlockMessage(evolve)}
             data-testid={`evolve-${creature.assetId}`}
@@ -682,12 +701,13 @@ export function CreatureCard({
           >
             {evolveLabel()}
           </button>
+          )}
 
           {/* Why Evolve is locked — the ONE gate the chain would hit, in plain
               English, so nobody has to guess (and nobody sees a raw assertion).
               The EGG/$HATCH distinction is spelled out because they are separate
               currencies: Evolve is paid in EGG, never in $HATCH. */}
-          {!evolve.allowed && evolve.reason !== 'max-stage' && (
+          {onEvolve && !evolve.allowed && evolve.reason !== 'max-stage' && (
             <span className={styles.evolveHint} data-testid={`evolve-hint-${creature.assetId}`}>
               {evolve.reason === 'egg'
                 // The button already states cost vs balance; the hint's job is the
@@ -735,6 +755,27 @@ export function CreatureCard({
           )}
         </div>
       </article>
+
+      {/* ── Card back: the rarity's NFT card-back art (art/nft-cards). Tapping
+          anywhere on it flips back to the creature. ── */}
+      <button
+        type="button"
+        className={styles.cardBack}
+        onClick={() => setFlipped(false)}
+        aria-label={`Flip back to ${displayName}`}
+        title="Flip back to the creature"
+        data-testid={`cardback-${creature.assetId}`}
+        data-rarity={rarity}
+      >
+        <img
+          className={styles.cardBackImg}
+          src={`${BASE}assets/nft-back-${rarity}.png`}
+          alt={`${rarity} card back`}
+          draggable={false}
+        />
+        <span className={styles.cardBackHint}>↩ tap to flip back</span>
+      </button>
+      </div>
     </div>
   )
 }

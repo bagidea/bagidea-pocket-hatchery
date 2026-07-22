@@ -230,6 +230,12 @@ export interface GameActions {
   breedCost: number | null
   /** Live rarity odds + earn premium for one hatch (from configv3 weights). */
   hatchOdds: HatchOdds[]
+  /**
+   * True when this is the `?view=<account>` spectator: the chain is read live but
+   * buildSigner refuses, so NOTHING can be signed. The UI must hide every action
+   * control (feed/wake/evolve/burn/rename/pin/harvest/claim/hatch/breed).
+   */
+  readOnly: boolean
 }
 
 const EMPTY_RESOURCES: Resources = { egg: 0, energy: 0, maxEnergy: 0, hatch: 0, lastHarvest: 0, lastClaimed: 0, harvestCd: 0, claimedSeason: 0, currentSeason: 0, offlineCapH: 0, dailyEggCap: 0, capScalesRarity: false, eggHarvestedToday: 0, poolBalance: 0, paused: false, feedsToday: 0, feedDailyCap: 0, evolveCost: 0, now: 0 }
@@ -419,7 +425,12 @@ function toCreature(
   // Real species name from the gene's species_id (bits 0–3), falling back to
   // the chain's speciescfg.family or the old hardcoded default.
   const name = speciesNameFromGene(row.genetics)
-  const rarity = RARITY_BY_EGG_TYPE[Math.min(Math.max(sp?.egg_type ?? 0, 0), 5)]
+  // Rarity is the creature's OWN rolled egg_type (creatrsv2.egg_type), decoupled
+  // from the species template — a template can be minted at any tier, so the
+  // template's egg_type is NOT the creature's rarity. Fall back to the template's
+  // egg_type only for an un-upgraded ABI that lacks the per-creature column.
+  const eggType = row.egg_type ?? sp?.egg_type ?? 0
+  const rarity = RARITY_BY_EGG_TYPE[Math.min(Math.max(eggType, 0), 5)]
   const earn = earnFromChain(sp, row.stage, cfg, rarity)
   const wake = wakeCostFromConfig(cfg, rarity)
   return {
@@ -572,6 +583,16 @@ interface GameSigner {
   ): Promise<{ txid?: string }>
 }
 
+// Read-only spectator: `?view=<account>` loads that account's REAL on-chain
+// collection with no wallet. It seeds the READ path only — buildSigner refuses
+// outright while ?view is present (it would otherwise see the seeded waxwing
+// actor and happily build a sign-intent), so no gameplay action can ever reach
+// a wallet from a spectator URL. Used for public views and honest live hit-tests.
+const VIEW_ACCOUNT: string | null =
+  typeof window !== 'undefined'
+    ? new URLSearchParams(window.location.search).get('view')
+    : null
+
 // ── The hook ─────────────────────────────────────────────────────────────────
 export function useGameActions(): GameActions {
   // WCW session (only set in 'wcw' mode).
@@ -698,8 +719,22 @@ export function useGameActions(): GameActions {
     return () => clearInterval(id)
   }, [session, waxwingActor, connectMode, refresh])
 
+  // Read-only spectator (`?view=<account>`): seed the read actor once on mount so
+  // the effect above pulls that account's real chain state and live-polls it.
+  // Signing is impossible: buildSigner refuses while VIEW_ACCOUNT is set.
+  useEffect(() => {
+    if (!VIEW_ACCOUNT) return
+    setWaxwingActor(VIEW_ACCOUNT)
+    setConnectMode('waxwing')
+  }, [])
+
   // Build the signer for the active backend. Throws (readably) if not connected.
   const buildSigner = useCallback((): GameSigner => {
+    // Spectator hard-stop: ?view seeds the waxwing read actor, which would make
+    // the waxwing branch below build a real sign-intent for an account the
+    // spectator may not even own. Refuse before any backend is consulted — the
+    // UI also hides every action control, but this is the guarantee.
+    if (VIEW_ACCOUNT) throw new Error('spectator view is read-only — open the game without ?view to play')
     const mode = modeRef.current
     if (mode === 'wcw') {
       const s = sessionRef.current
@@ -1175,5 +1210,6 @@ export function useGameActions(): GameActions {
     hatchCost,
     breedCost,
     hatchOdds,
+    readOnly: VIEW_ACCOUNT != null,
   }
 }

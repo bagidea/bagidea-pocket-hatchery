@@ -574,9 +574,15 @@ function claimBlockCopy(claim: ClaimState, cooldownLeft: number): { icon: string
 // ── Connected Dashboard (WCW / waxwing wallet required) ─────────────
 function ConnectedDashboard() {
   const game = useGameActions()
-  const [connected, setConnected] = useState(
-    () => new URLSearchParams(window.location.search).has('dash')
-  )
+  // Spectator (`?view=<account>`): play.ts refuses to build a signer, and this
+  // flag hides every control that would try — the dashboard becomes pure display.
+  const readOnly = game.readOnly
+  // `?view=<account>` is the read-only spectator (play.ts seeds the read actor);
+  // like `?dash` it lands straight on the dashboard, no wallet connect.
+  const [connected, setConnected] = useState(() => {
+    const p = new URLSearchParams(window.location.search)
+    return p.has('dash') || p.has('view')
+  })
   const [connecting, setConnecting] = useState<ConnectMode | null>(null)
   const [showHatch, setShowHatch] = useState(false)
   const [hatchSpecies, setHatchSpecies] = useState<{ speciesId: string; speciesName: string }>({
@@ -586,7 +592,11 @@ function ConnectedDashboard() {
   const [toast, setToast] = useState<LastAction | null>(null)
   // The farm is the home view: a connected player lands on their living habitat,
   // not on a list. The collection is one click away for acting on a creature.
-  const [tab, setTab] = useState<'creatures' | 'farm' | 'breeding'>('farm')
+  // Spectator view lands on the collection (that's where the rarity cards are);
+  // a connected player lands on their farm.
+  const [tab, setTab] = useState<'creatures' | 'farm' | 'breeding'>(
+    () => (new URLSearchParams(window.location.search).has('view') ? 'creatures' : 'farm'),
+  )
   const [showHelp, setShowHelp] = useState(false)
   // Live collection filter — matches nickname / asset id / species / tier.
   const [query, setQuery] = useState('')
@@ -783,8 +793,16 @@ function ConnectedDashboard() {
             {NETWORK.label}
           </div>
           {/* Which connect backend + account is live — verify waxwing sign test
-              uses the correct account (switch to phgamecreatr before sign). */}
-          {game.connectMode && (
+              uses the correct account (switch to phgamecreatr before sign). A
+              spectator (?view) shows a read-only badge instead: no wallet is
+              attached, so unlock/disconnect would only mislead. */}
+          {readOnly ? (
+            <div className={styles.walletPill} title="Spectator view — reading the chain only, nothing can be signed" data-testid="spectator-pill">
+              <span className={styles.walletMode}>👁</span>
+              <span className={styles.walletAccount}>{game.connectedAs}</span>
+              <span className={styles.walletMode}>read-only</span>
+            </div>
+          ) : game.connectMode && (
             <div className={styles.walletPill} title={`Connected via ${game.connectMode}`}>
               <span className={styles.walletMode}>{game.connectMode === 'waxwing' ? '🪙' : '☁️'}</span>
               <span className={styles.walletAccount}>{game.connectedAs}</span>
@@ -867,15 +885,18 @@ function ConnectedDashboard() {
             <h2 className={styles.heroTitle}>
               Hatch your <span className={styles.heroAccent}>magical</span> creature
             </h2>
-            <button
-              className={styles.hatchBtn}
-              onClick={onHatch}
-              disabled={game.animating}
-            >
-              <span className={styles.hatchBtnIcon}>🥚</span>
-              Hatch Egg
-              <span className={styles.hatchCost}>({game.hatchCost ?? '—'} EGG)</span>
-            </button>
+            {/* Spectator: no Hatch — it signs. The odds panel below stays (pure info). */}
+            {!readOnly && (
+              <button
+                className={styles.hatchBtn}
+                onClick={onHatch}
+                disabled={game.animating}
+              >
+                <span className={styles.hatchBtnIcon}>🥚</span>
+                Hatch Egg
+                <span className={styles.hatchCost}>({game.hatchCost ?? '—'} EGG)</span>
+              </button>
+            )}
 
             {/* Rarity odds + free-to-start path (live configv3 weights). */}
             <HatchOddsPanel odds={game.hatchOdds} />
@@ -985,18 +1006,22 @@ function ConnectedDashboard() {
                       key={c.assetId}
                       creature={c}
                       disabled={game.animating}
-                      onFeed={() => game.feed(c.assetId)}
-                      onWake={() => game.awaken(c.assetId)}
-                      onEvolve={() => game.evolve(c.assetId)}
-                      onBurn={() => game.burn(c.assetId)}
+                      /* Spectator (?view): pass NO handlers — the card hides every
+                         action control (feed/wake/evolve/burn/rename/pin) and the
+                         signer refuses anyway. Pin is also withheld: it writes the
+                         VIEWED account's prefs, which aren't the spectator's. */
+                      onFeed={readOnly ? undefined : () => game.feed(c.assetId)}
+                      onWake={readOnly ? undefined : () => game.awaken(c.assetId)}
+                      onEvolve={readOnly ? undefined : () => game.evolve(c.assetId)}
+                      onBurn={readOnly ? undefined : () => game.burn(c.assetId)}
                       /* Name comes from the NFT's own mutable data (play.ts reads
                          it back off chain), and renaming signs setname — so the
                          card, the farm and any wallet all show the same string. */
                       nickname={c.nickname}
-                      onRename={(name) => void game.rename(c.assetId, name)}
+                      onRename={readOnly ? undefined : (name) => void game.rename(c.assetId, name)}
                       renaming={game.renamingId === c.assetId}
                       pinned={prefs.pins.includes(c.assetId)}
-                      onTogglePin={() => togglePin(c.assetId)}
+                      onTogglePin={readOnly ? undefined : () => togglePin(c.assetId)}
                       staticSprite
                       /* Live chain numbers the card's Feed/Evolve gates need, so a
                          blocked action reads its reason off the card instead of
@@ -1143,7 +1168,8 @@ function ConnectedDashboard() {
               <button
                 className={styles.quickBtn}
                 onClick={() => game.harvest()}
-                disabled={harvestCdLeft > 0 || game.animating}
+                /* readOnly: the numbers stay (live info) but the tap is dead. */
+                disabled={readOnly || harvestCdLeft > 0 || game.animating}
               >
                 <span className={styles.harvestValue}>
                   {harvestSummary.capReached
@@ -1184,7 +1210,7 @@ function ConnectedDashboard() {
               <button
                 className={`${styles.quickBtn} ${claimState.blocked === 'claimed' ? styles.quickBtnClaimed : ''}`}
                 onClick={() => game.claimReward()}
-                disabled={!claimState.claimable || game.animating}
+                disabled={readOnly || !claimState.claimable || game.animating}
                 data-testid="claim-btn"
               >
                 <span className={styles.harvestValue}>
@@ -1207,7 +1233,7 @@ function ConnectedDashboard() {
             creatures={game.creatures}
             resources={game.resources}
             breedCost={game.breedCost}
-            disabled={game.animating}
+            disabled={game.animating || readOnly}
             onBreed={(a, b) => game.breed(a, b)}
           />
         )}
