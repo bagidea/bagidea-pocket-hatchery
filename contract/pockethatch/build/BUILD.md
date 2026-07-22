@@ -9,8 +9,8 @@ artifact ใหม่ ไม่งั้น artifact บนดิสก์จะ
 
 | artifact | size | sha256 | สถานะ |
 |---|---|---|---|
-| `pockethatch.slotcfg.wasm` | 162,692 B | `ee7a150f91f0a1a463c836999d5cd889b71402d953910803a0f9b2203d5105f2` | ✅ **อยู่บนเชนตอนนี้** (`phgamecreatr`, wax-testnet) — build จาก commit `1eaad85` |
-| `pockethatch.rules.wasm` | 162,761 B | `ae75ce303706d7ce4cacd64751f021b9b8969d963f8080d2795fe2f7a3253998` | ⚠️ **ยังไม่ deploy** — build จาก `17cebf8` (refactor เข้า `ph_rules.hpp`) |
+| `pockethatch.rules.wasm` | 162,761 B | `ae75ce303706d7ce4cacd64751f021b9b8969d963f8080d2795fe2f7a3253998` | ✅ **อยู่บนเชนตอนนี้** (`phgamecreatr`, wax-testnet) — build จาก `17cebf8` (refactor เข้า `ph_rules.hpp` + `is_sated` 64-bit). setcode-only tx `df3b554da1c8d126c8031aa6fa27ed53eef7011b41778b68df748224e76e6079` (2026-07-22) — ABI ไม่แตะ (rules.abi == slotcfg.abi) |
+| `pockethatch.slotcfg.wasm` | 162,692 B | `ee7a150f91f0a1a463c836999d5cd889b71402d953910803a0f9b2203d5105f2` | รุ่นก่อน (เคยอยู่บนเชนถึง 2026-07-22) — build จาก commit `1eaad85` |
 | `pockethatch.mergefix.wasm` | 160,021 B | `559880bfb545a7052f044b6a663866c981d64aaf593b71f875a05b06d8859a73` | รุ่นก่อน (merge-fix) |
 
 `pockethatch.slotcfg.abi` ตรงกันทุกรุ่นตั้งแต่ slotcfg — `diff` ระหว่าง `rules.abi` กับ

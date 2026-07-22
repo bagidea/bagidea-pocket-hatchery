@@ -44,14 +44,33 @@ const ok = (pred, what, detail = "") => {
   else { console.log(`  FAIL  ${what}${detail ? ` — ${detail}` : ""}`); failures++; }
 };
 
-const rpc = async (endpoint, body) =>
-  (await fetch(`${RPC}/v1/chain/${endpoint}`, { method: "POST", body: JSON.stringify(body) })).json();
+// The public testnet RPC drops the TLS socket now and then ("other side
+// closed"). Every read here is idempotent, so retry a transient network error a
+// few times before giving up — one dropped connection must not abort a run that
+// has already broadcast setcode.
+const rpc = async (endpoint, body, tries = 4) => {
+  for (let i = 1; ; i++) {
+    try {
+      return await (await fetch(`${RPC}/v1/chain/${endpoint}`, { method: "POST", body: JSON.stringify(body) })).json();
+    } catch (e) {
+      if (i >= tries) throw e;
+      await new Promise((s) => setTimeout(s, 500 * i));
+    }
+  }
+};
 
 const rows = async (table, scope = CONTRACT, limit = 200) =>
   (await rpc("get_table_rows", { json: true, code: CONTRACT, scope, table, limit })).rows || [];
 
-const wax = async (payload) => {
-  const r = await fetch(WAXWING, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) });
+// The daemon reads only { cmd, args }: it does `parseArgs(body.args)` and, when
+// args is an object, uses it verbatim as the field bag (from/contract/action/
+// data…). Passing those fields as siblings of `cmd` drops them — args ends up
+// undefined and pushaction throws "contract and action required". So fold every
+// field except `cmd` under `args`. (This path only ever ran read-only before —
+// a locked wallet skipped every signing call — so the miss went unseen.)
+const wax = async ({ cmd, ...rest }) => {
+  const body = Object.keys(rest).length ? { cmd, args: rest } : { cmd };
+  const r = await fetch(WAXWING, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
   return r.json();
 };
 
