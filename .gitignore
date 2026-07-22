@@ -1,5 +1,6 @@
 # ─── Secrets — NEVER commit. On-disk only, under .secrets/ ──────────────
 .secrets/
+tools/setup_keosd.sh
 
 # ─── Build artifacts ────────────────────────────────────────────────────
 contract/pockethatch/build/*.wasm
