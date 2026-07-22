@@ -36,7 +36,8 @@ import type { Session } from '@wharfkit/session'
 import { login, restore, logout } from './wallet'
 import { getContract } from './contract'
 import { isPlayable, getActiveNetwork } from './network'
-import { waxwingStatus, ensureNetwork, waxwingAccount, waxwingBuildAction, waxwingWaitForIntent, waxwingCancel, openWaxwingPanel, type WaxwingIntent } from './waxwing'
+import { waxwingStatus, ensureNetwork, waxwingAccount, waxwingBuildAction, waxwingMarketIntent, waxwingWaitForIntent, waxwingCancel, openWaxwingPanel, type WaxwingIntent } from './waxwing'
+import { fetchSale, buildListActions, buildBuyActions, buildCancelActions, formatWax } from './market'
 import {
   fetchGameState,
   getTokenBalance,
@@ -214,6 +215,12 @@ export interface GameActions {
   renamingId: string | null
   harvest: () => Promise<ActionResult>
   claimReward: () => Promise<ActionResult>
+  /** List one of your creatures on the In-Game Marketplace (announcesale+createoffer, one atomic tx). */
+  marketList: (assetId: string, priceWax: number) => Promise<ActionResult>
+  /** Buy a listed creature (deposit+purchasesale, one atomic tx). */
+  marketBuy: (saleId: string) => Promise<ActionResult>
+  /** Delist your own sale (cancelsale). */
+  marketCancel: (saleId: string) => Promise<ActionResult>
   refresh: () => Promise<void>
   confirmPending: () => Promise<void>
   cancelPending: () => void
@@ -728,6 +735,25 @@ export function useGameActions(): GameActions {
     setConnectMode('waxwing')
   }, [])
 
+  // Shared waxwing sign-wait: show the pending intent, open the wallet panel,
+  // and resolve when the player's tap IN WAXWING broadcasts (or cancels) it.
+  // Used by every waxwing-mode action — gameplay pushes and market intents alike.
+  const awaitWaxwingSign = useCallback(
+    async (intent: WaxwingIntent, label: string): Promise<{ txid: string }> => {
+      pendingIntentRef.current = intent
+      setPendingSign({ intent, label })
+      // Open waxwing so the player can unlock + sign in the wallet UI.
+      openWaxwingPanel()
+      try {
+        return await waxwingWaitForIntent(intent.id)
+      } finally {
+        pendingIntentRef.current = null
+        setPendingSign(null)
+      }
+    },
+    [],
+  )
+
   // Build the signer for the active backend. Throws (readably) if not connected.
   const buildSigner = useCallback((): GameSigner => {
     // Spectator hard-stop: ?view seeds the waxwing read actor, which would make
@@ -757,22 +783,12 @@ export function useGameActions(): GameActions {
         push: async (action, data, opts) => {
           const label = opts?.label ?? ACTION_LABEL[action] ?? action
           const intent = await waxwingBuildAction(action, data, actor, { label, contract: opts?.contract })
-          pendingIntentRef.current = intent
-          setPendingSign({ intent, label })
-          // Open waxwing so the player can unlock + sign in the wallet UI.
-          openWaxwingPanel()
-          try {
-            const result = await waxwingWaitForIntent(intent.id)
-            return result
-          } finally {
-            pendingIntentRef.current = null
-            setPendingSign(null)
-          }
+          return awaitWaxwingSign(intent, label)
         },
       }
     }
     throw new Error('wallet not connected')
-  }, [])
+  }, [awaitWaxwingSign])
 
   // Run one signed gameplay action through the active backend, then refresh
   // state. Catches contract/wallet errors into `lastAction` instead of throwing
@@ -1164,6 +1180,73 @@ export function useGameActions(): GameActions {
     return run('Claim reward', (s) => s.push('claimreward', { owner: s.actor }))
   }, [run])
 
+  // ── In-Game Marketplace (AtomicMarket lifecycle) ────────────────────────────
+  // list / buy / delist run through the SAME run() gate as every gameplay action:
+  // buildSigner() supplies the actor and refuses outright for the ?view spectator;
+  // run() owns the toast/animating/refresh lifecycle. Per backend:
+  //   waxwing → the daemon registers a market intent (multi-action, ATOMIC) on the
+  //             same sx_ confirm gate; the player's tap IN THE WALLET broadcasts.
+  //   wcw     → market.ts's own action builders, signed in the browser wallet.
+  // No path broadcasts without the player's tap (CEO rule).
+  const marketList = useCallback(
+    (assetId: string, priceWax: number) =>
+      run('List on Market', async (s) => {
+        const price = formatWax(priceWax) // validates > 0 before anything signs
+        if (modeRef.current === 'waxwing') {
+          const intent = await waxwingMarketIntent('market-list', {
+            from: s.actor,
+            asset_ids: [assetId],
+            price: priceWax,
+            collection: getActiveNetwork().contract,
+          })
+          return awaitWaxwingSign(intent, `List creature #${assetId} · ${price}`)
+        }
+        const session = sessionRef.current
+        if (!session) throw new Error('wallet not connected')
+        return getContract(session).pushActions(buildListActions(s.actor, assetId, priceWax))
+      }),
+    [run, awaitWaxwingSign],
+  )
+
+  const marketBuy = useCallback(
+    (saleId: string) =>
+      run('Buy from Market', async (s) => {
+        // Re-read the sale LIVE before signing: the price/state on screen may be
+        // minutes old, and the deposit must match the chain's number exactly.
+        const sale = await fetchSale(saleId)
+        if (!sale || sale.state !== 1) throw new Error('this sale is no longer listed')
+        if (sale.seller === s.actor) throw new Error('this is your own listing — delist it instead')
+        if (modeRef.current === 'waxwing') {
+          const intent = await waxwingMarketIntent('market-buy', { from: s.actor, sale_id: saleId })
+          return awaitWaxwingSign(
+            intent,
+            `Buy creature #${sale.assetId} · ${sale.price.amount} ${sale.price.symbol}`,
+          )
+        }
+        const session = sessionRef.current
+        if (!session) throw new Error('wallet not connected')
+        return getContract(session).pushActions(buildBuyActions(s.actor, sale))
+      }),
+    [run, awaitWaxwingSign],
+  )
+
+  const marketCancel = useCallback(
+    (saleId: string) =>
+      run('Delist from Market', async (s) => {
+        const sale = await fetchSale(saleId)
+        if (!sale || sale.state !== 1) throw new Error('this sale is no longer listed')
+        if (sale.seller !== s.actor) throw new Error(`only the seller (${sale.seller}) can delist this sale`)
+        if (modeRef.current === 'waxwing') {
+          const intent = await waxwingMarketIntent('market-cancel', { from: s.actor, sale_id: saleId })
+          return awaitWaxwingSign(intent, `Delist creature #${sale.assetId}`)
+        }
+        const session = sessionRef.current
+        if (!session) throw new Error('wallet not connected')
+        return getContract(session).pushActions(buildCancelActions(s.actor, saleId))
+      }),
+    [run, awaitWaxwingSign],
+  )
+
   // In the current flow, signing happens IN WAXWING (the player unlocks + taps
   // Sign in the wallet panel), not in the game's SignSheet. The game detects the
   // outcome via waxwingWaitForIntent polling. confirmPending opens the waxwing
@@ -1197,6 +1280,9 @@ export function useGameActions(): GameActions {
     renamingId,
     harvest,
     claimReward,
+    marketList,
+    marketBuy,
+    marketCancel,
     refresh,
     confirmPending,
     cancelPending,

@@ -196,6 +196,28 @@ export async function waxwingBuildAction(
 }
 
 /**
+ * Build a sign-intent for an AtomicMarket op through the daemon wallet — the
+ * In-Game Marketplace's waxwing sign path. The marketplace UI, reads and action
+ * shapes all live in the GAME (market.ts); in waxwing mode the daemon is simply
+ * the wallet that signs, exactly as it is for every gameplay action. Its
+ * market-list / market-buy / market-cancel cmds register the SAME sx_ intent
+ * the game already gates: nothing broadcasts until the player taps Sign in the
+ * waxwing panel (list = announcesale+createoffer, buy = deposit+purchasesale,
+ * cancel = cancelsale — one atomic tx each, matching market.ts's builders).
+ */
+export async function waxwingMarketIntent(
+  kind: 'market-list' | 'market-buy' | 'market-cancel',
+  args: Record<string, unknown>,
+): Promise<WaxwingIntent> {
+  const r = await cmd<{ ok?: boolean; confirmRequired?: boolean; intent?: WaxwingIntent; msg?: string }>(
+    kind,
+    args,
+  )
+  if (r.confirmRequired && r.intent) return r.intent
+  throw new Error(r.msg || `waxwing ${kind} failed`)
+}
+
+/**
  * Broadcast a previously-built intent after the player taps Sign in the popup.
  * Single-use: the engine drops the intent once broadcast (or on TTL/expiry).
  */

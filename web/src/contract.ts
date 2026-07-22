@@ -71,6 +71,22 @@ export class PocketHatcheryContract {
     return { txid, actionName: name, action, broadcast: true }
   }
 
+  /**
+   * Sign + broadcast SEVERAL pre-built actions as ONE atomic transaction — the
+   * In-Game Marketplace path (list = announcesale+createoffer, buy = deposit+
+   * purchasesale). The actions arrive fully built (market.ts) with the actor
+   * already in their authorization; this only hands them to the wallet.
+   */
+  async pushActions(
+    actions: { account: string; name: string; authorization: { actor: string; permission: string }[]; data: Record<string, unknown> }[],
+  ): Promise<{ txid: string }> {
+    const result = (await this.session.transact(
+      { actions },
+      { broadcast: true },
+    )) as TransactResultLike
+    return { txid: String(result?.response?.transaction_id ?? result?.id ?? '') }
+  }
+
   async initplayer(): Promise<ContractCallResult> {
     return this.push('initplayer', { owner: this.actor })
   }

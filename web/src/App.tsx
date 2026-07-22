@@ -4,6 +4,7 @@ import { getActiveNetwork, isPlayable } from './network'
 import { CreatureCard, type Creature } from './components/CreatureCard'
 import { BreedingPage } from './components/BreedingPage'
 import { FarmScene } from './components/FarmScene'
+import { MarketPage } from './components/MarketPage'
 import { useDemoGame } from './demoGame'
 import { openWaxwingPanel } from './waxwing'
 import { speciesIdFromGene } from './geneDecoder'
@@ -594,7 +595,7 @@ function ConnectedDashboard() {
   // not on a list. The collection is one click away for acting on a creature.
   // Spectator view lands on the collection (that's where the rarity cards are);
   // a connected player lands on their farm.
-  const [tab, setTab] = useState<'creatures' | 'farm' | 'breeding'>(
+  const [tab, setTab] = useState<'creatures' | 'farm' | 'market' | 'breeding'>(
     () => (new URLSearchParams(window.location.search).has('view') ? 'creatures' : 'farm'),
   )
   const [showHelp, setShowHelp] = useState(false)
@@ -912,6 +913,13 @@ function ConnectedDashboard() {
             🌾 Farm
           </button>
           <button
+            className={`${styles.tabBtn} ${tab === 'market' ? styles.tabActive : ''}`}
+            onClick={() => setTab('market')}
+            data-testid="tab-market"
+          >
+            🏪 Market
+          </button>
+          <button
             className={`${styles.tabBtn} ${tab === 'creatures' ? styles.tabActive : ''}`}
             onClick={() => setTab('creatures')}
           >
@@ -929,6 +937,21 @@ function ConnectedDashboard() {
           // Clicking a creature in the farm hands the player back to its card —
           // the farm is where you SEE them, the collection is where you act.
           <FarmScene creatures={game.creatures} onSelect={() => setTab('creatures')} />
+        ) : tab === 'market' ? (
+          // In-Game Marketplace — live AtomicMarket board for the game collection.
+          // Buy/List/Delist sign through the SAME unified game signer; a `?view`
+          // spectator browses with every action control hidden (and play.ts's
+          // buildSigner refuses regardless).
+          <MarketPage
+            actor={game.connectedAs}
+            readOnly={readOnly}
+            animating={game.animating}
+            hatchOdds={game.hatchOdds}
+            creatures={game.creatures}
+            onList={game.marketList}
+            onBuy={game.marketBuy}
+            onCancel={game.marketCancel}
+          />
         ) : tab === 'creatures' ? (
           <>
             {/* Creature inventory */}

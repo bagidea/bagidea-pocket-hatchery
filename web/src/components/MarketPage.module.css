@@ -1,0 +1,422 @@
+/*
+ * MarketPage.module.css — In-Game Marketplace, translated 1:1 from the approved
+ * mock (art/marketplace-mock/marketplace.html). Shell/panel/text tokens come from
+ * styles/tokens.css (--ph-*); the RARITY frame palette is the mock's own —
+ * NFT-CARD-DESIGN.md §8 canonical NFT card colours — declared locally so the
+ * marketplace matches the approved design without touching global tokens.
+ * Card art ratio = 7:10 (NFT-CARD-DESIGN.md: 300×432 px).
+ */
+
+.page {
+  /* Rarity palette — NFT-CARD-DESIGN.md §8 (the mock's :root) */
+  --mk-common:    #8FD694;
+  --mk-uncommon:  #5BC0BE;
+  --mk-rare:      #5FB8E8;
+  --mk-epic:      #B07BE8;
+  --mk-legendary: #FFD86B;
+  --mk-mythic:    #F472B6; /* representative; rendered as rainbow gradient */
+  --mk-card-ratio: 7/10;
+  padding: 4px 0 24px;
+}
+
+@keyframes mythicRainbow {
+  0%   { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(360deg); }
+}
+
+.pgTitle {
+  font-family: var(--ph-font-display, 'Baloo 2', system-ui);
+  font-size: 24px;
+  font-weight: 800;
+  margin-bottom: 16px;
+}
+
+/* ── Filter bar ── */
+.filters {
+  display: flex; align-items: center; gap: 8px;
+  flex-wrap: wrap; margin-bottom: 12px;
+}
+.chip {
+  padding: 5px 14px; border-radius: 999px; font-size: 12px;
+  font-weight: 700; border: 1.5px solid; cursor: pointer; user-select: none;
+  background: transparent;
+  font-family: inherit;
+  transition: background .12s, opacity .12s;
+}
+.chipPct { opacity: .55; font-size: 9px; }
+.chipAll      { border-color: var(--ph-panel-border-strong); color: var(--ph-text-muted); background: var(--ph-panel); }
+.chipAllSel   { background: rgba(255,255,255,0.12); color: var(--ph-text-primary); }
+.chipCommon   { border-color: rgba(143,214,148,0.55); color: var(--mk-common); }
+.chipUncommon { border-color: rgba(91,192,190,0.55);  color: var(--mk-uncommon); }
+.chipRare     { border-color: rgba(95,184,232,0.55);  color: var(--mk-rare); }
+.chipEpic     { border-color: rgba(176,123,232,0.55); color: var(--mk-epic); }
+.chipLegendary{ border-color: rgba(255,216,107,0.55); color: var(--mk-legendary); }
+.chipMythic   {
+  border-color: rgba(244,114,182,0.65); color: var(--mk-mythic);
+  animation: mythicRainbow 4s linear infinite;
+}
+.chipSel { background: rgba(255,255,255,0.10); }
+.fsep { width: 1px; height: 24px; background: var(--ph-panel-border); margin: 0 4px; }
+.fsel {
+  padding: 6px 12px; border-radius: var(--ph-radius-md, 16px);
+  background: var(--ph-panel); border: 1px solid var(--ph-panel-border);
+  color: var(--ph-text-primary); font-size: 12px;
+  font-family: inherit; outline: none;
+}
+.fsel option { background: #131836; }
+.fselRight { margin-left: auto; }
+
+/* ── Stats bar ── */
+.stats {
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  padding: 10px 18px;
+  background: var(--ph-panel); border: 1px solid var(--ph-panel-border);
+  border-radius: var(--ph-radius-lg, 20px); margin-bottom: 20px; font-size: 13px;
+}
+.stItem { display: flex; align-items: center; gap: 5px; }
+.stLabel { color: var(--ph-text-muted); }
+.stVal   { font-weight: 700; }
+.stValMythic { font-weight: 700; color: var(--mk-mythic); }
+.stDot   { color: var(--ph-text-disabled); }
+
+/* ── Listing grid ── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+/* ── Listing card ── */
+.lcard {
+  border-radius: var(--ph-radius-xl, 24px); border: 1.5px solid;
+  background: rgba(8,10,20,0.70); overflow: hidden;
+  cursor: pointer; transition: transform .15s, box-shadow .15s;
+  position: relative;
+  text-align: left;
+  padding: 0;
+  font-family: inherit;
+  color: var(--ph-text-primary);
+}
+.lcard:hover { transform: translateY(-4px); }
+.lcardCommon    { border-color: rgba(143,214,148,0.40); box-shadow: 0 0 12px rgba(143,214,148,0.14); }
+.lcardUncommon  { border-color: rgba(91,192,190,0.40);  box-shadow: 0 0 14px rgba(91,192,190,0.14); }
+.lcardRare      { border-color: rgba(95,184,232,0.50);  box-shadow: 0 0 18px rgba(95,184,232,0.18); }
+.lcardEpic      { border-color: rgba(176,123,232,0.55); box-shadow: 0 0 22px rgba(176,123,232,0.20); }
+.lcardLegendary { border-color: rgba(255,216,107,0.60); box-shadow: 0 0 26px rgba(255,216,107,0.24); }
+.lcardMythic    {
+  border-color: rgba(244,114,182,0.65);
+  box-shadow: 0 0 32px rgba(244,114,182,0.28), 0 0 60px rgba(161,140,209,0.18);
+  animation: mythicRainbow 6s linear infinite;
+}
+
+/* Sprite window standing in for the mock's pre-rendered PNG — same 7:10 frame,
+   the game's live gene-driven renderer paints the creature inside. */
+.cardArt {
+  width: 100%;
+  aspect-ratio: var(--mk-card-ratio);
+  display: flex; align-items: center; justify-content: center;
+  border-bottom: 1px solid var(--ph-panel-border);
+  background: radial-gradient(ellipse at 50% 62%, rgba(255,255,255,0.06), transparent 70%);
+  overflow: hidden;
+}
+.cardArt > * { width: 82%; height: auto; }
+.cardInfo { padding: 12px; }
+.cardHdr  {
+  display: flex; align-items: center;
+  justify-content: space-between; margin-bottom: 5px; gap: 6px;
+}
+.cardName {
+  font-family: var(--ph-font-display, 'Baloo 2', system-ui);
+  font-size: 14px; font-weight: 700;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* Rarity badges */
+.rbadge {
+  font-size: 10px; font-weight: 800; padding: 2px 8px;
+  border-radius: 999px; letter-spacing: .04em; flex-shrink: 0;
+}
+.rbadgeCommon    { background: rgba(143,214,148,0.14); color: var(--mk-common); }
+.rbadgeUncommon  { background: rgba(91,192,190,0.14);  color: var(--mk-uncommon); }
+.rbadgeRare      { background: rgba(95,184,232,0.14);  color: var(--mk-rare); }
+.rbadgeEpic      { background: rgba(176,123,232,0.14); color: var(--mk-epic); }
+.rbadgeLegendary { background: rgba(255,216,107,0.14); color: var(--mk-legendary); }
+.rbadgeMythic    {
+  background: linear-gradient(135deg, #ff9a9e, #a18cd1, #a6c1ee, #96e6a1);
+  color: #fff; animation: mythicRainbow 4s linear infinite;
+}
+.badgeLg { font-size: 11px; padding: 4px 12px; letter-spacing: .05em; }
+
+.stageRow {
+  display: flex; align-items: center; gap: 6px;
+  margin-bottom: 9px; font-size: 11px; color: var(--ph-text-muted);
+}
+.sdot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.sdotCommon    { background: var(--mk-common); }
+.sdotUncommon  { background: var(--mk-uncommon); }
+.sdotRare      { background: var(--mk-rare); }
+.sdotEpic      { background: var(--mk-epic); }
+.sdotLegendary { background: var(--mk-legendary); }
+.sdotMythic    { background: var(--mk-mythic); }
+
+.priceRow { display: flex; align-items: baseline; gap: 5px; margin-bottom: 2px; }
+.pAmt { font-family: var(--ph-font-display, 'Baloo 2', system-ui); font-size: 21px; font-weight: 800; }
+.pSym { font-size: 11px; font-weight: 700; color: var(--ph-text-muted); }
+.floorRow { font-size: 11px; color: var(--ph-text-disabled); margin-bottom: 10px; }
+.floorRow b { color: var(--ph-text-muted); }
+
+/* Rarity-tinted buy buttons */
+.buyBtn {
+  width: 100%; padding: 8px; border-radius: var(--ph-radius-md, 16px); border: none;
+  font-family: var(--ph-font-display, 'Baloo 2', system-ui); font-size: 13px; font-weight: 700;
+  cursor: pointer; color: #fff; transition: filter .15s;
+}
+.buyBtn:hover:not(:disabled) { filter: brightness(1.1); }
+.buyBtn:disabled { opacity: .5; cursor: not-allowed; }
+.buyCommon    { background: linear-gradient(135deg, #5BB572, #8FD694); }
+.buyUncommon  { background: linear-gradient(135deg, #3DA5A3, #5BC0BE); }
+.buyRare      { background: linear-gradient(135deg, #3D8FBF, #5FB8E8); }
+.buyEpic      { background: linear-gradient(135deg, #8A4FD4, #B07BE8); }
+.buyLegendary { background: linear-gradient(135deg, #F0B830, #FFD86B); color: #1a1020; }
+.buyMythic    {
+  background: linear-gradient(135deg, #ff9a9e, #a18cd1, #a6c1ee, #96e6a1);
+  animation: mythicRainbow 4s linear infinite;
+}
+
+.mineBadge {
+  position: absolute; top: 10px; right: 10px; z-index: 2;
+  background: rgba(255,216,107,0.90); color: #1a1020;
+  font-size: 9px; font-weight: 800; padding: 2px 8px;
+  border-radius: 999px; letter-spacing: .06em; text-transform: uppercase;
+}
+
+/* ── Empty / loading / error states ── */
+.boardState {
+  padding: 48px 24px; text-align: center;
+  background: var(--ph-panel); border: 1px solid var(--ph-panel-border);
+  border-radius: var(--ph-radius-lg, 20px);
+  color: var(--ph-text-muted); font-size: 14px;
+}
+.boardStateIcon { font-size: 34px; display: block; margin-bottom: 10px; }
+
+/* ── Detail view ── */
+.backBtn {
+  display: inline-flex; align-items: center; gap: 6px;
+  color: var(--ph-text-muted); font-size: 13px; font-weight: 600;
+  background: none; border: none; cursor: pointer;
+  font-family: inherit;
+  padding: 6px 0; margin-bottom: 16px;
+}
+.backBtn:hover { color: var(--ph-text-primary); }
+
+.dLayout {
+  display: grid; grid-template-columns: 320px 1fr;
+  gap: 24px; align-items: start;
+}
+@media (max-width: 900px) { .dLayout { grid-template-columns: 1fr; } }
+
+.dCardWrap {
+  border-radius: var(--ph-radius-xl, 24px); overflow: hidden;
+  border: 2px solid transparent;
+  margin-bottom: 14px;
+  aspect-ratio: var(--mk-card-ratio);
+  display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(ellipse at 50% 62%, rgba(255,255,255,0.07), rgba(8,10,20,0.7) 75%);
+  transition: border-color .2s, box-shadow .2s;
+}
+.dCardWrap > * { width: 84%; height: auto; }
+.dWrapCommon    { border-color: rgba(143,214,148,0.60); box-shadow: 0 0 20px rgba(143,214,148,0.20); }
+.dWrapUncommon  { border-color: rgba(91,192,190,0.60);  box-shadow: 0 0 22px rgba(91,192,190,0.22); }
+.dWrapRare      { border-color: rgba(95,184,232,0.60);  box-shadow: 0 0 26px rgba(95,184,232,0.24); }
+.dWrapEpic      { border-color: rgba(176,123,232,0.65); box-shadow: 0 0 30px rgba(176,123,232,0.26); }
+.dWrapLegendary { border-color: rgba(255,216,107,0.65); box-shadow: 0 0 34px rgba(255,216,107,0.28); }
+.dWrapMythic    {
+  border-color: rgba(244,114,182,0.60);
+  box-shadow: 0 0 40px rgba(244,114,182,0.32), 0 0 80px rgba(161,140,209,0.18);
+  animation: mythicRainbow 4s linear infinite;
+}
+
+.dMeta {
+  background: var(--ph-panel); border: 1px solid var(--ph-panel-border);
+  border-radius: var(--ph-radius-lg, 20px); padding: 14px 16px;
+}
+.metaRow {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 12px;
+}
+.metaRow:last-child { border-bottom: none; }
+.mkey { color: var(--ph-text-muted); }
+.mval { color: var(--ph-text-primary); font-weight: 600; }
+.mvalMono { font-family: 'Courier New', monospace; font-size: 11px; color: var(--ph-text-muted); font-weight: 600; }
+
+.dPanel {
+  background: var(--ph-panel); border: 1px solid var(--ph-panel-border);
+  border-radius: var(--ph-radius-xl, 24px); padding: 28px;
+  backdrop-filter: var(--ph-panel-blur, blur(16px));
+}
+.dName {
+  font-family: var(--ph-font-display, 'Baloo 2', system-ui); font-size: 28px; font-weight: 800;
+  margin-bottom: 10px; display: flex; align-items: center; gap: 10px;
+}
+.dNameId { font-size: 14px; color: var(--ph-text-disabled); font-weight: 600; }
+.badges { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+.badgeStage {
+  background: var(--ph-panel-raised); border: 1px solid var(--ph-panel-border);
+  color: var(--ph-text-muted); font-size: 11px; font-weight: 800;
+  padding: 4px 12px; border-radius: 999px;
+}
+
+.priceLabel { font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: var(--ph-text-disabled); margin-bottom: 4px; }
+.priceBig   {
+  font-family: var(--ph-font-display, 'Baloo 2', system-ui); font-size: 38px; font-weight: 800;
+  display: flex; align-items: baseline; gap: 8px;
+}
+.priceBigSym { font-size: 18px; color: var(--ph-text-muted); font-weight: 600; }
+.floorLine   { font-size: 12px; color: var(--ph-text-disabled); margin-top: 4px; margin-bottom: 6px; }
+.floorLine b { color: var(--ph-text-muted); }
+.sellerLine  { font-size: 12px; color: var(--ph-text-disabled); margin-bottom: 20px; }
+.sellerName  { color: var(--mk-rare); font-family: monospace; font-size: 11px; }
+
+.btnRow { display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; }
+
+.btnBuy {
+  flex: 1; min-width: 180px; padding: 14px; border-radius: var(--ph-radius-lg, 20px); border: none;
+  color: #fff; font-family: var(--ph-font-display, 'Baloo 2', system-ui); font-size: 15px; font-weight: 800;
+  cursor: pointer; transition: filter .15s;
+}
+.btnBuy:hover:not(:disabled) { filter: brightness(1.1); }
+.btnBuy:disabled { opacity: .5; cursor: not-allowed; }
+
+.btnList {
+  flex: 1; min-width: 160px; padding: 14px; border-radius: var(--ph-radius-lg, 20px);
+  border: 1px solid rgba(255,216,107,0.40); background: rgba(255,216,107,0.06);
+  color: var(--mk-legendary); font-family: var(--ph-font-display, 'Baloo 2', system-ui);
+  font-size: 14px; font-weight: 700; cursor: pointer;
+}
+.btnList:disabled { opacity: .5; cursor: not-allowed; }
+.btnCancel {
+  padding: 14px 18px; border-radius: var(--ph-radius-lg, 20px);
+  border: 1px solid var(--ph-panel-border); background: var(--ph-panel);
+  color: var(--ph-text-muted); font-family: inherit;
+  font-size: 13px; font-weight: 700; cursor: pointer;
+}
+.btnCancel:disabled { opacity: .5; cursor: not-allowed; }
+.btnSell {
+  flex: 1; min-width: 160px; padding: 14px; border-radius: var(--ph-radius-lg, 20px);
+  border: 1px solid rgba(95,184,232,0.40); background: rgba(95,184,232,0.08);
+  color: var(--mk-rare); font-family: var(--ph-font-display, 'Baloo 2', system-ui);
+  font-size: 14px; font-weight: 700; cursor: pointer;
+}
+.btnSell:disabled { opacity: .5; cursor: not-allowed; }
+
+/* List-price input (owner-unlisted state) */
+.priceInputRow { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; }
+.priceInput {
+  width: 160px; padding: 12px 14px; border-radius: var(--ph-radius-md, 16px);
+  background: rgba(255,255,255,0.05); border: 1px solid var(--ph-panel-border-strong);
+  color: var(--ph-text-primary); font-family: inherit; font-size: 15px; font-weight: 700;
+  outline: none;
+}
+.priceInput:focus { border-color: rgba(255,216,107,0.5); }
+.priceInputSym { color: var(--ph-text-muted); font-size: 13px; font-weight: 700; }
+
+.divider  { height: 1px; background: var(--ph-panel-border); margin: 20px 0; }
+.secTitle {
+  font-size: 10px; text-transform: uppercase; letter-spacing: .1em;
+  color: var(--ph-text-disabled); font-weight: 700; margin-bottom: 12px;
+}
+.dataGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.dcell {
+  background: rgba(255,255,255,0.025); border: 1px solid var(--ph-panel-border);
+  border-radius: var(--ph-radius-md, 16px); padding: 10px 12px;
+}
+.dkey { font-size: 10px; color: var(--ph-text-disabled); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 3px; }
+.dval { font-size: 14px; font-weight: 700; }
+.dvalMono { font-family: 'Courier New', monospace; font-size: 11px; color: var(--ph-text-muted); font-weight: 600; word-break: break-all; }
+.geneCell {
+  margin-top: 8px; padding: 10px 12px;
+  background: rgba(255,255,255,0.025);
+  border: 1px solid var(--ph-panel-border); border-radius: var(--ph-radius-md, 16px);
+}
+.rarityCommon    { color: var(--mk-common); }
+.rarityUncommon  { color: var(--mk-uncommon); }
+.rarityRare      { color: var(--mk-rare); }
+.rarityEpic      { color: var(--mk-epic); }
+.rarityLegendary { color: var(--mk-legendary); }
+.rarityMythic    { color: var(--mk-mythic); }
+
+.sbarWrap { margin-bottom: 10px; }
+.sbarHdr  { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; }
+.sbarHdr span { color: var(--ph-text-muted); }
+.sbarHdr b    { color: var(--ph-text-primary); }
+.sbarTrack { height: 6px; background: rgba(255,255,255,0.07); border-radius: 99px; overflow: hidden; }
+.sbarFill  { height: 100%; border-radius: 99px; }
+.sbarSatiety { background: linear-gradient(90deg, #F0B830, #FFD86B); }
+.sbarGrowth  { background: linear-gradient(90deg, #8A4FD4, #B07BE8); }
+
+.htable    { width: 100%; border-collapse: collapse; font-size: 12px; }
+.htable th {
+  text-align: left; padding: 8px 6px; color: var(--ph-text-disabled);
+  font-weight: 700; font-size: 10px; text-transform: uppercase;
+  letter-spacing: .06em; border-bottom: 1px solid var(--ph-panel-border);
+}
+.htable td { padding: 9px 6px; border-bottom: 1px solid rgba(255,255,255,0.04); color: var(--ph-text-muted); }
+.htable td:first-child { color: var(--ph-text-primary); font-weight: 600; }
+.evMint  { color: var(--mk-common) !important; }
+.hPrice  { color: var(--mk-legendary) !important; }
+
+/* ── Drop-rates footnote (live configv3 odds) ── */
+.oddsBar {
+  display: flex; gap: 6px; margin-top: 20px; flex-wrap: wrap; align-items: center;
+  background: var(--ph-panel); border: 1px solid var(--ph-panel-border);
+  border-radius: var(--ph-radius-md, 16px); padding: 10px 14px; font-size: 11px;
+}
+.oddsBarLabel { color: var(--ph-text-disabled); font-size: 10px; text-transform: uppercase; letter-spacing: .08em; margin-right: 4px; }
+.odd { display: flex; align-items: center; gap: 4px; font-weight: 700; }
+.oddMythic { animation: mythicRainbow 4s linear infinite; }
+.oddDot { width: 8px; height: 8px; border-radius: 50%; }
+.oddSep { color: var(--ph-text-disabled); margin: 0 2px; }
+.oddPct { color: var(--ph-text-disabled); }
+
+/* ── Sell-your-creatures strip ── */
+.sellSection { margin-top: 28px; }
+.sellHead {
+  display: flex; align-items: baseline; gap: 10px; margin-bottom: 12px;
+}
+.sellTitle {
+  font-family: var(--ph-font-display, 'Baloo 2', system-ui);
+  font-size: 17px; font-weight: 800;
+}
+.sellHint { font-size: 12px; color: var(--ph-text-muted); }
+.sellStrip {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+}
+.sellCard {
+  border-radius: var(--ph-radius-lg, 20px); border: 1px solid var(--ph-panel-border);
+  background: var(--ph-panel); overflow: hidden; cursor: pointer;
+  padding: 0; text-align: left; font-family: inherit; color: var(--ph-text-primary);
+  transition: transform .15s, border-color .15s;
+}
+.sellCard:hover { transform: translateY(-3px); border-color: var(--ph-panel-border-strong); }
+.sellArt {
+  width: 100%; aspect-ratio: 1;
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
+  background: radial-gradient(ellipse at 50% 62%, rgba(255,255,255,0.05), transparent 70%);
+}
+.sellArt > * { width: 72%; height: auto; }
+.sellInfo { padding: 10px 12px; }
+.sellName {
+  font-family: var(--ph-font-display, 'Baloo 2', system-ui);
+  font-size: 13px; font-weight: 700; margin-bottom: 3px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.sellMeta { font-size: 11px; color: var(--ph-text-muted); margin-bottom: 8px; }
+.sellListBtn {
+  width: 100%; padding: 7px; border-radius: var(--ph-radius-md, 16px);
+  border: 1px solid rgba(255,216,107,0.40); background: rgba(255,216,107,0.06);
+  color: var(--mk-legendary); font-family: var(--ph-font-display, 'Baloo 2', system-ui);
+  font-size: 12px; font-weight: 700; cursor: pointer;
+}
+.noteLine { font-size: 12px; color: var(--ph-text-muted); margin-bottom: 12px; }
