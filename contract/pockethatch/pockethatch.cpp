@@ -229,26 +229,27 @@ checksum256 pockethatch::make_genetics(uint64_t seed) const {
     return checksum256(arr);
 }
 
-uint64_t pockethatch::pick_template(uint64_t egg_type) const {
+uint64_t pockethatch::pick_template() const {
+    // Rarity-decoupled: pick from ALL species weighted by egg_weight.
+    // The species's own egg_type is irrelevant — rarity was already rolled
+    // independently by roll_egg_type() and is stored per-creature.
     species_t sps(get_self(), get_self().value);
-    auto idx = sps.get_index<"byeggtype"_n>();
 
     uint64_t total_weight = 0;
-    for (auto it = idx.lower_bound(egg_type); it != idx.end() && it->egg_type == egg_type; ++it) {
+    for (auto it = sps.begin(); it != sps.end(); ++it) {
         total_weight += it->egg_weight;
     }
-    check(total_weight > 0, "no species for this egg type");
+    check(total_weight > 0, "no species configured");
 
     uint64_t roll = make_seed() % total_weight;
     uint64_t cumulative = 0;
-    for (auto it = idx.lower_bound(egg_type); it != idx.end() && it->egg_type == egg_type; ++it) {
+    for (auto it = sps.begin(); it != sps.end(); ++it) {
         cumulative += it->egg_weight;
         if (roll < cumulative) return it->template_id;
     }
 
-    auto first = idx.lower_bound(egg_type);
-    check(first != idx.end() && first->egg_type == egg_type, "no species found");
-    return first->template_id;
+    check(false, "no species selected");
+    return 0; // unreachable
 }
 
 uint64_t pockethatch::roll_egg_type() const {
@@ -327,12 +328,14 @@ ATTR_MAP pockethatch::read_mutable_data(name collection, name owner, uint64_t as
 }
 
 uint64_t pockethatch::mint_creature(name owner, uint64_t template_id,
-                                    const checksum256& genetics, uint32_t born_at)
+                                    const checksum256& genetics, uint32_t born_at,
+                                    uint64_t egg_type)
 {
     config_row cfg = _cfg();
 
     ATTR_MAP immut = {
-        {"genetics", ATOM_ATTR(attr_hex(genetics))}
+        {"genetics", ATOM_ATTR(attr_hex(genetics))},
+        {"egg_type", ATOM_ATTR((uint64_t)egg_type)}
     };
     ATTR_MAP mut = {
         {"stage",  ATOM_ATTR((uint32_t)0)},
@@ -368,6 +371,7 @@ uint64_t pockethatch::mint_creature(name owner, uint64_t template_id,
         r.last_fed    = born_at;   // Feed v2: newborn starts fully fed (fed_until = born_at + fed_dur)
         r.last_bred   = 0;
         r.genetics    = genetics;
+        r.egg_type    = (uint8_t)egg_type;
     });
 
     return asset_id;
@@ -387,10 +391,11 @@ void pockethatch::hatch(name owner, uint64_t egg_type) {
     check(!cfg.paused, "game paused");
     ensure_player(owner);
 
-    // ── RNG: auto-roll rarity tier, then pick species within that tier ──
-    // (egg_type parameter from caller is ignored — contract rolls rarity server-side)
+    // ── RNG: auto-roll rarity tier, then pick species from ALL species ──
+    // (egg_type parameter from caller is ignored — contract rolls rarity server-side,
+    //  and species is picked independently of rarity via pick_template())
     uint64_t rolled_egg_type = roll_egg_type();
-    uint64_t template_id = pick_template(rolled_egg_type);
+    uint64_t template_id = pick_template();
     species_t sps(get_self(), get_self().value);
     auto sp_it = sps.find(template_id);
     check(sp_it != sps.end(), "species not found");
@@ -413,7 +418,7 @@ void pockethatch::hatch(name owner, uint64_t egg_type) {
 
     // ── Mint via shared helper (no HATCH burn) ──
     uint32_t now = current_time_point().sec_since_epoch();
-    mint_creature(owner, template_id, genetics, now);
+    mint_creature(owner, template_id, genetics, now, rolled_egg_type);
 }
 
 void pockethatch::firsthatch(name owner, uint64_t egg_type) {
@@ -431,9 +436,9 @@ void pockethatch::firsthatch(name owner, uint64_t egg_type) {
     bool has_creature = (it != idx.end() && it->owner == owner);
     check(!has_creature, "already have a creature — use regular hatch");
 
-    // ── RNG: auto-roll rarity tier, then pick species ──
+    // ── RNG: auto-roll rarity tier, then pick species from ALL species ──
     uint64_t rolled_egg_type = roll_egg_type();
-    uint64_t template_id = pick_template(rolled_egg_type);
+    uint64_t template_id = pick_template();
     species_t sps(get_self(), get_self().value);
     auto sp_it = sps.find(template_id);
     check(sp_it != sps.end(), "species not found");
@@ -446,7 +451,7 @@ void pockethatch::firsthatch(name owner, uint64_t egg_type) {
 
     // ── Mint via shared helper — ZERO cost ──
     uint32_t now = current_time_point().sec_since_epoch();
-    mint_creature(owner, template_id, genetics, now);
+    mint_creature(owner, template_id, genetics, now, rolled_egg_type);
 }
 
 void pockethatch::feed(name owner, uint64_t asset_id) {
@@ -526,7 +531,7 @@ void pockethatch::evolve(name owner, uint64_t asset_id) {
     uint32_t now = current_time_point().sec_since_epoch();
 
     // ── Feed v2: a hungry creature can't evolve (satiety gate) ──
-    check(ph_rules::is_sated(now, c_it->last_fed, fed_duration_for(cfg, sp_it->egg_type)),
+    check(ph_rules::is_sated(now, c_it->last_fed, fed_duration_for(cfg, c_it->egg_type)),
           "creature is hungry — feed before evolving");
 
     // Sync
@@ -631,7 +636,7 @@ void pockethatch::harvest(name owner) {
         if (it->stage != 0) continue;
         auto sp_it = sps.find(it->template_id);
         if (sp_it == sps.end()) continue;
-        uint32_t awaken_dur = awaken_duration_for(cfg, sp_it->egg_type);
+        uint32_t awaken_dur = awaken_duration_for(cfg, it->egg_type);
         if (now >= it->born_at + awaken_dur) {
             awaken_ids.push_back(it->asset_id);
         }
@@ -651,7 +656,7 @@ void pockethatch::harvest(name owner) {
         uint8_t idx_yield = it->stage - 1;        // stage 1→yield[0], etc.
         if (idx_yield >= 6) continue;
 
-        uint32_t fed_dur   = fed_duration_for(cfg, sp_it->egg_type);
+        uint32_t fed_dur   = fed_duration_for(cfg, it->egg_type);
         if (fed_dur == 0) continue;
         uint32_t fed_until = it->last_fed + fed_dur;
         uint32_t ws = std::max(std::max(p.last_harvest, it->last_fed), cap_start);
@@ -665,7 +670,7 @@ void pockethatch::harvest(name owner) {
         uint64_t sat_we = (uint64_t)(fed_until - we) * 10000ULL / fed_dur;
         uint64_t avg_sat = (sat_ws + sat_we) / 2;
 
-        uint16_t mult = earn_mult_for(cfg, sp_it->egg_type);
+        uint16_t mult = earn_mult_for(cfg, it->egg_type);
         if (mult > best_mult) best_mult = mult;
         gross += sp_it->yield_for(idx_yield) * fed_h
                * (uint64_t)mult / 10000ULL
@@ -723,7 +728,7 @@ void pockethatch::claimreward(name owner) {
         if (it->stage > highest_stage) highest_stage = it->stage;
         auto sp_it = sps.find(it->template_id);
         if (!has_fed_creature && sp_it != sps.end()) {
-            uint32_t fed_dur = fed_duration_for(cfg, sp_it->egg_type);
+            uint32_t fed_dur = fed_duration_for(cfg, it->egg_type);
             if (now < it->last_fed + fed_dur) has_fed_creature = true;
         }
     }
@@ -821,12 +826,14 @@ void pockethatch::breed(name owner, uint64_t parent_a, uint64_t parent_b) {
     }
     auto gpacked = sha256(reinterpret_cast<const char*>(checksum256(gblend).data()), 32);
 
-    // Pick offspring template — same as parent A for v1 (can be blended later)
-    uint64_t off_template = ca.template_id;
+    // ── Rarity decoupled: roll egg_type + pick species independently ──
+    uint64_t off_egg_type = roll_egg_type();
+    uint64_t off_template = pick_template();
 
     // Inline mint offspring NFT
     ATTR_MAP immut = {
-        {"genetics", ATOM_ATTR(attr_hex(gpacked))}
+        {"genetics", ATOM_ATTR(attr_hex(gpacked))},
+        {"egg_type", ATOM_ATTR((uint64_t)off_egg_type)}
     };
     ATTR_MAP mut = {
         {"stage",  ATOM_ATTR((uint32_t)0)},
@@ -858,6 +865,7 @@ void pockethatch::breed(name owner, uint64_t parent_a, uint64_t parent_b) {
         r.last_fed    = now;   // Feed v2: newborn starts fully fed (match mint_creature)
         r.last_bred   = 0;
         r.genetics    = gpacked;
+        r.egg_type    = (uint8_t)off_egg_type;
     });
 
     // Update parent cooldowns
@@ -896,7 +904,7 @@ void pockethatch::accelerate(name owner, uint64_t asset_id, asset amount) {
     // Same gate as evolve. Without it, paying HATCH was a way to buy growth
     // straight past the satiety economy — the one thing feeding is meant to
     // pace.
-    check(ph_rules::is_sated(now, c_it->last_fed, fed_duration_for(cfg, sp_it->egg_type)),
+    check(ph_rules::is_sated(now, c_it->last_fed, fed_duration_for(cfg, c_it->egg_type)),
           "creature is hungry — feed before accelerating");
 
     auto c = *c_it;
@@ -958,10 +966,8 @@ void pockethatch::burncreature(name owner, uint64_t asset_id) {
     config_row cfg = _cfg();
     uint8_t stage = c_it->stage;
 
-    // ── Look up species rarity ──
-    species_t sps(get_self(), get_self().value);
-    auto sp_it = sps.find(c_it->template_id);
-    uint64_t egg_type = (sp_it != sps.end()) ? sp_it->egg_type : 0;
+    // ── Creature's own rolled rarity (decoupled from species) ──
+    uint64_t egg_type = c_it->egg_type;
 
     // ── HATCH payout from reward pool ──
     // formula: base × stage_mult × rarity_mult
@@ -1098,6 +1104,15 @@ void pockethatch::equipcosmetic(name owner, uint64_t asset_id, uint64_t cosmetic
 }
 
 // ─── Admin actions ──────────────────────────────────────────────────────
+
+void pockethatch::clearcreatures() {
+    require_auth(get_self());
+    creatures_t crs(get_self(), get_self().value);
+    auto it = crs.begin();
+    while (it != crs.end()) {
+        it = crs.erase(it);
+    }
+}
 
 void pockethatch::clearconfig() {
     require_auth(get_self());
@@ -1281,11 +1296,8 @@ void pockethatch::on_wax_transfer(name from, name to, asset quantity, std::strin
     check(it->owner == from, "not your creature");
     check(it->stage == 0, "already awake");
 
-    // 4. Look up species + rarity
-    species_t sps(get_self(), get_self().value);
-    auto sp = sps.find(it->template_id);
-    check(sp != sps.end(), "species not found");
-    uint64_t egg_type = sp->egg_type;
+    // 4. Creature's own rolled rarity (decoupled from species)
+    uint64_t egg_type = it->egg_type;
 
     // 5. Validate WAX amount (excess WAX accepted as donation)
     //    (timer gate removed — WAX wake is always available during stage 0;

@@ -346,6 +346,7 @@ struct [[eosio::table("creatrsv2")]] creature_row {
     uint32_t    last_fed;
     uint32_t    last_bred;
     checksum256 genetics;
+    uint8_t     egg_type;   // rarity 0-5 rolled at hatch/breed (decoupled from species)
 
     uint64_t primary_key() const { return asset_id; }
     uint64_t by_owner() const { return owner.value; }
@@ -392,6 +393,7 @@ public:
     [[eosio::action]] void unlockslot(name owner, uint8_t slot_index);
     [[eosio::action]] void equipcosmetic(name owner, uint64_t asset_id, uint64_t cosmetic_tmpl);
     [[eosio::action]] void burncreature(name owner, uint64_t asset_id);
+    [[eosio::action]] void clearcreatures();
 
     // ── Admin actions (contract-auth) ───────────────────────────
 
@@ -446,11 +448,11 @@ private:
     void fund_pool(const asset& amount, const std::string& source);
     uint64_t make_seed() const;
     checksum256 make_genetics(uint64_t seed) const;
-    uint64_t pick_template(uint64_t egg_type) const;
+    uint64_t pick_template() const;  // picks from ALL species weighted by egg_weight (rarity decoupled)
     uint64_t roll_egg_type() const;
     uint64_t resolve_new_asset(name owner) const;
     uint64_t predict_asset_id() const;
-    uint64_t mint_creature(name owner, uint64_t template_id, const checksum256& genetics, uint32_t born_at);
+    uint64_t mint_creature(name owner, uint64_t template_id, const checksum256& genetics, uint32_t born_at, uint64_t egg_type);
     bool nft_exists(name collection, name owner, uint64_t asset_id) const;
     // Current mutable map of an asset, ready to edit + hand back to setassetdata
     // (see aa_mutdata.hpp for why every write has to merge).
