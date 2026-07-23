@@ -90,3 +90,15 @@
 | วันที่ | account | permission | การกระทำ | TX |
 |---|---|---|---|---|
 | 2026-07-23 | `officewax123` | `owner` | rotated — old WIF (tools/evolve-2017) revoked, new key active | `3c961875a9a6fe43f7b1ea8cc2bd62440d549a17215f823e53de2eab485617ad` |
+
+## Secret Scan — 2026-07-23
+
+Scope: full repo (`rg --no-ignore`) for patterns `PVT_K1_`, `5K…` / `5J…` / `5H…` (WIF private keys), `BagIdea password`
+
+| pattern | hits | verdict |
+|---|---|---|
+| `PVT_K1_` | 0 | clean |
+| `BagIdea password` | 0 | clean |
+| `5K` / `5J` / `5H` (WIF) | **2** | **verified false positives** — base64 fragment inside minified crypto lib at `web/public/assets/index.js` and `index-BY6_yxax.js` (tracked build artifact); string is mid-sequence, not a valid WIF key |
+
+**Result: 0 live private keys found.** The 2 hits are confirmed false positives in minified bundles and pose no risk. Future auditors: grep `web/public/assets/*.js` — these hits are expected and benign.

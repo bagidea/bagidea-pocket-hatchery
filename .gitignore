@@ -25,6 +25,7 @@ deploy/nodejs/node_modules/
 # ─── Temp / debug files ─────────────────────────────────────────────────
 tmp/
 _bak/
+_recon/
 *.bak
 _deployed_abi.bin
 _live_abi.json
