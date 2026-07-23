@@ -2,6 +2,12 @@
 .secrets/
 tools/setup_keosd.sh
 
+# ─── Env files — never commit (web/.env is whitelisted: public VITE_CHAIN only)
+.env
+.env.*
+*.env
+!web/.env
+
 # ─── Build artifacts ────────────────────────────────────────────────────
 contract/pockethatch/build/*.wasm
 contract/pockethatch/build/*.abi
