@@ -1,0 +1,88 @@
+{
+  "label": "before",
+  "url": "http://localhost:5173/plugin/pocket-hatchery/static/farmperf.html",
+  "gpu": {
+    "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 1060 6GB (0x00001C03) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "software": false
+  },
+  "frames": {
+    "count": 83,
+    "avgMs": 96.17,
+    "p50": 100.2,
+    "p95": 116.9,
+    "p99": 117,
+    "worstMs": 117,
+    "long_gt16_7": 82,
+    "long_gt50": 82,
+    "pctLong16": 98.8
+  },
+  "tracePhasesMs": {
+    "scripting": 22331.4,
+    "other": 58758.2,
+    "composite": 1234.4,
+    "paint": 1801,
+    "recalc-style": 290.8,
+    "layout": 465.5,
+    "raster": 379.3,
+    "gc": 64.3
+  },
+  "traceTotalMs": 85324.9,
+  "topEventsMs": [
+    {
+      "name": "RunTask",
+      "ms": 15367.5
+    },
+    {
+      "name": "Scheduler::RunTask",
+      "ms": 6922.2
+    },
+    {
+      "name": "GpuChannel::ExecuteDeferredRequest",
+      "ms": 6894.2
+    },
+    {
+      "name": "GPUTask",
+      "ms": 6891.2
+    },
+    {
+      "name": "CommandBuffer::Flush",
+      "ms": 6887.7
+    },
+    {
+      "name": "CommandBufferStub::OnAsyncFlush",
+      "ms": 6887.4
+    },
+    {
+      "name": "CommandBufferService:PutChanged",
+      "ms": 6886.2
+    },
+    {
+      "name": "RendererRasterWorker",
+      "ms": 6885
+    },
+    {
+      "name": "RasterDecoderImpl::DoEndRasterCHROMIUM",
+      "ms": 4673.6
+    },
+    {
+      "name": "RasterDecoderImpl::DoEndRasterCHROMIUM::Flush",
+      "ms": 4659.7
+    },
+    {
+      "name": "RasterDecoderImpl::DoRasterCHROMIUM",
+      "ms": 2215.7
+    },
+    {
+      "name": "RasterDecoderImpl::DoRasterCHROMIUM::Deserializing",
+      "ms": 2210.7
+    },
+    {
+      "name": "ProxyMain::BeginMainFrame",
+      "ms": 947.8
+    },
+    {
+      "name": "WebFrameWidgetImpl::UpdateLifecycle",
+      "ms": 567.4
+    }
+  ]
+}

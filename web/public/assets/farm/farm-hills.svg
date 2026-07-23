@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" preserveAspectRatio="xMidYMax slice">
+  <!-- Pocket Hatchery · Farm scene LAYER 10 — FAR HILLS (atmospheric depth)
+       Flamingo (Designer) · 2026-07-17 · z-index 10
+       Three ridges, each darker + more saturated as it comes forward: classic
+       aerial perspective. The far ridge is nearly sky-coloured so it reads as
+       distance, not as a shape. Rim-lit from the sun at x=600 (see farm-sky).
+       Hue path walks ph-color-meadow (#22C55E) down into the shell navy. -->
+  <defs>
+    <linearGradient id="ridgeFar" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#6B4A72"/>
+      <stop offset="1" stop-color="#4A3760"/>
+    </linearGradient>
+    <linearGradient id="ridgeMid" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3E4A62"/>
+      <stop offset="1" stop-color="#28324A"/>
+    </linearGradient>
+    <linearGradient id="ridgeNear" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2C5545"/>
+      <stop offset="1" stop-color="#1B3B2C"/>
+    </linearGradient>
+    <!-- warm haze that pools along each ridge line -->
+    <linearGradient id="haze" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F59E0B" stop-opacity="0.30"/>
+      <stop offset="1" stop-color="#F59E0B" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="hazeBlur" x="-10%" y="-100%" width="120%" height="300%">
+      <feGaussianBlur stdDeviation="12"/>
+    </filter>
+  </defs>
+
+  <!-- ── far ridge (most distant, lowest contrast) ── -->
+  <path fill="url(#ridgeFar)" opacity="0.72" d="
+    M0,430 L0,396 C90,370 170,382 262,362 C360,340 424,356 512,344
+    C606,330 668,348 760,338 C858,326 930,344 1024,336
+    C1126,326 1196,344 1290,334 C1388,324 1476,346 1600,330
+    L1600,430 Z"/>
+  <rect x="0" y="392" width="1600" height="46" fill="url(#haze)" filter="url(#hazeBlur)" opacity="0.7"/>
+
+  <!-- ── mid ridge ── -->
+  <path fill="url(#ridgeMid)" d="
+    M0,430 L0,414 C110,398 186,410 288,392 C392,374 470,392 566,384
+    C664,376 726,392 828,386 C936,380 1010,396 1112,388
+    C1214,380 1300,398 1408,388 C1490,380 1548,392 1600,384
+    L1600,430 Z"/>
+  <!-- sun-side rim light on the mid ridge -->
+  <path fill="#F5B14E" opacity="0.20" filter="url(#hazeBlur)" d="
+    M300,406 C400,382 470,396 566,388 C664,380 726,396 828,390 L828,404 L300,418 Z"/>
+
+  <!-- ── near ridge: the treeline the meadow runs up against ── -->
+  <path fill="url(#ridgeNear)" d="
+    M0,432 L0,424 C120,412 200,422 300,412 C404,402 468,416 570,410
+    C676,404 742,416 850,412 C960,408 1032,420 1140,414
+    C1250,408 1330,420 1440,412 C1520,406 1566,414 1600,410
+    L1600,432 Z"/>
+
+  <!-- distant conifer treeline silhouettes sitting on the near ridge -->
+  <g fill="#163226" opacity="0.9">
+    <path d="M84,414 l11,-30 l11,30 z"/>   <path d="M112,416 l9,-24 l9,24 z"/>
+    <path d="M208,410 l12,-32 l12,32 z"/>  <path d="M238,413 l8,-22 l8,22 z"/>
+    <path d="M356,406 l10,-27 l10,27 z"/>  <path d="M382,408 l12,-31 l12,31 z"/>
+    <path d="M494,412 l9,-25 l9,25 z"/>    <path d="M690,412 l11,-29 l11,29 z"/>
+    <path d="M718,414 l8,-21 l8,21 z"/>    <path d="M912,410 l12,-32 l12,32 z"/>
+    <path d="M944,412 l9,-24 l9,24 z"/>    <path d="M1178,412 l11,-30 l11,30 z"/>
+    <path d="M1206,414 l8,-22 l8,22 z"/>   <path d="M1352,410 l12,-31 l12,31 z"/>
+    <path d="M1382,413 l9,-24 l9,24 z"/>   <path d="M1490,411 l10,-27 l10,27 z"/>
+  </g>
+
+  <!-- ground-fog band pooling right at the horizon — sells the distance -->
+  <rect x="0" y="404" width="1600" height="34" fill="#F0C88A" opacity="0.13" filter="url(#hazeBlur)"/>
+</svg>

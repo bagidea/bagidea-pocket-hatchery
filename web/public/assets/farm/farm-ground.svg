@@ -1,0 +1,146 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" preserveAspectRatio="xMidYMax slice">
+  <!-- Pocket Hatchery · Farm scene LAYER 20 — GROUND / MEADOW PLANE
+       Flamingo (Designer) · 2026-07-17 · z-index 20
+       This is the plane creatures actually stand on. Horizon y=430.
+       WALKABLE BAND (see docs/FARM-SCENE-SPEC.md — authoritative):
+         back edge  y=520, x 300 -> 1300
+         front edge y=830, x  90 -> 1510
+       The mown pen + its stripes are generated from EXACTLY those four numbers:
+       stripe boundary j (j=0..10) runs from x=300+100j at the back edge to
+       x=90+142j at the front edge. That is why the stripes converge with the pen
+       instead of fighting it. If the walkable band moves, regenerate the stripes.
+       Greens are ph-color-meadow (#22C55E) / ph-color-mint (#34D399) pushed into
+       dusk: value drops hard front-to-back so the sky still owns the brightness. -->
+  <defs>
+    <linearGradient id="meadowGrad" x1="0" y1="0" x2="0" y2="1">
+      <!-- far grass catches the golden horizon; near grass sinks to near-black -->
+      <stop offset="0"    stop-color="#4A6B44"/>
+      <stop offset="0.10" stop-color="#31543A"/>
+      <stop offset="0.34" stop-color="#20402E"/>
+      <stop offset="0.64" stop-color="#152D21"/>
+      <stop offset="1"    stop-color="#0C1C15"/>
+    </linearGradient>
+
+    <!-- warm light spilling from the horizon across the far meadow only -->
+    <radialGradient id="sunSpill" cx="0.375" cy="0" r="0.62">
+      <stop offset="0"    stop-color="#F5B14E" stop-opacity="0.50"/>
+      <stop offset="0.4"  stop-color="#F59E0B" stop-opacity="0.16"/>
+      <stop offset="1"    stop-color="#F59E0B" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- the mown, brighter pen where the creatures live -->
+    <linearGradient id="penGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0"   stop-color="#6E9E55" stop-opacity="0.42"/>
+      <stop offset="0.45" stop-color="#457A48" stop-opacity="0.26"/>
+      <stop offset="1"   stop-color="#254A33" stop-opacity="0.10"/>
+    </linearGradient>
+
+    <radialGradient id="lanternPool" cx="0.5" cy="0.5">
+      <stop offset="0"   stop-color="#FDE68A" stop-opacity="0.30"/>
+      <stop offset="0.5" stop-color="#F59E0B" stop-opacity="0.11"/>
+      <stop offset="1"   stop-color="#F59E0B" stop-opacity="0"/>
+    </radialGradient>
+
+    <filter id="softEdge" x="-15%" y="-40%" width="130%" height="180%">
+      <feGaussianBlur stdDeviation="16"/>
+    </filter>
+    <filter id="pathBlur" x="-15%" y="-20%" width="130%" height="140%">
+      <feGaussianBlur stdDeviation="5"/>
+    </filter>
+    <filter id="penBlur" x="-10%" y="-20%" width="120%" height="140%">
+      <feGaussianBlur stdDeviation="7"/>
+    </filter>
+    <filter id="horizonBlur" x="-10%" y="-200%" width="120%" height="500%">
+      <feGaussianBlur stdDeviation="9"/>
+    </filter>
+
+    <!-- Pen mask: every stripe/pool is clipped to the walkable trapezoid, so the
+         lit area of the ART and the walkable polygon in CODE cannot drift apart. -->
+    <clipPath id="penClip">
+      <path d="M300,520 L1300,520 L1510,830 L90,830 Z"/>
+    </clipPath>
+  </defs>
+
+  <!-- ── the meadow plane ── -->
+  <rect x="0" y="430" width="1600" height="470" fill="url(#meadowGrad)"/>
+  <rect x="0" y="430" width="1600" height="220" fill="url(#sunSpill)"/>
+
+  <!-- horizon knit: soft dark band so grass meets the treeline instead of
+       butting against it with a hard edge -->
+  <rect x="0" y="424" width="1600" height="18" fill="#1B3B2C" opacity="0.9" filter="url(#horizonBlur)"/>
+  <rect x="0" y="430" width="1600" height="26" fill="#E8B45E" opacity="0.10" filter="url(#horizonBlur)"/>
+
+  <!-- ══ MOWN PEN = the WALKABLE trapezoid, drawn 1:1 with the spec coords ══ -->
+  <g clip-path="url(#penClip)">
+    <path d="M300,520 L1300,520 L1510,830 L90,830 Z" fill="url(#penGrad)" filter="url(#penBlur)"/>
+
+    <!-- mow stripes: boundary j from (300+100j, 520) to (90+142j, 830).
+         Alternating bands j = 0,2,4,6,8. -->
+    <g opacity="0.07" fill="#B6E89A">
+      <path d="M300,520  L400,520  L232,830  L90,830   Z"/>
+      <path d="M500,520  L600,520  L516,830  L374,830  Z"/>
+      <path d="M700,520  L800,520  L800,830  L658,830  Z"/>
+      <path d="M900,520  L1000,520 L1084,830 L942,830  Z"/>
+      <path d="M1100,520 L1200,520 L1368,830 L1226,830 Z"/>
+    </g>
+
+    <!-- ── warm lantern pools (lanterns themselves live in the prop layers) ── -->
+    <ellipse cx="330"  cy="640" rx="170" ry="58" fill="url(#lanternPool)"/>
+    <ellipse cx="1268" cy="620" rx="150" ry="50" fill="url(#lanternPool)"/>
+    <ellipse cx="792"  cy="784" rx="230" ry="72" fill="url(#lanternPool)" opacity="0.75"/>
+
+    <!-- clover / wildflower dots for cosiness (ph-color-coral + golden) -->
+    <g opacity="0.45">
+      <g fill="#F9C7D4"><circle cx="228" cy="600" r="2.4"/><circle cx="236" cy="606" r="2"/>
+        <circle cx="1352" cy="580" r="2.4"/><circle cx="1344" cy="586" r="2"/>
+        <circle cx="602" cy="704" r="2.8"/><circle cx="612" cy="710" r="2.2"/></g>
+      <g fill="#FDE68A"><circle cx="452" cy="646" r="2.4"/><circle cx="1108" cy="672" r="2.6"/>
+        <circle cx="884" cy="612" r="2.2"/><circle cx="1462" cy="742" r="3"/>
+        <circle cx="164" cy="756" r="3"/></g>
+    </g>
+  </g>
+
+  <!-- soft rim on the pen's front lip so the mown area reads as a raised plane -->
+  <path d="M90,830 L1510,830" stroke="#8FD694" stroke-opacity="0.06" stroke-width="3" fill="none"/>
+
+  <!-- ── dirt path: barn door (top right) down to the front, crosses the pen ── -->
+  <path filter="url(#pathBlur)" fill="#4C3A26" opacity="0.8" d="
+    M1196,506 C1210,560 1180,610 1120,668 C1052,734 980,786 936,846
+    L1096,846 C1140,782 1206,724 1268,660 C1322,604 1348,552 1332,506 Z"/>
+  <path filter="url(#pathBlur)" fill="#6E5638" opacity="0.5" d="
+    M1214,508 C1226,558 1198,606 1142,662 C1080,724 1014,776 972,842
+    L1052,842 C1096,778 1160,722 1218,660 C1268,606 1292,556 1278,508 Z"/>
+  <!-- sun-side edge light along the path so it doesn't read as a flat smear -->
+  <path filter="url(#pathBlur)" fill="none" stroke="#C9A063" stroke-opacity="0.22" stroke-width="3" d="
+    M1196,506 C1210,560 1180,610 1120,668 C1052,734 980,786 936,846"/>
+
+  <!-- ── grass texture: short flecks far, longer flecks near (depth cue) ── -->
+  <g stroke="#6FAE5E" stroke-linecap="round" fill="none">
+    <g opacity="0.20" stroke-width="1.6">
+      <path d="M150,470 v-5"/><path d="M262,478 v-6"/><path d="M398,466 v-5"/>
+      <path d="M540,482 v-6"/><path d="M690,472 v-5"/><path d="M842,486 v-6"/>
+      <path d="M980,468 v-5"/><path d="M1128,480 v-6"/><path d="M1290,470 v-5"/>
+      <path d="M1436,484 v-6"/><path d="M76,492 v-6"/><path d="M1540,462 v-5"/>
+    </g>
+    <g opacity="0.17" stroke-width="2.2">
+      <path d="M186,556 v-9"/><path d="M352,572 v-10"/><path d="M498,548 v-9"/>
+      <path d="M646,580 v-10"/><path d="M812,558 v-9"/><path d="M968,584 v-10"/>
+      <path d="M1112,552 v-9"/><path d="M1268,576 v-10"/><path d="M1420,560 v-9"/>
+      <path d="M62,588 v-10"/><path d="M1522,548 v-9"/>
+    </g>
+    <g opacity="0.14" stroke-width="3">
+      <path d="M120,690 v-14"/><path d="M296,714 v-16"/><path d="M470,684 v-14"/>
+      <path d="M660,726 v-16"/><path d="M860,696 v-14"/><path d="M1040,730 v-16"/>
+      <path d="M1230,690 v-14"/><path d="M1410,720 v-16"/><path d="M1546,700 v-14"/>
+    </g>
+  </g>
+
+  <!-- unmown darker grass OUTSIDE the pen: frames the walkable area by contrast -->
+  <path fill="#0E2118" opacity="0.5" filter="url(#softEdge)" d="
+    M0,520 L300,520 L90,830 L0,830 Z"/>
+  <path fill="#0E2118" opacity="0.5" filter="url(#softEdge)" d="
+    M1300,520 L1600,520 L1600,830 L1510,830 Z"/>
+
+  <!-- near-ground shadow so the foreground sinks and the pen pops -->
+  <rect x="0" y="812" width="1600" height="88" fill="#08140F" opacity="0.42" filter="url(#softEdge)"/>
+</svg>

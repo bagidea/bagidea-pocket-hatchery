@@ -1,0 +1,206 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" preserveAspectRatio="xMidYMax slice">
+  <!-- Pocket Hatchery · Farm scene LAYER 30 — BACKDROP PROPS (always BEHIND creatures)
+       Flamingo (Designer) · 2026-07-17 · z-index 30
+       Every prop here has its base ABOVE the walkable back edge (y=520), so it can
+       never overlap a creature — that is exactly why it's safe to draw as one flat
+       layer with no y-sorting. Props that DO sit inside the walkable band ship as
+       separate files (prop-*.svg) with baseY anchors. See docs/FARM-SCENE-SPEC.md.
+       Warm windows + lanterns = ph-color-golden(-light). Barn = ph-color-coral
+       family, dusk-darkened, because a red barn against a golden sky is the whole
+       cosy-farm read in one shape. -->
+  <defs>
+    <linearGradient id="barnWall" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0"   stop-color="#8E3242"/>
+      <stop offset="0.5" stop-color="#B4404F"/>
+      <stop offset="1"   stop-color="#6E2434"/>
+    </linearGradient>
+    <linearGradient id="barnRoof" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4B5570"/>
+      <stop offset="1" stop-color="#2C3348"/>
+    </linearGradient>
+    <linearGradient id="barnSide" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#5C2030"/>
+      <stop offset="1" stop-color="#3E1622"/>
+    </linearGradient>
+    <radialGradient id="windowGlow" cx="0.5" cy="0.5">
+      <stop offset="0"   stop-color="#FFF3C4" stop-opacity="0.95"/>
+      <stop offset="0.4" stop-color="#FDE68A" stop-opacity="0.55"/>
+      <stop offset="1"   stop-color="#F59E0B" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="treeCanopy" x1="0.3" y1="0" x2="0.8" y2="1">
+      <stop offset="0"   stop-color="#3F7A4E"/>
+      <stop offset="0.5" stop-color="#265239"/>
+      <stop offset="1"   stop-color="#163226"/>
+    </linearGradient>
+    <linearGradient id="trunk" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#4A3527"/>
+      <stop offset="1" stop-color="#2A1D15"/>
+    </linearGradient>
+    <linearGradient id="fenceRail" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#B99A6E"/>
+      <stop offset="1" stop-color="#6B5238"/>
+    </linearGradient>
+    <filter id="propShadow" x="-40%" y="-40%" width="180%" height="200%">
+      <feGaussianBlur stdDeviation="9"/>
+    </filter>
+    <filter id="glowSoft" x="-120%" y="-120%" width="340%" height="340%">
+      <feGaussianBlur stdDeviation="7"/>
+    </filter>
+  </defs>
+
+  <!-- ══ BACK FENCE — runs along the walkable back edge (y≈516) ══ -->
+  <g>
+    <!-- rails -->
+    <rect x="60" y="486" width="1480" height="5" rx="2.5" fill="url(#fenceRail)" opacity="0.9"/>
+    <rect x="60" y="502" width="1480" height="5" rx="2.5" fill="url(#fenceRail)" opacity="0.9"/>
+    <!-- posts -->
+    <g fill="url(#fenceRail)">
+      <rect x="86"   y="474" width="8" height="44" rx="3"/>
+      <rect x="236"  y="474" width="8" height="44" rx="3"/>
+      <rect x="386"  y="474" width="8" height="44" rx="3"/>
+      <rect x="536"  y="474" width="8" height="44" rx="3"/>
+      <rect x="686"  y="474" width="8" height="44" rx="3"/>
+      <rect x="836"  y="474" width="8" height="44" rx="3"/>
+      <rect x="986"  y="474" width="8" height="44" rx="3"/>
+      <rect x="1136" y="474" width="8" height="44" rx="3"/>
+      <rect x="1286" y="474" width="8" height="44" rx="3"/>
+      <rect x="1436" y="474" width="8" height="44" rx="3"/>
+      <rect x="1530" y="474" width="8" height="44" rx="3"/>
+    </g>
+    <!-- rim light from the sun on the top rail -->
+    <rect x="60" y="486" width="1480" height="1.6" fill="#FFD98A" opacity="0.55"/>
+  </g>
+
+  <!-- ══ BARN — right of centre, base y=516 (sits on the back edge) ══ -->
+  <g>
+    <ellipse cx="1210" cy="518" rx="150" ry="14" fill="#0A1A14" opacity="0.5" filter="url(#propShadow)"/>
+    <!-- side wall (perspective, facing left toward the sun) -->
+    <path fill="url(#barnSide)" d="M1100,396 L1100,516 L1150,516 L1150,382 Z"/>
+    <!-- front wall -->
+    <rect x="1150" y="382" width="160" height="134" fill="url(#barnWall)"/>
+    <!-- roof -->
+    <path fill="url(#barnRoof)" d="M1136,388 L1230,326 L1324,388 L1310,396 L1230,344 L1150,396 Z"/>
+    <path fill="#5A6580" d="M1100,396 L1136,388 L1150,396 Z"/>
+    <!-- roof ridge highlight -->
+    <path d="M1230,328 L1322,388" stroke="#8FA0C4" stroke-width="2" opacity="0.5" fill="none"/>
+    <!-- white trim -->
+    <g stroke="#E8DCC8" stroke-width="3" opacity="0.6" fill="none">
+      <path d="M1230,344 L1230,516"/>
+      <path d="M1160,400 L1300,400"/>
+    </g>
+    <!-- big door, warm light pouring out -->
+    <ellipse cx="1230" cy="500" rx="70" ry="54" fill="url(#windowGlow)" opacity="0.75"/>
+    <path fill="#3A1620" d="M1194,436 h72 v80 h-72 Z"/>
+    <path fill="url(#windowGlow)" d="M1200,442 h60 v74 h-60 Z"/>
+    <!-- hay loft window -->
+    <circle cx="1230" cy="374" r="16" fill="url(#windowGlow)" filter="url(#glowSoft)"/>
+    <circle cx="1230" cy="374" r="9"  fill="#FFF3C4"/>
+    <!-- warm bloom around the whole barn -->
+    <ellipse cx="1230" cy="450" rx="180" ry="130" fill="url(#windowGlow)" opacity="0.18"/>
+  </g>
+
+  <!-- ══ SILO, left of the barn ══ -->
+  <g>
+    <ellipse cx="1370" cy="518" rx="40" ry="9" fill="#0A1A14" opacity="0.45" filter="url(#propShadow)"/>
+    <rect x="1344" y="392" width="52" height="124" fill="#57607C"/>
+    <rect x="1344" y="392" width="14" height="124" fill="#6E7896" opacity="0.7"/>
+    <path fill="#3B4358" d="M1338,394 a32,26 0 0 1 64,0 Z"/>
+    <g stroke="#39415A" stroke-width="1.4" opacity="0.7">
+      <path d="M1344,420 h52"/><path d="M1344,448 h52"/><path d="M1344,476 h52"/>
+    </g>
+    <rect x="1344" y="392" width="2.5" height="124" fill="#FFD98A" opacity="0.35"/>
+  </g>
+
+  <!-- ══ BIG TREE — left anchor, base y=516 ══ -->
+  <g>
+    <ellipse cx="196" cy="518" rx="86" ry="12" fill="#0A1A14" opacity="0.5" filter="url(#propShadow)"/>
+    <path fill="url(#trunk)" d="M186,516 C184,470 180,440 176,414 l24,0 C198,442 200,472 206,516 Z"/>
+    <g fill="url(#treeCanopy)">
+      <ellipse cx="190" cy="392" rx="94" ry="62"/>
+      <ellipse cx="132" cy="414" rx="54" ry="38"/>
+      <ellipse cx="250" cy="410" rx="58" ry="40"/>
+      <ellipse cx="196" cy="348" rx="62" ry="42"/>
+    </g>
+    <!-- sun-side rim on the canopy (light comes from x=600 → right side lit) -->
+    <g fill="#8FD694" opacity="0.20">
+      <ellipse cx="252" cy="392" rx="34" ry="24"/>
+      <ellipse cx="228" cy="352" rx="26" ry="18"/>
+    </g>
+  </g>
+
+  <!-- ══ SECOND TREE — smaller, far left edge ══ -->
+  <g opacity="0.95">
+    <ellipse cx="42" cy="512" rx="52" ry="9" fill="#0A1A14" opacity="0.45" filter="url(#propShadow)"/>
+    <path fill="url(#trunk)" d="M36,512 C34,480 32,462 30,444 l16,0 C46,464 48,482 52,512 Z"/>
+    <g fill="url(#treeCanopy)">
+      <ellipse cx="40" cy="424" rx="62" ry="42"/>
+      <ellipse cx="82" cy="440" rx="36" ry="26"/>
+    </g>
+    <ellipse cx="84" cy="424" rx="22" ry="16" fill="#8FD694" opacity="0.16"/>
+  </g>
+
+  <!-- ══ WINDMILL — far background, reads instantly as "farm" at a glance.
+       Silhouette-first: a proper 6-vane fan, not thin sticks, so it survives
+       being small. Rim-lit on the sun side (x=600 is to its left). ══ -->
+  <g opacity="0.9">
+    <!-- lattice tower -->
+    <path fill="#2C3348" d="M690,516 l-14,0 l11,-96 l8,0 Z"/>
+    <path fill="#3E4761" d="M690,516 l14,0 l-11,-96 l-8,0 Z"/>
+    <g stroke="#4B5570" stroke-width="1.5" fill="none" opacity="0.85">
+      <path d="M679,494 h22"/><path d="M681,470 h18"/><path d="M683,446 h14"/>
+      <path d="M679,494 l22,-24"/><path d="M701,494 l-20,-24"/>
+      <path d="M681,470 l18,-24"/><path d="M699,470 l-16,-24"/>
+    </g>
+    <path d="M687,420 l-11,96" stroke="#FFD98A" stroke-width="1.2" opacity="0.35" fill="none"/>
+
+    <!-- fan: 6 vanes around the hub -->
+    <g transform="translate(690,414)">
+      <g fill="#5A6580" stroke="#39415A" stroke-width="0.8">
+        <g transform="rotate(10)">  <path d="M0,0 L-4,-30 L4,-30 Z"/></g>
+        <g transform="rotate(70)">  <path d="M0,0 L-4,-30 L4,-30 Z"/></g>
+        <g transform="rotate(130)"> <path d="M0,0 L-4,-30 L4,-30 Z"/></g>
+        <g transform="rotate(190)"> <path d="M0,0 L-4,-30 L4,-30 Z"/></g>
+        <g transform="rotate(250)"> <path d="M0,0 L-4,-30 L4,-30 Z"/></g>
+        <g transform="rotate(310)"> <path d="M0,0 L-4,-30 L4,-30 Z"/></g>
+      </g>
+      <!-- sun-side vanes catch the gold -->
+      <g fill="#FFD98A" opacity="0.30">
+        <g transform="rotate(190)"><path d="M0,0 L-4,-30 L4,-30 Z"/></g>
+        <g transform="rotate(250)"><path d="M0,0 L-4,-30 L4,-30 Z"/></g>
+      </g>
+      <circle r="5" fill="#8FA0C4"/>
+      <circle r="2" fill="#2C3348"/>
+      <!-- tail vane -->
+      <path fill="#4B5570" d="M4,2 L30,10 L30,-6 L4,-4 Z"/>
+      <path fill="#FFD98A" opacity="0.2" d="M4,2 L30,10 L30,7 L4,0 Z"/>
+    </g>
+  </g>
+
+  <!-- ══ FEED SHED — left of the barn, base y=514 ══ -->
+  <g>
+    <ellipse cx="920" cy="516" rx="66" ry="9" fill="#0A1A14" opacity="0.45" filter="url(#propShadow)"/>
+    <path fill="#3E4A62" d="M866,462 L920,432 L974,462 L964,468 L920,444 L876,468 Z"/>
+    <rect x="876" y="466" width="88" height="50" fill="#5C4632"/>
+    <rect x="876" y="466" width="88" height="50" fill="url(#barnSide)" opacity="0.35"/>
+    <rect x="900" y="482" width="26" height="34" fill="#2A1D15"/>
+    <rect x="902" y="484" width="22" height="32" fill="url(#windowGlow)" opacity="0.8"/>
+    <rect x="876" y="466" width="88" height="2" fill="#FFD98A" opacity="0.4"/>
+  </g>
+
+  <!-- ══ HANGING LANTERNS on the back fence — the ground pools in
+       farm-ground.svg sit under these two ══ -->
+  <g>
+    <g transform="translate(330,470)">
+      <circle r="26" fill="url(#windowGlow)" filter="url(#glowSoft)" opacity="0.9"/>
+      <rect x="-1" y="-30" width="2" height="12" fill="#6B5238"/>
+      <path fill="#4A3527" d="M-7,-18 h14 l3,20 h-20 Z"/>
+      <path fill="#FFF3C4" d="M-4.5,-15 h9 l2,15 h-13 Z"/>
+    </g>
+    <g transform="translate(1268,468)">
+      <circle r="24" fill="url(#windowGlow)" filter="url(#glowSoft)" opacity="0.85"/>
+      <rect x="-1" y="-28" width="2" height="11" fill="#6B5238"/>
+      <path fill="#4A3527" d="M-6.5,-17 h13 l2.5,18 h-18 Z"/>
+      <path fill="#FFF3C4" d="M-4,-14 h8 l2,14 h-12 Z"/>
+    </g>
+  </g>
+</svg>

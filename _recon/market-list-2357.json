@@ -1,0 +1,4 @@
+{"cmd":"pushactions","args":{"from":"waxwingsuper","actions":[
+  {"contract":"atomicmarket","action":"announcesale","data":{"seller":"waxwingsuper","asset_ids":["1099603752357"],"listing_price":"9.00000000 WAX","settlement_symbol":"8,WAX","maker_marketplace":""}},
+  {"contract":"atomicassets","action":"createoffer","data":{"sender":"waxwingsuper","recipient":"atomicmarket","sender_asset_ids":["1099603752357"],"recipient_asset_ids":[],"memo":"sale"}}
+]}}

@@ -1,0 +1,11 @@
+--- a/contract/pockethatch/pockethatch.cpp
++++ b/contract/pockethatch/pockethatch.cpp
+@@ -868,7 +868,7 @@ void pockethatch::burncreature(name owner, uint64_t asset_id) {
+     // ── Resilient burn: skip burnasset if NFT is already gone ──
+     if (nft_exists(cfg.collection, owner, asset_id)) {
+         action(
+-            permission_level{get_self(), "active"_n},
++            permission_level{owner, "active"_n},
+             "atomicassets"_n,
+             "burnasset"_n,
+             aa_burn{owner, asset_id}

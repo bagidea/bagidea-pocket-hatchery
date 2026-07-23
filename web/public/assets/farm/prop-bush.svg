@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 70" width="110" height="70">
+  <!-- Pocket Hatchery · Farm prop — BERRY BUSH  |  ANCHOR: bottom-centre (55, 70)
+       Flamingo (Designer) · 2026-07-17 · Y-SORTED prop.
+       Default placements: (x=250, baseY=760) and (x=1420, baseY=700). -->
+  <defs>
+    <linearGradient id="bLeaf" x1="0.3" y1="0" x2="0.8" y2="1">
+      <stop offset="0"   stop-color="#4F9159"/>
+      <stop offset="0.55" stop-color="#2A5238"/>
+      <stop offset="1"   stop-color="#14291F"/>
+    </linearGradient>
+    <filter id="bShadow" x="-40%" y="-50%" width="180%" height="220%">
+      <feGaussianBlur stdDeviation="3.5"/>
+    </filter>
+  </defs>
+
+  <ellipse cx="55" cy="65" rx="40" ry="6" fill="#0A1A14" opacity="0.5" filter="url(#bShadow)"/>
+
+  <g fill="url(#bLeaf)">
+    <ellipse cx="55" cy="40" rx="42" ry="26"/>
+    <ellipse cx="28" cy="48" rx="22" ry="16"/>
+    <ellipse cx="84" cy="47" rx="24" ry="17"/>
+    <ellipse cx="58" cy="26" rx="26" ry="17"/>
+    <ellipse cx="34" cy="30" rx="16" ry="11"/>
+  </g>
+  <!-- sun-side rim (light from centre-left of the scene) -->
+  <g fill="#8FD694" opacity="0.20">
+    <ellipse cx="76" cy="30" rx="18" ry="11"/>
+    <ellipse cx="92" cy="44" rx="11" ry="8"/>
+  </g>
+  <!-- berries: ph-color-coral -->
+  <g fill="#F43F5E" opacity="0.9">
+    <circle cx="40" cy="34" r="3"/><circle cx="66" cy="28" r="2.6"/>
+    <circle cx="80" cy="42" r="2.8"/><circle cx="30" cy="46" r="2.4"/>
+    <circle cx="56" cy="48" r="2.6"/><circle cx="92" cy="52" r="2.2"/>
+  </g>
+  <g fill="#FFB3C0" opacity="0.65">
+    <circle cx="39" cy="33" r="1"/><circle cx="65" cy="27" r="0.9"/>
+    <circle cx="79" cy="41" r="0.9"/>
+  </g>
+</svg>

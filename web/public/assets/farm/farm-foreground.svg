@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" preserveAspectRatio="xMidYMax slice">
+  <!-- Pocket Hatchery · Farm scene LAYER 900 — FOREGROUND (always IN FRONT of creatures)
+       Flamingo (Designer) · 2026-07-17 · z-index 900 · pointer-events: none
+       Everything here is rooted BELOW the walkable front edge (y=830), so it can
+       only ever occlude a creature's feet — never its face. That's what makes it
+       safe as one flat always-on-top layer.
+       This layer is the depth trick: out-of-focus DARK blades framing the sharp,
+       lit middle ground. They must read as silhouette — near-black against the
+       mown pen — so they are drawn tall (up to y~700) and barely lit. Nothing
+       readable goes in here. -->
+  <defs>
+    <linearGradient id="fgGrass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0"   stop-color="#1E4430"/>
+      <stop offset="0.45" stop-color="#102618"/>
+      <stop offset="1"   stop-color="#060E0A"/>
+    </linearGradient>
+    <linearGradient id="fgGrassDark" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0D2018"/>
+      <stop offset="1" stop-color="#040906"/>
+    </linearGradient>
+    <!-- vignette: pulls the eye to the pen. Corners fall to the shell navy
+         (ph-shell-bg-bottom #080A14) so the scene dissolves into the page.
+         Kept gentle at the bottom so the blades still read. -->
+    <radialGradient id="vignette" cx="0.5" cy="0.5" r="0.82">
+      <stop offset="0"    stop-color="#080A14" stop-opacity="0"/>
+      <stop offset="0.60" stop-color="#080A14" stop-opacity="0.06"/>
+      <stop offset="0.84" stop-color="#080A14" stop-opacity="0.30"/>
+      <stop offset="1"    stop-color="#080A14" stop-opacity="0.60"/>
+    </radialGradient>
+    <filter id="fgBlur" x="-10%" y="-20%" width="120%" height="140%">
+      <feGaussianBlur stdDeviation="4"/>
+    </filter>
+    <filter id="fgBlurHeavy" x="-10%" y="-20%" width="120%" height="140%">
+      <feGaussianBlur stdDeviation="9"/>
+    </filter>
+  </defs>
+
+  <!-- ── vignette first: it must sit UNDER the blades, or it flattens them ── -->
+  <rect width="1600" height="900" fill="url(#vignette)"/>
+
+  <!-- ══ MID-BLUR BLADE CLUMPS — rooted at y=900, arcing up to ~y=740 ══ -->
+  <g filter="url(#fgBlur)" fill="url(#fgGrass)">
+    <!-- left clump -->
+    <path d="M0,900 L0,812 q22,-74 42,-6 q14,-92 38,-10 q26,-78 44,4 q22,-66 44,10 q18,-52 36,16 L180,900 Z"/>
+    <path d="M150,900 q14,-88 36,-14 q18,-96 40,-8 q26,-70 44,10 L280,900 Z"/>
+    <!-- left-centre -->
+    <path d="M360,900 q16,-82 38,-10 q20,-90 42,-6 q24,-64 42,14 L500,900 Z"/>
+    <!-- centre (kept lower so it never covers the lantern post) -->
+    <path d="M640,900 q14,-58 34,-8 q18,-66 38,-4 q22,-48 38,12 L760,900 Z"/>
+    <!-- right-centre -->
+    <path d="M950,900 q16,-86 38,-12 q20,-92 42,-6 q24,-68 44,12 L1090,900 Z"/>
+    <!-- right clump -->
+    <path d="M1300,900 q14,-80 36,-10 q20,-94 42,-8 q26,-72 44,10 q20,-58 38,14 L1470,900 Z"/>
+    <path d="M1450,900 L1600,900 L1600,806 q-26,-78 -46,-4 q-16,-90 -40,-8 q-28,-72 -46,8 Z"/>
+  </g>
+
+  <!-- faint sun-side rim on a few blade tips: stops the silhouette going dead -->
+  <g filter="url(#fgBlur)" fill="none" stroke="#6FAE5E" stroke-opacity="0.16"
+     stroke-width="2" stroke-linecap="round">
+    <path d="M42,806 q6,44 2,72"/>
+    <path d="M226,798 q6,48 2,78"/>
+    <path d="M440,804 q6,46 2,74"/>
+    <path d="M1030,802 q6,46 2,76"/>
+    <path d="M1382,798 q6,50 2,80"/>
+  </g>
+
+  <!-- ══ HEAVY-BLUR NEAR BLADES — the closest layer, pure bokeh ══ -->
+  <g filter="url(#fgBlurHeavy)" fill="url(#fgGrassDark)">
+    <path d="M0,900 L0,844 q32,-102 58,-8 q24,-110 50,-6 q30,-86 54,12 L230,900 Z"/>
+    <path d="M300,900 q18,-108 44,-14 q24,-98 48,-6 q28,-74 48,16 L470,900 Z"/>
+    <path d="M780,900 q16,-72 38,-10 q24,-64 46,-2 L920,900 Z"/>
+    <path d="M1180,900 q18,-96 44,-12 q24,-104 48,-8 L1330,900 Z"/>
+    <path d="M1420,900 L1600,900 L1600,850 q-38,-104 -62,-8 q-26,-108 -52,-4 q-32,-80 -54,14 Z"/>
+  </g>
+
+  <!-- ══ FOREGROUND FENCE POST, bottom-left: frames the shot, says "pen" ══ -->
+  <g filter="url(#fgBlur)">
+    <path fill="#160F0A" d="M92,900 L92,742 l22,-6 l0,164 Z"/>
+    <path fill="#241811" d="M92,742 l22,-6 l6,4 l-22,6 Z"/>
+    <!-- rail stub running off toward the right, cut by the frame -->
+    <path fill="#160F0A" opacity="0.9" d="M114,790 L300,806 l0,12 L114,802 Z"/>
+    <path fill="#3A2A1C" opacity="0.5" d="M114,790 L300,806 l0,3 L114,793 Z"/>
+  </g>
+
+  <!-- cool night wash on the very bottom edge — soft, does not crush the blades -->
+  <rect x="0" y="874" width="1600" height="26" fill="#080A14" opacity="0.35" filter="url(#fgBlurHeavy)"/>
+</svg>

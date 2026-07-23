@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" preserveAspectRatio="xMidYMax slice">
+  <!-- Pocket Hatchery · Farm scene LAYER 950 — FIREFLIES / ATMOSPHERE
+       Flamingo (Designer) · 2026-07-17 · z-index 950 · pointer-events: none
+       The "it's alive" pass. Self-animating SVG (SMIL) so it works even if it's
+       just an <img> — no JS needed from Poppy. Every animation is wrapped so the
+       reduced-motion media query can kill it (see the <style> block below, which
+       honours prefers-reduced-motion the same way tokens.css does).
+       Colours: ph-color-golden-light (#FDE68A) fireflies, with two rare/epic
+       tinted motes so the FX echo the tier palette. -->
+  <defs>
+    <radialGradient id="fly" cx="0.5" cy="0.5">
+      <stop offset="0"   stop-color="#FFFDF0" stop-opacity="1"/>
+      <stop offset="0.25" stop-color="#FDE68A" stop-opacity="0.85"/>
+      <stop offset="0.6" stop-color="#F59E0B" stop-opacity="0.30"/>
+      <stop offset="1"   stop-color="#F59E0B" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="flyRare" cx="0.5" cy="0.5">
+      <stop offset="0"   stop-color="#EAF4FF" stop-opacity="1"/>
+      <stop offset="0.3" stop-color="#60A5FA" stop-opacity="0.7"/>
+      <stop offset="1"   stop-color="#60A5FA" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="flyEpic" cx="0.5" cy="0.5">
+      <stop offset="0"   stop-color="#F6EAFF" stop-opacity="1"/>
+      <stop offset="0.3" stop-color="#C084FC" stop-opacity="0.7"/>
+      <stop offset="1"   stop-color="#C084FC" stop-opacity="0"/>
+    </radialGradient>
+    <!-- volumetric shaft from the horizon sun -->
+    <linearGradient id="shaft" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFE8A0" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#FFE8A0" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="shaftBlur" x="-30%" y="-10%" width="160%" height="120%">
+      <feGaussianBlur stdDeviation="18"/>
+    </filter>
+  </defs>
+
+  <style>
+    /* Fireflies bob on their own path AND pulse. Two independent animations per
+       mote keeps the motion from looking like a synchronised grid. */
+    .fly    { animation: bob 7s ease-in-out infinite alternate; }
+    .fly b  { }
+    @keyframes bob   { from { transform: translate(0,0);      }
+                       to   { transform: translate(26px,-34px); } }
+    @keyframes bob2  { from { transform: translate(0,0);      }
+                       to   { transform: translate(-32px,-22px); } }
+    @keyframes bob3  { from { transform: translate(0,0);      }
+                       to   { transform: translate(18px,-46px); } }
+    @keyframes pulse { 0%,100% { opacity: .25 } 50% { opacity: 1 } }
+
+    .f1 { animation: bob  8s  ease-in-out infinite alternate; }
+    .f2 { animation: bob2 11s ease-in-out infinite alternate; }
+    .f3 { animation: bob3 9.5s ease-in-out infinite alternate; }
+    .p  { animation: pulse 3.4s ease-in-out infinite; }
+    .p2 { animation: pulse 5.1s ease-in-out infinite; }
+    .p3 { animation: pulse 4.2s ease-in-out infinite; }
+
+    /* Accessibility: match tokens.css — motion off means motion off. */
+    @media (prefers-reduced-motion: reduce) {
+      .f1,.f2,.f3,.p,.p2,.p3 { animation: none !important; }
+    }
+  </style>
+
+  <!-- god ray from the horizon sun (x=600) fanning across the meadow -->
+  <g filter="url(#shaftBlur)" opacity="0.85">
+    <path fill="url(#shaft)" d="M560,430 L640,430 L900,900 L700,900 Z"/>
+    <path fill="url(#shaft)" d="M600,430 L660,430 L1160,900 L960,900 Z" opacity="0.6"/>
+  </g>
+
+  <!-- ── fireflies: denser in the mid ground where the creatures are ── -->
+  <g>
+    <g class="f1" style="animation-delay:-1.2s"><g class="p"  style="animation-delay:-0.4s"><circle cx="268"  cy="612" r="9" fill="url(#fly)"/></g></g>
+    <g class="f2" style="animation-delay:-3.4s"><g class="p2" style="animation-delay:-1.8s"><circle cx="412"  cy="560" r="6" fill="url(#fly)"/></g></g>
+    <g class="f3" style="animation-delay:-0.6s"><g class="p3" style="animation-delay:-2.6s"><circle cx="596"  cy="648" r="10" fill="url(#fly)"/></g></g>
+    <g class="f1" style="animation-delay:-5.1s"><g class="p2" style="animation-delay:-0.9s"><circle cx="742"  cy="584" r="5.5" fill="url(#fly)"/></g></g>
+    <g class="f2" style="animation-delay:-2.2s"><g class="p"  style="animation-delay:-3.1s"><circle cx="884"  cy="666" r="9" fill="url(#fly)"/></g></g>
+    <g class="f3" style="animation-delay:-4.4s"><g class="p3" style="animation-delay:-1.1s"><circle cx="1032" cy="596" r="6.5" fill="url(#fly)"/></g></g>
+    <g class="f1" style="animation-delay:-6.3s"><g class="p2" style="animation-delay:-2.2s"><circle cx="1196" cy="640" r="6" fill="url(#fly)"/></g></g>
+    <g class="f2" style="animation-delay:-1.7s"><g class="p"  style="animation-delay:-4.0s"><circle cx="1350" cy="572" r="9" fill="url(#fly)"/></g></g>
+    <g class="f3" style="animation-delay:-3.9s"><g class="p3" style="animation-delay:-0.3s"><circle cx="1466" cy="688" r="5.5" fill="url(#fly)"/></g></g>
+    <g class="f1" style="animation-delay:-2.8s"><g class="p"  style="animation-delay:-1.5s"><circle cx="150"  cy="700" r="6.5" fill="url(#fly)"/></g></g>
+
+    <!-- lower, larger motes (nearer the camera → bigger, softer) -->
+    <g class="f2" style="animation-delay:-4.8s"><g class="p3" style="animation-delay:-2.9s"><circle cx="340"  cy="792" r="10" fill="url(#fly)" opacity="0.7"/></g></g>
+    <g class="f3" style="animation-delay:-1.4s"><g class="p2" style="animation-delay:-3.7s"><circle cx="1080" cy="812" r="11" fill="url(#fly)" opacity="0.6"/></g></g>
+    <g class="f1" style="animation-delay:-3.1s"><g class="p"  style="animation-delay:-0.7s"><circle cx="700"  cy="836" r="9"  fill="url(#fly)" opacity="0.65"/></g></g>
+
+    <!-- two tier-tinted motes: rare blue + epic violet -->
+    <g class="f3" style="animation-delay:-5.5s"><g class="p2" style="animation-delay:-1.3s"><circle cx="510"  cy="524" r="6" fill="url(#flyRare)"/></g></g>
+    <g class="f2" style="animation-delay:-2.6s"><g class="p3" style="animation-delay:-4.4s"><circle cx="1268" cy="536" r="6" fill="url(#flyEpic)"/></g></g>
+
+    <!-- high drifting sparks up near the treeline -->
+    <g class="f1" style="animation-delay:-7.2s"><g class="p3" style="animation-delay:-2.0s"><circle cx="820"  cy="470" r="4" fill="url(#fly)" opacity="0.8"/></g></g>
+    <g class="f2" style="animation-delay:-0.9s"><g class="p"  style="animation-delay:-3.3s"><circle cx="1010" cy="486" r="4.5" fill="url(#fly)" opacity="0.75"/></g></g>
+    <g class="f3" style="animation-delay:-6.0s"><g class="p2" style="animation-delay:-0.5s"><circle cx="240"  cy="480" r="4" fill="url(#fly)" opacity="0.7"/></g></g>
+  </g>
+</svg>

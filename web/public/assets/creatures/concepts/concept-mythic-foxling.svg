@@ -1,0 +1,151 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 210">
+  <defs>
+    <radialGradient id="bodyGrad" cx="50%" cy="40%"><stop offset="0%" stop-color="#6EE7B7"/><stop offset="100%" stop-color="#22C55E"/></radialGradient>
+    <radialGradient id="tailGrad" cx="40%" cy="40%"><stop offset="0%" stop-color="#6EE7B7"/><stop offset="100%" stop-color="#059669"/></radialGradient>
+    <radialGradient id="eyeShine" cx="35%" cy="30%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="100%" stop-color="#FAFAFA"/></radialGradient>
+    <radialGradient id="cheekGrad" cx="50%" cy="50%"><stop offset="0%" stop-color="#FDA4AF"/><stop offset="100%" stop-color="#F43F5E" stop-opacity="0"/></radialGradient>
+    <!-- Mythic aurora aura — outer ring (teal) -->
+    <radialGradient id="aura1" cx="50%" cy="48%">
+      <stop offset="0%" stop-color="#0D9488" stop-opacity="0"/>
+      <stop offset="70%" stop-color="#14B8A6" stop-opacity="0.22"/>
+      <stop offset="85%" stop-color="#0D9488" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#0D9488" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Mythic aurora — mid ring (purple) -->
+    <radialGradient id="aura2" cx="50%" cy="48%">
+      <stop offset="0%" stop-color="#7C3AED" stop-opacity="0.3"/>
+      <stop offset="60%" stop-color="#8B5CF6" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#8B5CF6" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Mythic aurora — core (red/crimson) -->
+    <radialGradient id="aura3" cx="50%" cy="48%">
+      <stop offset="0%" stop-color="#DC2626" stop-opacity="0.35"/>
+      <stop offset="45%" stop-color="#EF4444" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#EF4444" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Prismatic fur overlay -->
+    <linearGradient id="auroraFur" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#EF4444" stop-opacity="0.18"/>
+      <stop offset="33%" stop-color="#8B5CF6" stop-opacity="0.15"/>
+      <stop offset="66%" stop-color="#14B8A6" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#EF4444" stop-opacity="0.1"/>
+    </linearGradient>
+    <!-- Crystal tail -->
+    <radialGradient id="crystalGrad" cx="30%" cy="30%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="40%" stop-color="#F87171"/><stop offset="100%" stop-color="#DC2626"/></radialGradient>
+    <!-- Cosmic eye -->
+    <radialGradient id="cosmicEye" cx="35%" cy="30%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="50%" stop-color="#14B8A6"/><stop offset="100%" stop-color="#EF4444"/></radialGradient>
+
+    <filter id="glow"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="bigGlow"><feGaussianBlur stdDeviation="14"/></filter>
+    <filter id="midGlow"><feGaussianBlur stdDeviation="7"/></filter>
+    <filter id="cosmicGlow"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+
+  <!-- Background (deep space near-black) -->
+  <rect width="200" height="210" fill="#02030A"/>
+
+  <!-- Star field (faint, far bg) -->
+  <circle cx="18"  cy="14"  r="0.8" fill="#FFFFFF" opacity="0.5"/>
+  <circle cx="55"  cy="8"   r="0.5" fill="#FFFFFF" opacity="0.4"/>
+  <circle cx="140" cy="12"  r="0.7" fill="#14B8A6" opacity="0.5"/>
+  <circle cx="178" cy="25"  r="0.6" fill="#FFFFFF" opacity="0.45"/>
+  <circle cx="188" cy="78"  r="0.9" fill="#FFFFFF" opacity="0.4"/>
+  <circle cx="8"   cy="90"  r="0.7" fill="#FFFFFF" opacity="0.35"/>
+  <circle cx="192" cy="140" r="0.5" fill="#F87171" opacity="0.5"/>
+  <circle cx="22"  cy="180" r="0.6" fill="#FFFFFF" opacity="0.4"/>
+  <circle cx="175" cy="185" r="0.8" fill="#14B8A6" opacity="0.45"/>
+  <circle cx="100" cy="5"   r="0.5" fill="#FFFFFF" opacity="0.3"/>
+
+  <!-- ═══ MYTHIC TRIPLE AURORA AURA ═══ -->
+  <!-- Outermost ring: teal -->
+  <circle cx="100" cy="108" r="95" fill="url(#aura1)"/>
+  <circle cx="100" cy="108" r="94" fill="none" stroke="#14B8A6" stroke-width="1.5" opacity="0.4"/>
+  <!-- Mid ring: purple -->
+  <circle cx="100" cy="108" r="80" fill="url(#aura2)"/>
+  <circle cx="100" cy="108" r="79" fill="none" stroke="#8B5CF6" stroke-width="1.2" opacity="0.5"/>
+  <!-- Core glow: crimson -->
+  <circle cx="100" cy="108" r="65" fill="url(#aura3)"/>
+  <circle cx="100" cy="108" r="64" fill="none" stroke="#EF4444" stroke-width="2" opacity="0.45"/>
+  <!-- Bloom behind creature -->
+  <circle cx="100" cy="108" r="55" fill="#7C3AED" opacity="0.15" filter="url(#bigGlow)"/>
+
+  <!-- ═══ CREATURE (foxling — all traits max) ═══ -->
+  <!-- Extra-fluffy tail -->
+  <path d="M128,110 Q165,80 160,125 Q168,145 138,140 Q145,125 128,110Z" fill="url(#tailGrad)" stroke="#059669" stroke-width="1"/>
+  <circle cx="155" cy="110" r="12" fill="#6EE7B7" opacity="0.45"/>
+  <circle cx="158" cy="125" r="10" fill="#34D399" opacity="0.35"/>
+  <!-- Crystal tail crystal (crimson hue for Mythic) -->
+  <polygon points="164,100 169,90 167,102 175,94 168,106 161,106" fill="url(#crystalGrad)" filter="url(#cosmicGlow)"/>
+
+  <!-- Ears (tufted) -->
+  <polygon points="66,48 58,12 76,42" fill="url(#bodyGrad)" stroke="#059669" stroke-width="1"/>
+  <path d="M62,16 Q58,6 64,4 Q70,6 66,16" fill="#34D399"/>
+  <polygon points="66,48 60,16 70,42" fill="#F43F5E" opacity="0.35"/>
+  <polygon points="134,48 142,12 124,42" fill="url(#bodyGrad)" stroke="#059669" stroke-width="1"/>
+  <path d="M138,16 Q142,6 136,4 Q130,6 134,16" fill="#34D399"/>
+  <polygon points="134,48 140,16 130,42" fill="#F43F5E" opacity="0.35"/>
+
+  <!-- Body (with aurora fur overlay) -->
+  <ellipse cx="100" cy="120" rx="38" ry="42" fill="url(#bodyGrad)" stroke="#059669" stroke-width="1"/>
+  <ellipse cx="100" cy="120" rx="38" ry="42" fill="url(#auroraFur)"/>
+  <!-- Head -->
+  <circle cx="100" cy="72" r="36" fill="url(#bodyGrad)" stroke="#059669" stroke-width="1"/>
+  <circle cx="100" cy="72" r="36" fill="url(#auroraFur)"/>
+  <!-- Cheeks -->
+  <circle cx="76" cy="82" r="12" fill="url(#cheekGrad)"/>
+  <circle cx="124" cy="82" r="12" fill="url(#cheekGrad)"/>
+  <!-- Eyes (cosmic glow — multi-color) -->
+  <ellipse cx="86" cy="72" rx="9" ry="11" fill="#1E1B4B"/>
+  <ellipse cx="114" cy="72" rx="9" ry="11" fill="#1E1B4B"/>
+  <circle cx="83" cy="68" r="3.5" fill="url(#cosmicEye)"/>
+  <circle cx="89" cy="74" r="1.5" fill="#FAFAFA"/>
+  <circle cx="111" cy="68" r="3.5" fill="url(#cosmicEye)"/>
+  <circle cx="117" cy="74" r="1.5" fill="#FAFAFA"/>
+  <!-- Multi-color eye iris glow -->
+  <ellipse cx="86" cy="72" rx="9" ry="11" fill="none" stroke="#14B8A6" stroke-width="1.2" opacity="0.8" filter="url(#glow)"/>
+  <ellipse cx="114" cy="72" rx="9" ry="11" fill="none" stroke="#EF4444" stroke-width="1.2" opacity="0.8" filter="url(#glow)"/>
+  <!-- Nose & mouth -->
+  <ellipse cx="100" cy="80" rx="4" ry="3" fill="#1E1B4B"/>
+  <path d="M96,83 Q100,87 104,83" fill="none" stroke="#1E1B4B" stroke-width="1.2" stroke-linecap="round"/>
+  <!-- Paws -->
+  <ellipse cx="82" cy="150" rx="12" ry="8" fill="#34D399" stroke="#22C55E" stroke-width="0.8"/>
+  <ellipse cx="118" cy="150" rx="12" ry="8" fill="#34D399" stroke="#22C55E" stroke-width="0.8"/>
+  <ellipse cx="78" cy="158" rx="10" ry="6" fill="#34D399" stroke="#22C55E" stroke-width="0.8"/>
+  <ellipse cx="122" cy="158" rx="10" ry="6" fill="#34D399" stroke="#22C55E" stroke-width="0.8"/>
+
+  <!-- Crescent forehead mark (Mythic — cosmic) -->
+  <path d="M100,48 Q107,52 100,58 Q93,52 100,48Z" fill="none" stroke="#F87171" stroke-width="2" filter="url(#glow)"/>
+  <path d="M97,50 Q102,52 99,56" fill="#FAFAFA" opacity="0.7"/>
+
+  <!-- ═══ MYTHIC PARTICLES (12 mixed-color) ═══ -->
+  <!-- Red cluster -->
+  <circle cx="40"  cy="80"  r="3.5" fill="#EF4444" opacity="0.9"  filter="url(#glow)"/>
+  <circle cx="32"  cy="115" r="2.5" fill="#F87171" opacity="0.75" filter="url(#glow)"/>
+  <circle cx="48"  cy="148" r="2"   fill="#EF4444" opacity="0.65" filter="url(#glow)"/>
+  <!-- Teal cluster -->
+  <circle cx="162" cy="68"  r="3"   fill="#14B8A6" opacity="0.9"  filter="url(#glow)"/>
+  <circle cx="170" cy="110" r="3.5" fill="#0D9488" opacity="0.8"  filter="url(#glow)"/>
+  <circle cx="158" cy="150" r="2"   fill="#14B8A6" opacity="0.7"  filter="url(#glow)"/>
+  <!-- Purple cluster -->
+  <circle cx="46"  cy="50"  r="2.5" fill="#A78BFA" opacity="0.85" filter="url(#glow)"/>
+  <circle cx="158" cy="46"  r="2"   fill="#8B5CF6" opacity="0.8"  filter="url(#glow)"/>
+  <circle cx="108" cy="180" r="3"   fill="#7C3AED" opacity="0.7"  filter="url(#glow)"/>
+  <!-- White/cosmic -->
+  <circle cx="175" cy="155" r="2"   fill="#FFFFFF"  opacity="0.65" filter="url(#glow)"/>
+  <circle cx="28"  cy="170" r="2.5" fill="#FAFAFA"  opacity="0.6"  filter="url(#glow)"/>
+  <circle cx="110" cy="10"  r="1.5" fill="#FFFFFF"  opacity="0.7"  filter="url(#glow)"/>
+
+  <!-- Large star sparks (2×) -->
+  <path d="M160,38 L162,32 L164,38 L170,40 L164,42 L162,48 L160,42 L154,40Z" fill="#EF4444" opacity="0.9" filter="url(#cosmicGlow)"/>
+  <path d="M30,88  L31.5,84 L33,88  L37,89.5  L33,91  L31.5,95 L30,91  L26,89.5Z" fill="#14B8A6" opacity="0.85" filter="url(#glow)"/>
+
+  <!-- Aurora particle trail near tail -->
+  <circle cx="170" cy="88"  r="1.5" fill="#EF4444"  opacity="0.6" filter="url(#glow)"/>
+  <circle cx="174" cy="98"  r="1"   fill="#8B5CF6"  opacity="0.5" filter="url(#glow)"/>
+  <circle cx="176" cy="108" r="1.5" fill="#14B8A6"  opacity="0.6" filter="url(#glow)"/>
+  <circle cx="174" cy="118" r="1"   fill="#EF4444"  opacity="0.5" filter="url(#glow)"/>
+
+  <!-- Rarity badge -->
+  <rect x="44" y="194" width="112" height="13" rx="6.5" fill="#1A0A0A" opacity="0.92"/>
+  <text x="100" y="204" text-anchor="middle" font-family="'Nunito', system-ui, sans-serif" font-size="7" font-weight="700" letter-spacing="2" fill="#F87171">✦ MYTHIC</text>
+</svg>

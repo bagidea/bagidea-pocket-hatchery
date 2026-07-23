@@ -1,0 +1,242 @@
+{
+  "_comment": "Pocket Hatchery — Creature Variation Data v2.0.0 | 2026-07-17 (revised)",
+  "_spec": "docs/creature-variation-spec.md",
+  "_integration": "variationSpec.ts → setVariationSpec(). Renderer NEVER reads this file. It is design reference data and the canonical source for variationSpecImpl.ts.",
+  "_v1_removed": "cssVarsExtended, visibilityMap, chainRarityParam — those targeted the wrong API (SVG mark-N groups + geneDecoder cssVars injection). The real integration point is setVariationSpec().",
+
+  "version": "2.0.0",
+
+  "markingMap": {
+    "_comment": "gene.patternType (0–15) → MarkingKind. Renderer draws all markings programmatically via markingFill(). No SVG <g id='mark-N'> groups are needed.",
+    "rendererMarkings": [
+      { "kind": "none",          "description": "Clean silhouette — no pattern overlay" },
+      { "kind": "stripes",       "description": "Diagonal tiled stripe pattern; angle randomised per assetId seed" },
+      { "kind": "spots",         "description": "9 scattered ellipses; position + size randomised per seed" },
+      { "kind": "belly-patch",   "description": "Radial gradient ellipse on ventral area; position jittered ±3px" },
+      { "kind": "dapple",        "description": "6 large blurred blobs — appaloosa / cloud look" },
+      { "kind": "gradient-fade", "description": "Linear gradient sweep top → bottom across full body" },
+      { "kind": "freckles",      "description": "22 micro-dots; all positions randomised per seed" }
+    ],
+    "patternTypeToMarking": [
+      { "patternType": 0,  "marking": "none",          "note": "clean — default" },
+      { "patternType": 1,  "marking": "stripes" },
+      { "patternType": 2,  "marking": "spots" },
+      { "patternType": 3,  "marking": "spots",          "note": "same kind; creature differs because rnd seed differs" },
+      { "patternType": 4,  "marking": "belly-patch" },
+      { "patternType": 5,  "marking": "dapple" },
+      { "patternType": 6,  "marking": "freckles" },
+      { "patternType": 7,  "marking": "gradient-fade" },
+      { "patternType": 8,  "marking": "stripes",        "note": "different angle from rnd seed" },
+      { "patternType": 9,  "marking": "spots" },
+      { "patternType": 10, "marking": "dapple" },
+      { "patternType": 11, "marking": "freckles" },
+      { "patternType": 12, "marking": "belly-patch" },
+      { "patternType": 13, "marking": "gradient-fade" },
+      { "patternType": 14, "marking": "stripes" },
+      { "patternType": 15, "marking": "none",           "note": "Mythic slot — crown-shards accessory is the statement" }
+    ]
+  },
+
+  "accessoryMap": {
+    "_comment": "on-chain rarity (0–5) → AccessoryKind. Accessory color is derived from palette.accentHue by the renderer — not set here. 6 tiers (egg_type 0=Common … 5=Mythic). Matches variationSpecImpl.ts ACCESSORY_MAP.",
+    "values": [
+      { "rarity": 0, "tier": "Common",    "accessory": "none" },
+      { "rarity": 1, "tier": "Uncommon",  "accessory": "sparkles" },
+      { "rarity": 2, "tier": "Rare",      "accessory": "orbit-motes" },
+      { "rarity": 3, "tier": "Epic",      "accessory": "halo" },
+      { "rarity": 4, "tier": "Legendary", "accessory": "crown-shards" },
+      { "rarity": 5, "tier": "Mythic",    "accessory": "crown-shards" }
+    ],
+    "accessoryDescriptions": {
+      "none":         "Nothing",
+      "sparkles":     "4 tiny pulsing dots near the sprite",
+      "orbit-motes":  "6 larger motes slowly rotating around the sprite",
+      "halo":         "Elliptical halo above head + orbit-motes — Epic tier",
+      "crown-shards": "5 crystal shards radiating from crown + orbit-motes — Legendary (warm gold rim) and Mythic (ice-blue rim) are distinguished by rim light"
+    }
+  },
+
+  "eyeHuesTable": {
+    "_comment": "gene.eyeColor (0–15 index) → HSL hue 0–360 for CreaturePalette.eyeHue. This is NOT a CSS var — it is a field in CreaturePalette returned by paletteFor().",
+    "values": [270, 240, 200, 160, 120, 80, 50, 30, 10, 345, 320, 295, 230, 180, 140, 0],
+    "names":  ["Violet","Blue","Sky","Teal","Green","Olive","Amber","Gold","Copper","Rose","Pink","Purple","Indigo","Cyan","Mint","Ruby"]
+  },
+
+  "palettes": {
+    "_comment": "Named palettes for NFT metadata + lore UI hover tooltips. NOT read by the renderer. Used for naming creatures and palette-matched metadata generation.",
+    "foxling": {
+      "speciesId": 0,
+      "defaultPaletteId": "foxling-mint",
+      "variants": [
+        {
+          "id": "foxling-mint",
+          "name": "Mint",
+          "bodyHueRange": [0, 25],
+          "bodyTone": "#6EE7B7",
+          "accentColor": "#FDA4AF",
+          "eyeName": "Violet",
+          "eyeHueIdx": 0,
+          "patternHueRecommended": 330,
+          "mood": "Fresh + playful — default shipped look",
+          "nftLabel": "Mint Foxling"
+        },
+        {
+          "id": "foxling-teal",
+          "name": "Teal",
+          "bodyHueRange": [26, 65],
+          "bodyTone": "#2DD4BF",
+          "accentColor": "#7DD3FC",
+          "eyeName": "Sky",
+          "eyeHueIdx": 2,
+          "patternHueRecommended": 190,
+          "mood": "Cool ocean freshness",
+          "nftLabel": "Teal Foxling"
+        },
+        {
+          "id": "foxling-sage",
+          "name": "Sage",
+          "bodyHueRange": [66, 105],
+          "bodyTone": "#86EFAC",
+          "accentColor": "#FDE68A",
+          "eyeName": "Amber",
+          "eyeHueIdx": 6,
+          "patternHueRecommended": 45,
+          "mood": "Earthy forest guardian",
+          "nftLabel": "Sage Foxling"
+        },
+        {
+          "id": "foxling-twilight",
+          "name": "Twilight",
+          "bodyHueRange": [195, 245],
+          "bodyTone": "#60A5FA",
+          "accentColor": "#C4B5FD",
+          "eyeName": "Indigo",
+          "eyeHueIdx": 12,
+          "patternHueRecommended": 265,
+          "mood": "Night-watch, stargazer",
+          "nftLabel": "Twilight Foxling"
+        },
+        {
+          "id": "foxling-blossom",
+          "name": "Blossom",
+          "bodyHueRange": [295, 340],
+          "bodyTone": "#F9A8D4",
+          "accentColor": "#FCA5A5",
+          "eyeName": "Pink",
+          "eyeHueIdx": 10,
+          "patternHueRecommended": 320,
+          "mood": "Spring cherry — cute max",
+          "nftLabel": "Blossom Foxling"
+        }
+      ]
+    },
+    "flicker": {
+      "speciesId": 5,
+      "defaultPaletteId": "flicker-ember",
+      "variants": [
+        {
+          "id": "flicker-ember",
+          "name": "Ember",
+          "bodyHueRange": [0, 20],
+          "bodyTone": "#FF6B35",
+          "flameColor": "#FFD060",
+          "eyeName": "Gold",
+          "eyeHueIdx": 7,
+          "patternHueRecommended": 30,
+          "mood": "Classic fire sprite — warmth and energy",
+          "nftLabel": "Ember Flicker"
+        },
+        {
+          "id": "flicker-blaze",
+          "name": "Blaze",
+          "bodyHueRange": [340, 359],
+          "bodyTone": "#EF4444",
+          "flameColor": "#FF6B35",
+          "eyeName": "Copper",
+          "eyeHueIdx": 8,
+          "patternHueRecommended": 10,
+          "mood": "Fierce, competitive — arena fighter",
+          "nftLabel": "Blaze Flicker"
+        },
+        {
+          "id": "flicker-sunrise",
+          "name": "Sunrise",
+          "bodyHueRange": [21, 50],
+          "bodyTone": "#FCD34D",
+          "flameColor": "#FEFCE8",
+          "eyeName": "Gold",
+          "eyeHueIdx": 7,
+          "patternHueRecommended": 55,
+          "mood": "Bright + cheerful — sunbeam in creature form",
+          "nftLabel": "Sunrise Flicker"
+        },
+        {
+          "id": "flicker-specter",
+          "name": "Specter",
+          "bodyHueRange": [155, 215],
+          "bodyTone": "#BAE6FD",
+          "flameColor": "#ECFEFF",
+          "eyeName": "Sky",
+          "eyeHueIdx": 2,
+          "patternHueRecommended": 195,
+          "mood": "Ghost flame — ethereal ultra-rare visual",
+          "nftLabel": "Specter Flicker"
+        },
+        {
+          "id": "flicker-arcane",
+          "name": "Arcane",
+          "bodyHueRange": [240, 285],
+          "bodyTone": "#C084FC",
+          "flameColor": "#F0ABFC",
+          "eyeName": "Purple",
+          "eyeHueIdx": 11,
+          "patternHueRecommended": 280,
+          "mood": "Mystical caster — highest prestige color",
+          "nftLabel": "Arcane Flicker"
+        }
+      ]
+    }
+  },
+
+  "pluginSummary": {
+    "_comment": "Flamingo's complete implementation checklist. Three files total — one new, two edits.",
+    "steps": [
+      {
+        "step": 1,
+        "action": "CREATE",
+        "where": "web/src/variationSpecImpl.ts",
+        "what": "Copy the full implementation from spec §3. ~55 lines. Contains MARKING_MAP, ACCESSORY_MAP, EYE_HUES, hslToHex(), and initVariationSpec().",
+        "linesEstimate": "~55 lines"
+      },
+      {
+        "step": 2,
+        "action": "EDIT",
+        "where": "web/src/main.tsx",
+        "what": "Add two lines before first render: import { initVariationSpec } from './variationSpecImpl'; initVariationSpec();",
+        "linesEstimate": "2 lines"
+      },
+      {
+        "step": 3,
+        "action": "EDIT (optional polish)",
+        "where": "web/src/components/CreatureCard.module.css",
+        "what": "Add per-tier .artAura overrides from spec §9 to scale aura intensity Common → Legendary.",
+        "linesEstimate": "~20 lines CSS"
+      }
+    ],
+    "noChangesTo": [
+      "web/src/geneDecoder.ts — gene decoding complete; no CSS var additions needed for variation",
+      "web/src/creatureRender.ts — compositor already wired to getVariationSpec()",
+      "web/src/variationSpec.ts — interface stable; setVariationSpec is the only door",
+      "web/public/assets/creatures/foxling.svg — no mark-N groups, no new CSS classes needed",
+      "web/public/assets/creatures/flicker.svg — same as foxling",
+      "All other species SVGs — variation is species-agnostic via gradient role classification",
+      "contract/ — no on-chain changes",
+      "web/src/chain.ts — no ABI changes",
+      "web/src/satiety.ts — no game logic changes",
+      "deploy/ — no deploy scripts",
+      "Any keystore or credentials",
+      "Card 7:10 ratio (300×432px) — unchanged",
+      "All UI text — English-only, unchanged"
+    ]
+  }
+}

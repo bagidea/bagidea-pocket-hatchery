@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 200" width="90" height="200">
+  <!-- Pocket Hatchery · Farm prop — LANTERN POST  |  ANCHOR: bottom-centre (45, 200)
+       Flamingo (Designer) · 2026-07-17 · Y-SORTED prop — TALL.
+       NOTE for Poppy: this is the one prop tall enough that a creature standing
+       BEHIND it (smaller baseY) must still render behind it. Plain baseY sorting
+       gets that right — no special case needed.
+       Default placement: x=792, baseY=790. Its ground pool is already painted
+       into farm-ground.svg at (792, 784); keep them together if you move it. -->
+  <defs>
+    <linearGradient id="lPost" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0"   stop-color="#6E5A42"/>
+      <stop offset="0.4" stop-color="#4A3527"/>
+      <stop offset="1"   stop-color="#241811"/>
+    </linearGradient>
+    <radialGradient id="lFlame" cx="0.5" cy="0.5">
+      <stop offset="0"    stop-color="#FFFDF0" stop-opacity="1"/>
+      <stop offset="0.3"  stop-color="#FFF3C4" stop-opacity="0.9"/>
+      <stop offset="0.65" stop-color="#FDE68A" stop-opacity="0.45"/>
+      <stop offset="1"    stop-color="#F59E0B" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="lGlow" x="-200%" y="-200%" width="500%" height="500%">
+      <feGaussianBlur stdDeviation="8"/>
+    </filter>
+    <filter id="lShadow" x="-60%" y="-40%" width="220%" height="200%">
+      <feGaussianBlur stdDeviation="4"/>
+    </filter>
+  </defs>
+
+  <ellipse cx="45" cy="195" rx="22" ry="5" fill="#0A1A14" opacity="0.6" filter="url(#lShadow)"/>
+
+  <!-- post -->
+  <rect x="40" y="46" width="10" height="150" fill="url(#lPost)"/>
+  <rect x="40" y="46" width="2.4" height="150" fill="#FFD98A" opacity="0.28"/>
+  <!-- base stones -->
+  <ellipse cx="45" cy="194" rx="16" ry="5" fill="#4B5570"/>
+  <ellipse cx="45" cy="191" rx="13" ry="4" fill="#5E6982"/>
+  <!-- arm -->
+  <path fill="url(#lPost)" d="M45,52 h22 v5 h-22 Z"/>
+  <path fill="none" stroke="#4A3527" stroke-width="2.4" d="M50,52 q10,-10 17,0"/>
+
+  <!-- lantern head -->
+  <circle cx="67" cy="76" r="34" fill="url(#lFlame)" filter="url(#lGlow)" opacity="0.85"/>
+  <path fill="#3A2A1C" d="M67,57 l-2,0 l0,4 l4,0 l0,-4 Z"/>
+  <path fill="#4A3527" d="M56,62 h22 l3,4 h-28 Z"/>          <!-- cap -->
+  <path fill="#2E2015" d="M57,66 h20 l2,24 h-24 Z"/>          <!-- frame -->
+  <path fill="url(#lFlame)" d="M60,68 h14 l1.4,20 h-16.8 Z"/> <!-- glass -->
+  <ellipse cx="67" cy="80" rx="3.4" ry="5" fill="#FFFDF0"/>    <!-- flame core -->
+  <path fill="#3A2A1C" d="M55,90 h24 l-2,4 h-20 Z"/>          <!-- base -->
+  <!-- glass mullions -->
+  <g stroke="#241811" stroke-width="1" opacity="0.6">
+    <path d="M67,68 v20"/>
+  </g>
+</svg>
