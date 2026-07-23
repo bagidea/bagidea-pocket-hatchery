@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1280">
+<title>PH Marketplace — Browse (Mock)</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-top: #131836; --bg-mid: #0C1022; --bg-bot: #080A14;
+  --panel:         rgba(255,255,255,0.045);
+  --panel-raised:  rgba(255,255,255,0.07);
+  --panel-border:  rgba(255,255,255,0.09);
+  --panel-border-strong: rgba(255,255,255,0.14);
+  --text:   #EAF0F9;
+  --muted:  #97A2B6;
+  --dim:    #5B6478;
+  --c-common:    #8FD694; --c-uncommon: #5BC0BE;
+  --c-rare:      #5FB8E8; --c-epic:     #B07BE8;
+  --c-legendary: #FFD86B; --c-mythic:   #F472B6;
+  --font-d: 'Baloo 2', system-ui; --font-b: 'Nunito', system-ui;
+}
+@keyframes mythicRainbow{0%{filter:hue-rotate(0deg)}100%{filter:hue-rotate(360deg)}}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background: linear-gradient(180deg,var(--bg-top) 0%,var(--bg-mid) 42%,var(--bg-bot) 100%);
+  color:var(--text); font-family:var(--font-b); min-height:100vh; width:1280px;
+}
+/* ── Scrollbar ── */
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(99,102,241,0.40);border-radius:99px}
+*{scrollbar-width:thin;scrollbar-color:rgba(99,102,241,0.40) transparent}
+
+/* ── Header ── */
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 24px;
+  background:rgba(12,16,34,0.72);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--panel-border);position:sticky;top:0;z-index:50;
+  box-shadow:0 1px 0 rgba(255,255,255,0.03) inset,0 6px 20px rgba(0,0,0,0.35)}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--font-d);font-size:18px;font-weight:800}
+.tabs{display:flex;gap:4px}
+.tab{padding:7px 18px;border-radius:999px;background:transparent;border:none;
+  color:var(--muted);font-family:var(--font-b);font-size:13px;font-weight:700;cursor:pointer}
+.tab.active{background:rgba(255,255,255,0.08);color:var(--text)}
+.wallet{display:flex;align-items:center;gap:8px;padding:6px 14px;
+  background:var(--panel);border:1px solid var(--panel-border);border-radius:999px;font-size:12px;color:var(--muted)}
+
+/* ── Page ── */
+.page{padding:24px}
+.page-title{font-family:var(--font-d);font-size:24px;font-weight:800;margin-bottom:16px}
+
+/* ── Filter bar ── */
+.filters{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.chip{padding:5px 14px;border-radius:999px;font-size:12px;font-weight:700;border:1.5px solid;cursor:pointer;user-select:none}
+.chip.common   {border-color:var(--c-common);   color:var(--c-common)}
+.chip.uncommon {border-color:var(--c-uncommon); color:var(--c-uncommon)}
+.chip.rare     {border-color:var(--c-rare);     color:var(--c-rare)}
+.chip.epic     {border-color:var(--c-epic);     color:var(--c-epic)}
+.chip.legendary{border-color:var(--c-legendary);color:var(--c-legendary)}
+.chip.mythic   {border-color:rgba(244,114,182,0.80);color:var(--c-mythic);background:rgba(244,114,182,0.08);animation:mythicRainbow 4s linear infinite}
+.fsep{width:1px;height:24px;background:var(--panel-border);margin:0 4px}
+.fsel{padding:6px 12px;border-radius:8px;background:var(--panel);
+  border:1px solid var(--panel-border);color:var(--text);
+  font-size:12px;font-family:var(--font-b);outline:none}
+
+/* ── Stats bar ── */
+.stats{display:flex;align-items:center;gap:16px;padding:10px 18px;
+  background:var(--panel);border:1px solid var(--panel-border);border-radius:12px;
+  margin-bottom:20px;font-size:13px}
+.stat-item{display:flex;align-items:center;gap:5px}
+.stat-label{color:var(--muted)}
+.stat-val{font-weight:700;color:var(--text)}
+.stat-dot{color:var(--dim)}
+
+/* ── Grid ── */
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+
+/* ── Listing Card ── */
+.lcard{border-radius:16px;border:1.5px solid;background:rgba(8,10,20,0.70);
+  overflow:hidden;cursor:pointer;transition:transform .15s,box-shadow .15s;position:relative}
+.lcard:hover{transform:translateY(-4px)}
+.lcard.common   {border-color:rgba(143,214,148,0.40); box-shadow:0 0 12px rgba(143,214,148,0.16)}
+.lcard.uncommon {border-color:rgba(91,192,190,0.40);  box-shadow:0 0 14px rgba(91,192,190,0.16)}
+.lcard.rare     {border-color:rgba(95,184,232,0.50);  box-shadow:0 0 18px rgba(95,184,232,0.20)}
+.lcard.epic     {border-color:rgba(176,123,232,0.55); box-shadow:0 0 22px rgba(176,123,232,0.22)}
+.lcard.legendary{border-color:rgba(255,216,107,0.60); box-shadow:0 0 26px rgba(255,216,107,0.26)}
+.lcard.mythic   {border-color:rgba(244,114,182,0.65); box-shadow:0 0 32px rgba(244,114,182,0.30),0 0 60px rgba(161,140,209,0.20);animation:mythicRainbow 6s linear infinite}
+.card-art{width:100%;aspect-ratio:3/4;object-fit:cover;display:block;border-bottom:1px solid var(--panel-border)}
+.card-info{padding:12px}
+.card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+.card-name{font-family:var(--font-d);font-size:14px;font-weight:700;color:var(--text)}
+.rbadge{font-size:10px;font-weight:800;padding:2px 8px;border-radius:999px;letter-spacing:.04em}
+.rbadge.common   {background:rgba(143,214,148,0.14); color:var(--c-common)}
+.rbadge.uncommon {background:rgba(91,192,190,0.14);  color:var(--c-uncommon)}
+.rbadge.rare     {background:rgba(95,184,232,0.14);  color:var(--c-rare)}
+.rbadge.epic     {background:rgba(176,123,232,0.14); color:var(--c-epic)}
+.rbadge.legendary{background:rgba(255,216,107,0.14); color:var(--c-legendary)}
+.rbadge.mythic   {background:linear-gradient(135deg,#ff9a9e,#a18cd1,#a6c1ee,#96e6a1);color:#fff;animation:mythicRainbow 4s linear infinite}
+.stage-row{display:flex;align-items:center;gap:6px;margin-bottom:9px;font-size:11px;color:var(--muted)}
+.sdot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.price-row{display:flex;align-items:baseline;gap:5px;margin-bottom:2px}
+.p-amt{font-family:var(--font-d);font-size:21px;font-weight:800;color:var(--text)}
+.p-sym{font-size:11px;font-weight:700;color:var(--muted)}
+.floor-row{font-size:11px;color:var(--dim);margin-bottom:10px}
+.floor-row b{color:var(--muted)}
+.buy-btn{width:100%;padding:8px;border-radius:10px;border:none;
+  font-family:var(--font-d);font-size:13px;font-weight:700;cursor:pointer;color:#fff;transition:filter .15s}
+.buy-btn:hover{filter:brightness(1.1)}
+.buy-btn.common   {background:linear-gradient(135deg,#5BB572,#8FD694)}
+.buy-btn.uncommon {background:linear-gradient(135deg,#3DA5A3,#5BC0BE)}
+.buy-btn.rare     {background:linear-gradient(135deg,#3D8FBF,#5FB8E8)}
+.buy-btn.epic     {background:linear-gradient(135deg,#8A4FD4,#B07BE8)}
+.buy-btn.legendary{background:linear-gradient(135deg,#F0B830,#FFD86B);color:#1a1020}
+.buy-btn.mythic   {background:linear-gradient(135deg,#ff9a9e,#a18cd1,#a6c1ee,#96e6a1);animation:mythicRainbow 4s linear infinite}
+
+/* ── My listing badge ── */
+.mine-badge{position:absolute;top:10px;right:10px;background:rgba(245,158,11,0.90);
+  color:#1E1B4B;font-size:9px;font-weight:800;padding:2px 8px;border-radius:999px;
+  letter-spacing:.06em;text-transform:uppercase}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="hdr">
+  <div class="brand"><span>🥚</span><span>Pocket Hatchery</span></div>
+  <nav class="tabs">
+    <button class="tab">🌾 Farm</button>
+    <button class="tab active">🏪 Market</button>
+    <button class="tab">💕 Breed</button>
+    <button class="tab">📦 Collection</button>
+  </nav>
+  <div class="wallet">
+    <span style="color:#22C55E;font-size:8px">●</span>
+    bagideasuper
+    <span style="margin-left:6px;color:#F59E0B;font-weight:700">♦ 42.5 HATCH</span>
+    <span style="margin-left:4px;color:#60A5FA;font-weight:700">🥚 1,840 EGG</span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="page-title">🏪 Marketplace</div>
+
+  <!-- Filters -->
+  <div class="filters">
+    <span class="chip common">🟢 Common</span>
+    <span class="chip uncommon">🔵 Uncommon</span>
+    <span class="chip rare">💎 Rare</span>
+    <span class="chip epic">🔮 Epic</span>
+    <span class="chip legendary">👑 Legendary</span>
+    <span class="chip mythic">🔴 Mythic</span>
+    <div class="fsep"></div>
+    <select class="fsel"><option>All Species</option><option>Foxling</option><option>Sproutling</option><option>Shellby</option><option>Fluffle</option><option>Flicker</option><option>Droplet</option><option>Owlet</option><option>Glimmer</option></select>
+    <select class="fsel"><option>Stage: Any</option><option>Stage 1+</option><option>Stage 3+</option><option>Stage 5 (Max)</option></select>
+    <select class="fsel" style="margin-left:auto"><option>Price ↑ Low→High</option><option>Price ↓ High→Low</option><option>Newest First</option><option>Highest Stage</option><option>Rarity</option></select>
+  </div>
+
+  <!-- Stats bar -->
+  <div class="stats">
+    <div class="stat-item"><span class="stat-val">47</span><span class="stat-label">listings</span></div>
+    <span class="stat-dot">·</span>
+    <div class="stat-item"><span class="stat-label">Floor</span><span class="stat-val">1.2 WAX</span></div>
+    <span class="stat-dot">·</span>
+    <div class="stat-item"><span class="stat-label">Median</span><span class="stat-val">12.5 WAX</span></div>
+    <span class="stat-dot">·</span>
+    <div class="stat-item"><span class="stat-label">Mythic floor</span><span class="stat-val" style="color:var(--c-mythic)">80 WAX</span></div>
+    <span class="stat-dot">·</span>
+    <div class="stat-item"><span class="stat-label">24h vol</span><span class="stat-val">312 WAX</span></div>
+    <span class="stat-dot">·</span>
+    <div class="stat-item"><span class="stat-label">24h sales</span><span class="stat-val">14</span></div>
+  </div>
+
+  <!-- Grid -->
+  <div class="grid">
+
+    <!-- 1: Mythic Foxling (card-6) — My Listing -->
+    <div class="lcard mythic">
+      <div class="mine-badge">My Listing</div>
+      <img class="card-art" src="../nft-cards/card-6----foxling-mythic-front.png" alt="Foxling">
+      <div class="card-info">
+        <div class="card-hdr">
+          <span class="card-name">Foxling #0036</span>
+          <span class="rbadge mythic">MYTHIC</span>
+        </div>
+        <div class="stage-row"><span class="sdot" style="background:var(--c-mythic)"></span>Primal</div>
+        <div class="price-row"><span class="p-amt">85.00</span><span class="p-sym">WAX</span></div>
+        <div class="floor-row">Floor <b>80W</b> · Med <b>95W</b></div>
+        <button class="buy-btn mythic">Cancel Listing</button>
+      </div>
+    </div>
+
+    <!-- 2: Legendary Sproutling (card-11) -->
+    <div class="lcard legendary">
+      <img class="card-art" src="../nft-cards/card-11----sproutling-legendary-front.png" alt="Sproutling">
+      <div class="card-info">
+        <div class="card-hdr">
+          <span class="card-name">Sproutling #0071</span>
+          <span class="rbadge legendary">LEGENDARY</span>
+        </div>
+        <div class="stage-row"><span class="sdot" style="background:var(--c-legendary)"></span>Primal</div>
+        <div class="price-row"><span class="p-amt">65.00</span><span class="p-sym">WAX</span></div>
+        <div class="floor-row">Floor <b>60W</b> · Med <b>72W</b></div>
+        <button class="buy-btn legendary">Buy Now</button>
+      </div>
+    </div>
+
+    <!-- 3: Epic Shellby (card-10) -->
+    <div class="lcard epic">
+      <img class="card-art" src="../nft-cards/card-10----shellby-epic-front.png" alt="Shellby">
+      <div class="card-info">
+        <div class="card-hdr">
+          <span class="card-name">Shellby #0064</span>
+          <span class="rbadge epic">EPIC</span>
+        </div>
+        <div class="stage-row"><span class="sdot" style="background:var(--c-epic)"></span>Legend</div>
+        <div class="price-row"><span class="p-amt">18.50</span><span class="p-sym">WAX</span></div>
+        <div class="floor-row">Floor <b>15W</b> · Med <b>22W</b></div>
+        <button class="buy-btn epic">Buy Now</button>
+      </div>
+    </div>
+
+    <!-- 4: Legendary Fluffle (card-5) -->
+    <div class="lcard legendary">
+      <img class="card-art" src="../nft-cards/card-5----fluffle-legendary-front.png" alt="Fluffle">
+      <div class="card-info">
+        <div class="card-hdr">
+          <span class="card-name">Fluffle #0029</span>
+          <span class="rbadge legendary">LEGENDARY</span>
+        </div>
+        <div class="stage-row"><span class="sdot" style="background:var(--c-legendary)"></span>Primal</div>
+        <div class="price-row"><span class="p-amt">42.00</span><span class="p-sym">WAX</span></div>
+        <div class="floor-row">Floor <b>38W</b> · Med <b>50W</b></div>
+        <button class="buy-btn legendary">Buy Now</button>
+      </div>
+    </div>
+
+    <!-- 5: Epic Flicker (card-4) -->
+    <div class="lcard epic">
+      <img class="card-art" src="../nft-cards/card-4----flicker-epic-front.png" alt="Flicker">
+      <div class="card-info">
+        <div class="card-hdr">
+          <span class="card-name">Flicker #0022</span>
+          <span class="rbadge epic">EPIC</span>
+        </div>
+        <div class="stage-row"><span class="sdot" style="background:var(--c-epic)"></span>Legend</div>
+        <div class="price-row"><span class="p-amt">24.00</span><span class="p-sym">WAX</span></div>
+        <div class="floor-row">Floor <b>20W</b> · Med <b>28W</b></div>
+        <button class="buy-btn epic">Buy Now</button>
+      </div>
+    </div>
+
+    <!-- 6: Rare Droplet (card-3) -->
+    <div class="lcard rare">
+      <img class="card-art" src="../nft-cards/card-3----droplet-rare-front.png" alt="Droplet">
+      <div class="card-info">
+        <div class="card-hdr">
+          <span class="card-name">Droplet #0015</span>
+          <span class="rbadge rare">RARE</span>
+        </div>
+        <div class="stage-row"><span class="sdot" style="background:var(--c-rare)"></span>Rare</div>
+        <div class="price-row"><span class="p-amt">8.50</span><span class="p-sym">WAX</span></div>
+        <div class="floor-row">Floor <b>7W</b> · Med <b>11W</b></div>
+        <button class="buy-btn rare">Buy Now</button>
+      </div>
+    </div>
+
+    <!-- 7: Uncommon Owlet (card-8) -->
+    <div class="lcard uncommon">
+      <img class="card-art" src="../nft-cards/card-8----owlet-uncommon-front.png" alt="Owlet">
+      <div class="card-info">
+        <div class="card-hdr">
+          <span class="card-name">Owlet #0050</span>
+          <span class="rbadge uncommon">UNCOMMON</span>
+        </div>
+        <div class="stage-row"><span class="sdot" style="background:var(--c-uncommon)"></span>Adult</div>
+        <div class="price-row"><span class="p-amt">3.80</span><span class="p-sym">WAX</span></div>
+        <div class="floor-row">Floor <b>3.2W</b> · Med <b>4.5W</b></div>
+        <button class="buy-btn uncommon">Buy Now</button>
+      </div>
+    </div>
+
+    <!-- 8: Common Glimmer (card-7) -->
+    <div class="lcard common">
+      <img class="card-art" src="../nft-cards/card-7----glimmer-common-front.png" alt="Glimmer">
+      <div class="card-info">
+        <div class="card-hdr">
+          <span class="card-name">Glimmer #0043</span>
+          <span class="rbadge common">COMMON</span>
+        </div>
+        <div class="stage-row"><span class="sdot" style="background:var(--c-common)"></span>Baby</div>
+        <div class="price-row"><span class="p-amt">1.80</span><span class="p-sym">WAX</span></div>
+        <div class="floor-row">Floor <b>1.2W</b> · Med <b>2W</b></div>
+        <button class="buy-btn common">Buy Now</button>
+      </div>
+    </div>
+
+  </div><!-- /grid -->
+</main>
+</body>
+</html>

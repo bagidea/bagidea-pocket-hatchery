@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1280">
+<title>Pocket Hatchery — Marketplace</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/*
+ * Design token sources (read 2026-07-23):
+ *   Shell bg / panels / text   → web/src/styles/tokens.css v0.3 DARK (--ph-*)
+ *   Rarity frame colours       → NFT-CARD-DESIGN.md §8 tiebreaker palette
+ *   Creature SVG palette       → art/nft-cards/creature-template.svg (--critter-*)
+ *   Card proportions           → NFT-CARD-DESIGN.md: 300×432 px = 7:10
+ */
+:root {
+  /* ── Shell ── */
+  --ph-shell-bg-top:    #131836;
+  --ph-shell-bg-mid:    #0C1022;
+  --ph-shell-bg-bottom: #080A14;
+
+  /* ── Surface panels ── */
+  --ph-panel:              rgba(255,255,255,0.045);
+  --ph-panel-raised:       rgba(255,255,255,0.07);
+  --ph-panel-border:       rgba(255,255,255,0.09);
+  --ph-panel-border-strong:rgba(255,255,255,0.14);
+
+  /* ── Text ── */
+  --ph-text-primary: #EAF0F9;
+  --ph-text-muted:   #97A2B6;
+  --ph-text-dim:     #5B6478;
+
+  /* ── Rarity (NFT-CARD-DESIGN.md §8 — canonical NFT card palette) ── */
+  --ph-rarity-common:    #8FD694;
+  --ph-rarity-uncommon:  #5BC0BE;
+  --ph-rarity-rare:      #5FB8E8;
+  --ph-rarity-epic:      #B07BE8;
+  --ph-rarity-legendary: #FFD86B;
+  --ph-rarity-mythic:    #F472B6; /* representative; rendered as rainbow gradient */
+
+  /* ── Creature SVG palette — read from art/nft-cards/creature-template.svg :root ── */
+  --critter-base:            #10B981;
+  --critter-base-dark:       #059669;
+  --critter-accent:          #F59E0B;
+  --critter-pattern:         #F43F5E;
+  --critter-belly:           #FAFAFA;
+  --critter-eye:             #1E1B4B;
+  --critter-eye-shine:       #FFFFFF;
+  --critter-pattern-opacity: 0.55;
+
+  /* ── Card spec — NFT-CARD-DESIGN.md §2: 300×432 px, border-radius 24px ── */
+  --card-ratio:   7/10;
+  --card-radius:  24px;   /* --ph-radius-xl = 24px */
+
+  /* ── Typography ── */
+  --ph-font-display: 'Baloo 2', system-ui;
+  --ph-font-body:    'Nunito', system-ui;
+
+  /* ── Radius — canonical: web/src/styles/tokens.css ── */
+  --ph-radius-xl: 24px;
+  --ph-radius-lg: 20px;
+  --ph-radius-md: 16px;
+  --ph-radius-sm: 6px;
+}
+
+@keyframes mythicRainbow {
+  0%   { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(360deg); }
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: linear-gradient(180deg,
+    var(--ph-shell-bg-top) 0%,
+    var(--ph-shell-bg-mid) 42%,
+    var(--ph-shell-bg-bottom) 100%);
+  color: var(--ph-text-primary);
+  font-family: var(--ph-font-body);
+  min-height: 100vh;
+  width: 1280px;
+}
+
+/* Slim blue-glass scrollbar (game signature) */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.40); border-radius: 99px; }
+* { scrollbar-width: thin; scrollbar-color: rgba(99,102,241,0.40) transparent; }
+
+/* ════════════════════════════════════════
+   HEADER
+════════════════════════════════════════ */
+.hdr {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 24px;
+  background: rgba(12,16,34,0.72); backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--ph-panel-border);
+  position: sticky; top: 0; z-index: 50;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.03) inset, 0 6px 20px rgba(0,0,0,0.35);
+}
+.brand {
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--ph-font-display); font-size: 18px; font-weight: 800;
+}
+.tabs { display: flex; gap: 4px; }
+.tab {
+  padding: 7px 18px; border-radius: 999px; background: transparent; border: none;
+  color: var(--ph-text-muted); font-family: var(--ph-font-body);
+  font-size: 13px; font-weight: 700; cursor: pointer;
+}
+.tab.active { background: rgba(255,255,255,0.08); color: var(--ph-text-primary); }
+.wallet {
+  display: flex; align-items: center; gap: 8px; padding: 6px 14px;
+  background: var(--ph-panel); border: 1px solid var(--ph-panel-border);
+  border-radius: 999px; font-size: 12px; color: var(--ph-text-muted);
+}
+
+/* ════════════════════════════════════════
+   PAGE WRAPPER
+════════════════════════════════════════ */
+.page { padding: 24px; }
+
+/* ════════════════════════════════════════
+   BROWSE VIEW
+════════════════════════════════════════ */
+.pg-title {
+  font-family: var(--ph-font-display); font-size: 24px;
+  font-weight: 800; margin-bottom: 16px;
+}
+
+/* Filter bar */
+.filters {
+  display: flex; align-items: center; gap: 8px;
+  flex-wrap: wrap; margin-bottom: 12px;
+}
+.chip {
+  padding: 5px 14px; border-radius: 999px; font-size: 12px;
+  font-weight: 700; border: 1.5px solid; cursor: pointer; user-select: none;
+  transition: background .12s, opacity .12s;
+}
+.chip.all      { border-color: var(--ph-panel-border-strong); color: var(--ph-text-muted); background: var(--ph-panel); }
+.chip.all.sel  { background: rgba(255,255,255,0.12); color: var(--ph-text-primary); }
+.chip.common   { border-color: rgba(143,214,148,0.55); color: var(--ph-rarity-common); }
+.chip.uncommon { border-color: rgba(91,192,190,0.55);  color: var(--ph-rarity-uncommon); }
+.chip.rare     { border-color: rgba(95,184,232,0.55);  color: var(--ph-rarity-rare); }
+.chip.epic     { border-color: rgba(176,123,232,0.55); color: var(--ph-rarity-epic); }
+.chip.legendary{ border-color: rgba(255,216,107,0.55); color: var(--ph-rarity-legendary); }
+.chip.mythic   {
+  border-color: rgba(244,114,182,0.65); color: var(--ph-rarity-mythic);
+  animation: mythicRainbow 4s linear infinite;
+}
+.fsep { width:1px; height:24px; background:var(--ph-panel-border); margin:0 4px; }
+.fsel {
+  padding: 6px 12px; border-radius: var(--ph-radius-md);
+  background: var(--ph-panel); border: 1px solid var(--ph-panel-border);
+  color: var(--ph-text-primary); font-size: 12px;
+  font-family: var(--ph-font-body); outline: none;
+}
+
+/* Stats bar */
+.stats {
+  display: flex; align-items: center; gap: 16px;
+  padding: 10px 18px;
+  background: var(--ph-panel); border: 1px solid var(--ph-panel-border);
+  border-radius: var(--ph-radius-lg); margin-bottom: 20px; font-size: 13px;
+}
+.st-item { display: flex; align-items: center; gap: 5px; }
+.st-label { color: var(--ph-text-muted); }
+.st-val   { font-weight: 700; }
+.st-dot   { color: var(--ph-text-dim); }
+
+/* Listing grid */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+/* ────────────────────────────────────────
+   LISTING CARD
+   Card art ratio = 7:10 (NFT-CARD-DESIGN.md: 300×432 px)
+   --critter-* vars are the live palette the SVG render engine writes;
+   here the pre-rendered NFT PNG images carry those colours already.
+──────────────────────────────────────── */
+.lcard {
+  border-radius: var(--card-radius); border: 1.5px solid;
+  background: rgba(8,10,20,0.70); overflow: hidden;
+  cursor: pointer; transition: transform .15s, box-shadow .15s;
+  position: relative;
+}
+.lcard:hover { transform: translateY(-4px); }
+
+.lcard.common    { border-color:rgba(143,214,148,0.40); box-shadow:0 0 12px rgba(143,214,148,0.14); }
+.lcard.uncommon  { border-color:rgba(91,192,190,0.40);  box-shadow:0 0 14px rgba(91,192,190,0.14); }
+.lcard.rare      { border-color:rgba(95,184,232,0.50);  box-shadow:0 0 18px rgba(95,184,232,0.18); }
+.lcard.epic      { border-color:rgba(176,123,232,0.55); box-shadow:0 0 22px rgba(176,123,232,0.20); }
+.lcard.legendary { border-color:rgba(255,216,107,0.60); box-shadow:0 0 26px rgba(255,216,107,0.24); }
+.lcard.mythic    {
+  border-color: rgba(244,114,182,0.65);
+  box-shadow: 0 0 32px rgba(244,114,182,0.28), 0 0 60px rgba(161,140,209,0.18);
+  animation: mythicRainbow 6s linear infinite;
+}
+
+.card-art {
+  width: 100%;
+  aspect-ratio: var(--card-ratio); /* 7:10 */
+  object-fit: cover; display: block;
+  border-bottom: 1px solid var(--ph-panel-border);
+}
+.card-info { padding: 12px; }
+.card-hdr  {
+  display: flex; align-items: center;
+  justify-content: space-between; margin-bottom: 5px;
+}
+.card-name {
+  font-family: var(--ph-font-display); font-size: 14px; font-weight: 700;
+}
+
+/* Rarity badges */
+.rbadge {
+  font-size: 10px; font-weight: 800; padding: 2px 8px;
+  border-radius: 999px; letter-spacing: .04em;
+}
+.rbadge.common    { background:rgba(143,214,148,0.14); color:var(--ph-rarity-common); }
+.rbadge.uncommon  { background:rgba(91,192,190,0.14);  color:var(--ph-rarity-uncommon); }
+.rbadge.rare      { background:rgba(95,184,232,0.14);  color:var(--ph-rarity-rare); }
+.rbadge.epic      { background:rgba(176,123,232,0.14); color:var(--ph-rarity-epic); }
+.rbadge.legendary { background:rgba(255,216,107,0.14); color:var(--ph-rarity-legendary); }
+.rbadge.mythic    {
+  background: linear-gradient(135deg, #ff9a9e, #a18cd1, #a6c1ee, #96e6a1);
+  color: #fff; animation: mythicRainbow 4s linear infinite;
+}
+
+.stage-row {
+  display: flex; align-items: center; gap: 6px;
+  margin-bottom: 9px; font-size: 11px; color: var(--ph-text-muted);
+}
+.sdot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+.price-row   { display: flex; align-items: baseline; gap: 5px; margin-bottom: 2px; }
+.p-amt       { font-family: var(--ph-font-display); font-size: 21px; font-weight: 800; }
+.p-sym       { font-size: 11px; font-weight: 700; color: var(--ph-text-muted); }
+.floor-row   { font-size: 11px; color: var(--ph-text-dim); margin-bottom: 10px; }
+.floor-row b { color: var(--ph-text-muted); }
+
+/* Rarity-tinted buy buttons (browse cards) */
+.buy-btn {
+  width: 100%; padding: 8px; border-radius: var(--ph-radius-md); border: none;
+  font-family: var(--ph-font-display); font-size: 13px; font-weight: 700;
+  cursor: pointer; color: #fff; transition: filter .15s;
+}
+.buy-btn:hover { filter: brightness(1.1); }
+.buy-btn.common    { background: linear-gradient(135deg, #5BB572, #8FD694); }
+.buy-btn.uncommon  { background: linear-gradient(135deg, #3DA5A3, #5BC0BE); }
+.buy-btn.rare      { background: linear-gradient(135deg, #3D8FBF, #5FB8E8); }
+.buy-btn.epic      { background: linear-gradient(135deg, #8A4FD4, #B07BE8); }
+.buy-btn.legendary { background: linear-gradient(135deg, #F0B830, #FFD86B); color: #1a1020; }
+.buy-btn.mythic    {
+  background: linear-gradient(135deg, #ff9a9e, #a18cd1, #a6c1ee, #96e6a1);
+  animation: mythicRainbow 4s linear infinite;
+}
+
+.mine-badge {
+  position: absolute; top: 10px; right: 10px;
+  background: rgba(255,216,107,0.90); color: #1a1020;
+  font-size: 9px; font-weight: 800; padding: 2px 8px;
+  border-radius: 999px; letter-spacing: .06em; text-transform: uppercase;
+}
+
+/* ════════════════════════════════════════
+   DETAIL VIEW
+════════════════════════════════════════ */
+#view-detail { display: none; }
+
+.back-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  color: var(--ph-text-muted); font-size: 13px; font-weight: 600;
+  background: none; border: none; cursor: pointer;
+  padding: 6px 0; margin-bottom: 16px;
+}
+.back-btn:hover { color: var(--ph-text-primary); }
+
+.d-layout {
+  display: grid; grid-template-columns: 320px 1fr;
+  gap: 24px; align-items: start;
+}
+
+/* Detail card column — border/shadow/animation set by JS per rarity */
+.d-card-wrap {
+  border-radius: var(--card-radius); overflow: hidden;
+  border: 2px solid transparent;
+  margin-bottom: 14px;
+  transition: border-color .2s, box-shadow .2s;
+}
+.d-card-img {
+  width: 100%;
+  aspect-ratio: var(--card-ratio); /* 7:10 */
+  object-fit: cover; display: block;
+}
+.d-meta {
+  background: var(--ph-panel); border: 1px solid var(--ph-panel-border);
+  border-radius: var(--ph-radius-lg); padding: 14px 16px;
+}
+.meta-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 12px;
+}
+.meta-row:last-child { border-bottom: none; }
+.mkey { color: var(--ph-text-muted); }
+.mval { color: var(--ph-text-primary); font-weight: 600; }
+.mval.mono { font-family: 'Courier New',monospace; font-size: 11px; color: var(--ph-text-muted); }
+
+/* Detail right panel */
+.d-panel {
+  background: var(--ph-panel); border: 1px solid var(--ph-panel-border);
+  border-radius: var(--ph-radius-xl); padding: 28px;
+  backdrop-filter: blur(16px);
+  overflow-y: auto; max-height: calc(100vh - 90px);
+}
+.d-name {
+  font-family: var(--ph-font-display); font-size: 28px; font-weight: 800;
+  margin-bottom: 10px; display: flex; align-items: center; gap: 10px;
+}
+.badges { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+.badge-lg {
+  font-size: 11px; font-weight: 800; padding: 4px 12px;
+  border-radius: 999px; letter-spacing: .05em;
+}
+.badge-stage {
+  background: var(--ph-panel-raised); border: 1px solid var(--ph-panel-border);
+  color: var(--ph-text-muted); font-size: 11px; font-weight: 800;
+  padding: 4px 12px; border-radius: 999px;
+}
+.badge-fed {
+  background: rgba(143,214,148,0.12); border: 1px solid rgba(143,214,148,0.30);
+  color: var(--ph-rarity-common); font-size: 10px; font-weight: 800;
+  padding: 4px 12px; border-radius: 999px;
+}
+
+.price-label { font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: var(--ph-text-dim); margin-bottom: 4px; }
+.price-big   {
+  font-family: var(--ph-font-display); font-size: 38px; font-weight: 800;
+  display: flex; align-items: baseline; gap: 8px;
+}
+.price-big .sym { font-size: 18px; color: var(--ph-text-muted); font-weight: 600; }
+.floor-line  { font-size: 12px; color: var(--ph-text-dim); margin-top: 4px; margin-bottom: 6px; }
+.floor-line b{ color: var(--ph-text-muted); }
+.seller-line { font-size: 12px; color: var(--ph-text-dim); margin-bottom: 20px; }
+.seller-line a { color: var(--ph-rarity-rare); font-family: monospace; font-size: 11px; }
+
+.btn-row { display: flex; gap: 10px; margin-bottom: 24px; }
+
+/* Detail buy button — tier class applied by JS */
+.btn-buy {
+  flex: 1; padding: 14px; border-radius: var(--ph-radius-lg); border: none;
+  color: #fff; font-family: var(--ph-font-display); font-size: 15px; font-weight: 800;
+  cursor: pointer; transition: filter .15s;
+}
+.btn-buy.common    { background: linear-gradient(135deg, #5BB572, #8FD694); }
+.btn-buy.uncommon  { background: linear-gradient(135deg, #3DA5A3, #5BC0BE); }
+.btn-buy.rare      { background: linear-gradient(135deg, #3D8FBF, #5FB8E8); }
+.btn-buy.epic      { background: linear-gradient(135deg, #8A4FD4, #B07BE8); }
+.btn-buy.legendary { background: linear-gradient(135deg, #F0B830, #FFD86B); color: #1a1020; }
+.btn-buy.mythic    {
+  background: linear-gradient(135deg, #ff9a9e, #a18cd1, #a6c1ee, #96e6a1);
+  animation: mythicRainbow 4s linear infinite;
+}
+.btn-buy:hover { filter: brightness(1.1); }
+
+.btn-list {
+  flex: 1; padding: 14px; border-radius: var(--ph-radius-lg);
+  border: 1px solid rgba(255,216,107,0.40); background: rgba(255,216,107,0.06);
+  color: var(--ph-rarity-legendary); font-family: var(--ph-font-display);
+  font-size: 14px; font-weight: 700; cursor: pointer;
+}
+.btn-cancel {
+  padding: 14px 18px; border-radius: var(--ph-radius-lg);
+  border: 1px solid var(--ph-panel-border); background: var(--ph-panel);
+  color: var(--ph-text-muted); font-family: var(--ph-font-body);
+  font-size: 13px; font-weight: 700; cursor: pointer;
+}
+.btn-sell {
+  flex: 1; padding: 14px; border-radius: var(--ph-radius-lg);
+  border: 1px solid rgba(95,184,232,0.40); background: rgba(95,184,232,0.08);
+  color: var(--ph-rarity-rare); font-family: var(--ph-font-display);
+  font-size: 14px; font-weight: 700; cursor: pointer;
+}
+.state-tab {
+  padding: 5px 14px; border-radius: 999px; font-size: 11px; font-weight: 700;
+  border: 1px solid var(--ph-panel-border); background: var(--ph-panel);
+  color: var(--ph-text-muted); cursor: pointer; transition: background .12s;
+}
+.state-tab.active {
+  background: rgba(255,255,255,0.10); color: var(--ph-text-primary);
+  border-color: var(--ph-panel-border-strong);
+}
+
+.divider    { height: 1px; background: var(--ph-panel-border); margin: 20px 0; }
+.sec-title  {
+  font-size: 10px; text-transform: uppercase; letter-spacing: .1em;
+  color: var(--ph-text-dim); font-weight: 700; margin-bottom: 12px;
+}
+.data-grid  { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.dcell      {
+  background: rgba(255,255,255,0.025); border: 1px solid var(--ph-panel-border);
+  border-radius: var(--ph-radius-md); padding: 10px 12px;
+}
+.dkey  { font-size: 10px; color: var(--ph-text-dim); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 3px; }
+.dval  { font-size: 14px; font-weight: 700; }
+.dval.mono { font-family: 'Courier New',monospace; font-size: 11px; color: var(--ph-text-muted); }
+
+.sbar-wrap  { margin-bottom: 10px; }
+.sbar-hdr   { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; }
+.sbar-hdr span { color: var(--ph-text-muted); }
+.sbar-hdr b    { color: var(--ph-text-primary); }
+.sbar-track { height: 6px; background: rgba(255,255,255,0.07); border-radius: 99px; overflow: hidden; }
+.sbar-fill  { height: 100%; border-radius: 99px; }
+
+.htable     { width: 100%; border-collapse: collapse; font-size: 12px; }
+.htable th  {
+  text-align: left; padding: 8px 6px; color: var(--ph-text-dim);
+  font-weight: 700; font-size: 10px; text-transform: uppercase;
+  letter-spacing: .06em; border-bottom: 1px solid var(--ph-panel-border);
+}
+.htable td  { padding: 9px 6px; border-bottom: 1px solid rgba(255,255,255,0.04); color: var(--ph-text-muted); }
+.htable td:first-child { color: var(--ph-text-primary); font-weight: 600; }
+.tx-hash    { font-family: monospace; font-size: 10px; color: var(--ph-rarity-rare); cursor: pointer; }
+
+/* Rarity odds footnote */
+.odds-bar {
+  display: flex; gap: 6px; margin-top: 10px;
+  background: var(--ph-panel); border: 1px solid var(--ph-panel-border);
+  border-radius: var(--ph-radius-md); padding: 10px 14px; font-size: 11px;
+}
+.odd { display: flex; align-items: center; gap: 4px; font-weight: 700; }
+.odd-dot { width: 8px; height: 8px; border-radius: 50%; }
+.odd-sep  { color: var(--ph-text-dim); margin: 0 2px; }
+</style>
+</head>
+<body>
+
+<!-- ════ HEADER ════ -->
+<header class="hdr">
+  <div class="brand"><span>🥚</span><span>Pocket Hatchery</span></div>
+  <nav class="tabs">
+    <button class="tab">🌾 Farm</button>
+    <button class="tab active">🏪 Market</button>
+    <button class="tab">💕 Breed</button>
+    <button class="tab">📦 Collection</button>
+  </nav>
+  <div class="wallet">
+    <span style="color:var(--ph-rarity-common);font-size:8px">●</span>
+    bagideasuper
+    <span style="margin-left:6px;color:var(--ph-rarity-legendary);font-weight:700">♦ 42.5 HATCH</span>
+    <span style="margin-left:4px;color:var(--ph-rarity-rare);font-weight:700">🥚 1,840 EGG</span>
+  </div>
+</header>
+
+<main class="page">
+
+<!-- ════════════════════════════════════════
+     BROWSE VIEW
+════════════════════════════════════════ -->
+<div id="view-browse">
+  <div class="pg-title">🏪 Marketplace</div>
+
+  <!-- Filter bar -->
+  <div class="filters">
+    <span class="chip all sel" onclick="filterChip(this,'all')">All</span>
+    <span class="chip common"    onclick="filterChip(this,'common')">
+      ● Common <span style="opacity:.55;font-size:9px">69%</span>
+    </span>
+    <span class="chip uncommon"  onclick="filterChip(this,'uncommon')">
+      ● Uncommon <span style="opacity:.55;font-size:9px">20%</span>
+    </span>
+    <span class="chip rare"      onclick="filterChip(this,'rare')">
+      ● Rare <span style="opacity:.55;font-size:9px">8%</span>
+    </span>
+    <span class="chip epic"      onclick="filterChip(this,'epic')">
+      ● Epic <span style="opacity:.55;font-size:9px">2.5%</span>
+    </span>
+    <span class="chip legendary" onclick="filterChip(this,'legendary')">
+      ● Legendary <span style="opacity:.55;font-size:9px">0.45%</span>
+    </span>
+    <span class="chip mythic"    onclick="filterChip(this,'mythic')">
+      ● Mythic <span style="opacity:.55;font-size:9px">0.05%</span>
+    </span>
+    <div class="fsep"></div>
+    <select class="fsel">
+      <option>All Species</option>
+      <option>Foxling</option><option>Sproutling</option>
+      <option>Shellby</option><option>Fluffle</option>
+      <option>Flicker</option><option>Droplet</option>
+      <option>Owlet</option><option>Glimmer</option>
+    </select>
+    <select class="fsel">
+      <option>Stage: Any</option>
+      <option>Stage 1 — Baby</option>
+      <option>Stage 2 — Adult</option>
+      <option>Stage 3 — Rare</option>
+      <option>Stage 4 — Legend</option>
+      <option>Stage 5 — Primal</option>
+    </select>
+    <select class="fsel" style="margin-left:auto">
+      <option>Price: Low → High</option>
+      <option>Price: High → Low</option>
+      <option>Newest First</option>
+      <option>Highest Stage</option>
+      <option>Rarity</option>
+    </select>
+  </div>
+
+  <!-- Stats bar -->
+  <div class="stats">
+    <div class="st-item"><span class="st-val">47</span><span class="st-label">listings</span></div>
+    <span class="st-dot">·</span>
+    <div class="st-item"><span class="st-label">Floor</span>&nbsp;<span class="st-val">1.2 WAX</span></div>
+    <span class="st-dot">·</span>
+    <div class="st-item"><span class="st-label">Median</span>&nbsp;<span class="st-val">12.5 WAX</span></div>
+    <span class="st-dot">·</span>
+    <div class="st-item">
+      <span class="st-label">Mythic floor</span>&nbsp;
+      <span class="st-val" style="color:var(--ph-rarity-mythic)">80 WAX</span>
+    </div>
+    <span class="st-dot">·</span>
+    <div class="st-item"><span class="st-label">24h vol</span>&nbsp;<span class="st-val">312 WAX</span></div>
+    <span class="st-dot">·</span>
+    <div class="st-item"><span class="st-label">24h sales</span>&nbsp;<span class="st-val">14</span></div>
+  </div>
+
+  <!-- Listing grid — rendered by JS from LISTINGS array -->
+  <div class="grid" id="grid"></div>
+
+  <!-- Rarity odds bar (info footnote) -->
+  <div class="odds-bar" style="margin-top:20px">
+    <span style="color:var(--ph-text-dim);font-size:10px;text-transform:uppercase;letter-spacing:.08em;margin-right:4px">Drop Rates</span>
+    <span class="odd-sep">·</span>
+    <span class="odd"><span class="odd-dot" style="background:var(--ph-rarity-common)"></span><span style="color:var(--ph-rarity-common)">Common</span>&nbsp;<span style="color:var(--ph-text-dim)">69%</span></span>
+    <span class="odd-sep">·</span>
+    <span class="odd"><span class="odd-dot" style="background:var(--ph-rarity-uncommon)"></span><span style="color:var(--ph-rarity-uncommon)">Uncommon</span>&nbsp;<span style="color:var(--ph-text-dim)">20%</span></span>
+    <span class="odd-sep">·</span>
+    <span class="odd"><span class="odd-dot" style="background:var(--ph-rarity-rare)"></span><span style="color:var(--ph-rarity-rare)">Rare</span>&nbsp;<span style="color:var(--ph-text-dim)">8%</span></span>
+    <span class="odd-sep">·</span>
+    <span class="odd"><span class="odd-dot" style="background:var(--ph-rarity-epic)"></span><span style="color:var(--ph-rarity-epic)">Epic</span>&nbsp;<span style="color:var(--ph-text-dim)">2.5%</span></span>
+    <span class="odd-sep">·</span>
+    <span class="odd"><span class="odd-dot" style="background:var(--ph-rarity-legendary)"></span><span style="color:var(--ph-rarity-legendary)">Legendary</span>&nbsp;<span style="color:var(--ph-text-dim)">0.45%</span></span>
+    <span class="odd-sep">·</span>
+    <span class="odd" style="animation:mythicRainbow 4s linear infinite"><span class="odd-dot" style="background:var(--ph-rarity-mythic)"></span><span style="color:var(--ph-rarity-mythic)">Mythic</span>&nbsp;<span style="color:var(--ph-text-dim)">0.05%</span></span>
+  </div>
+</div><!-- /view-browse -->
+
+
+<!-- ════════════════════════════════════════
+     DETAIL VIEW  (populated by showDetail() from LISTINGS data)
+════════════════════════════════════════ -->
+<div id="view-detail">
+  <button class="back-btn" onclick="showBrowse()">← Marketplace</button>
+
+  <div class="d-layout">
+
+    <!-- LEFT: Card art + on-chain meta -->
+    <div>
+      <div class="d-card-wrap" id="d-card-wrap">
+        <img class="d-card-img" id="d-card-img" src="" alt="NFT Card">
+      </div>
+      <div class="d-meta">
+        <div class="meta-row"><span class="mkey">Collection</span><span class="mval">phgamecreatr</span></div>
+        <div class="meta-row"><span class="mkey">Asset ID</span><span class="mval mono" id="d-asset-id">—</span></div>
+        <div class="meta-row"><span class="mkey">Template</span><span class="mval mono" id="d-template">—</span></div>
+        <div class="meta-row"><span class="mkey">Schema</span><span class="mval">creatures</span></div>
+        <div class="meta-row"><span class="mkey">Minted</span><span class="mval" id="d-minted">—</span></div>
+        <div class="meta-row"><span class="mkey">Mint #</span><span class="mval" id="d-mint-num">—</span></div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Full detail panel -->
+    <div class="d-panel">
+      <div class="d-name">
+        <span id="d-name">—</span>
+        <span id="d-id" style="font-size:14px;color:var(--ph-text-dim);font-weight:600">—</span>
+      </div>
+      <div class="badges">
+        <span class="rbadge badge-lg" id="d-rarity-badge">—</span>
+        <span class="badge-stage" id="d-stage">—</span>
+        <span class="badge-fed">● Fed · <span id="d-fed-ago">—</span></span>
+      </div>
+
+      <!-- Price -->
+      <div class="price-label">Listing Price</div>
+      <div class="price-big"><span id="d-price">—</span><span class="sym">WAX</span></div>
+      <div class="floor-line">
+        Floor <b id="d-floor">—</b> · Median <b id="d-med">—</b> · Last sold <b id="d-last-sold">—</b>
+      </div>
+      <div class="seller-line">
+        Listed by <a href="#" id="d-seller">—</a> · <span id="d-listed-ago">—</span> · Sale #<span id="d-sale-id">—</span>
+      </div>
+
+      <!-- Demo: switch perspective to test all button states -->
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px;flex-wrap:wrap">
+        <span style="font-size:11px;color:var(--ph-text-muted);margin-right:4px">View as:</span>
+        <button class="state-tab" id="stab-buyer"          onclick="setDetailState('buyer')">Buyer</button>
+        <button class="state-tab" id="stab-owner-unlisted" onclick="setDetailState('owner-unlisted')">Owner · Unlisted</button>
+        <button class="state-tab" id="stab-owner-listed"   onclick="setDetailState('owner-listed')">Owner · Listed</button>
+      </div>
+
+      <!-- Action buttons — Buyer view -->
+      <div class="btn-row" id="btns-buyer" style="display:none">
+        <button class="btn-buy" id="d-btn-buy">Buy Now · — WAX</button>
+        <button class="btn-cancel">Cancel</button>
+      </div>
+
+      <!-- Action buttons — Owner, not yet listed -->
+      <div class="btn-row" id="btns-owner-unlisted" style="display:none">
+        <button class="btn-list" style="flex:1">List for Sale</button>
+        <button class="btn-sell" id="d-btn-sell-floor">Sell at Floor · — WAX</button>
+      </div>
+
+      <!-- Action buttons — Owner, already listed -->
+      <div class="btn-row" id="btns-owner-listed" style="display:none">
+        <button class="btn-list" style="flex:1">Edit Price</button>
+        <button class="btn-cancel">Delist</button>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Mutable stats -->
+      <div class="sec-title">Creature Stats — Mutable · On-chain</div>
+      <div class="data-grid" style="margin-bottom:14px">
+        <div class="dcell"><div class="dkey">Stage</div><div class="dval" id="d-stat-stage">—</div></div>
+        <div class="dcell"><div class="dkey">Age</div><div class="dval" id="d-stat-age">—</div></div>
+        <div class="dcell"><div class="dkey">Growth</div><div class="dval" id="d-stat-growth">—</div></div>
+        <div class="dcell"><div class="dkey">Last Fed</div><div class="dval" style="font-size:12px" id="d-stat-lastfed">—</div></div>
+      </div>
+      <div class="sbar-wrap">
+        <div class="sbar-hdr"><span>Satiety</span><b id="d-satiety-pct">—</b></div>
+        <div class="sbar-track">
+          <div class="sbar-fill" id="d-satiety-bar" style="width:0%;background:linear-gradient(90deg,#F0B830,#FFD86B)"></div>
+        </div>
+      </div>
+      <div class="sbar-wrap">
+        <div class="sbar-hdr"><span>Growth Progress</span><b id="d-growth-val">—</b></div>
+        <div class="sbar-track">
+          <div class="sbar-fill" id="d-growth-bar" style="width:0%;background:linear-gradient(90deg,#8A4FD4,#B07BE8)"></div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Immutable data (from AtomicAssets template) -->
+      <div class="sec-title">Immutable Data — Template · Permanent</div>
+      <div class="data-grid">
+        <div class="dcell"><div class="dkey">Species</div><div class="dval" id="d-imm-species">—</div></div>
+        <div class="dcell">
+          <div class="dkey">Rarity (egg_type)</div>
+          <div class="dval" id="d-imm-rarity">—</div>
+        </div>
+        <div class="dcell"><div class="dkey">Earn Multiplier</div><div class="dval" id="d-imm-earn">—</div></div>
+        <div class="dcell"><div class="dkey">Fed Duration</div><div class="dval" id="d-imm-feddur">—</div></div>
+        <div class="dcell"><div class="dkey">Daily Cap</div><div class="dval" id="d-imm-dailycap">—</div></div>
+        <div class="dcell">
+          <div class="dkey">Burn Value (max)</div>
+          <div class="dval" id="d-imm-burn">—</div>
+        </div>
+      </div>
+      <div style="margin-top:8px;padding:10px 12px;background:rgba(255,255,255,0.025);
+                  border:1px solid var(--ph-panel-border);border-radius:var(--ph-radius-md)">
+        <div class="dkey" style="margin-bottom:4px">Genetics Hash</div>
+        <div class="dval mono" id="d-imm-genetics">—</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Ownership history (mock — static template) -->
+      <div class="sec-title">Ownership History</div>
+      <table class="htable" id="d-history">
+        <thead>
+          <tr>
+            <th>Event</th><th>From</th><th>To</th>
+            <th>Price</th><th>Date</th><th>Tx</th>
+          </tr>
+        </thead>
+        <tbody id="d-history-body"></tbody>
+      </table>
+
+    </div><!-- /d-panel -->
+  </div><!-- /d-layout -->
+</div><!-- /view-detail -->
+
+</main>
+
+<script>
+/* ════════════════════════════════════════════════════════════
+   SINGLE SOURCE OF TRUTH — all card data lives here.
+   Browse grid, card footer, and detail modal all read from
+   the same object at the same index. Never hardcode twice.
+
+   ── Number provenance (2026-07-23) ────────────────────────
+   num / stageLabel / tier  = read off the card PNG itself
+                              (art/nft-cards/card-*-front.png).
+                              The PNG is the truth — never invent.
+   mintNum                  = the serial printed on the card
+                              (#0036 → "36 / ∞"). NOT the card
+                              file index.
+   template                 = AtomicAssets Template ID — a
+                              DIFFERENT number from the mint
+                              serial. Queried live from
+                              collection `phgamecreatr`
+                              (wax-testnet, 13 templates).
+                              Real ones today: Emberling r1
+                              #662976 · Blazetail r2 #662977 ·
+                              Drakember r3 #662978 · Foxling r3
+                              #663046 · r4 #663047 · r5 #663048
+                              (template immutable `rarity` is
+                              1-based: 1=Common … 6=Mythic).
+                              NONE of the species/tier pairs
+                              below exists on chain yet — even
+                              Foxling, because its Mythic tier
+                              was never minted (see
+                              deploy/setspecies/args-setspecies-
+                              creaturesv2-FOXLING_MYTHIC.json).
+                              ⚠ So every `template` here is a
+                              PLACEHOLDER in the 669xxx block
+                              (669 + tier digit + seq), chosen
+                              to sit clear of the real 662–663
+                              range and of any mint serial.
+                              Swap in real IDs once the
+                              creaturesv2 templates are created.
+════════════════════════════════════════════════════════════ */
+var LISTINGS = [
+  /* ① Mythic Foxling — My Listing  |  card-6: Foxling · PRIMAL · MYTHIC */
+  {
+    tier: 'mythic',
+    img: '../nft-cards/card-6----foxling-mythic-front.png',
+    name: 'Emberclaw', num: '#0036', species: 'Foxling',
+    stageNum: 5, stageLabel: 'Stage 5 · Primal',
+    price: '85.00', floor: '80', med: '95',
+    isMine: true, seller: 'bagideasuper',
+    listedAgo: '6 hours ago', saleId: '448821',
+    lastSold: '88 WAX (3h ago)',
+    /* template: PLACEHOLDER — no Foxling·Mythic template on chain yet */
+    assetId: '1099521667285', template: '#669601', minted: '2026-04-12', mintNum: '36 / ∞',
+    rarityLabel: 'Mythic (5)', earnMult: '× 3.3', fedDuration: '14 days',
+    dailyCap: '792 EGG', burnValue: '15,000 HATCH',
+    genetics: '0xAB3F9C2E1D7804F5…',
+    statStage: '5 — Primal', age: '102 days', growth: '84 / 100',
+    growthPct: 84, satiety: 73, lastFed: '2h 14m ago', fedAgo: '2h ago',
+    history: [
+      { event: 'Listed',   from: 'bagideasuper', to: '—',            price: '85 WAX', date: '6h ago',       tx: 'a1b2c3d4' },
+      { event: 'Transfer', from: 'tradepro12x',  to: 'bagideasuper', price: '88 WAX', date: '3 days ago',   tx: 'f9e8d7c6' },
+      { event: 'Transfer', from: 'waxgamer99x',  to: 'tradepro12x',  price: '—',      date: '14 days ago',  tx: 'c3b2a100' },
+      { event: 'Mint',     from: 'phgamecreatr', to: 'waxgamer99x',  price: '—',      date: '2026-04-12',   tx: '0001feed' },
+    ],
+  },
+  /* ② Legendary Sproutling  |  card-11: Sproutling · PRIMAL · LEGENDARY */
+  {
+    tier: 'legendary',
+    img: '../nft-cards/card-11----sproutling-legendary-front.png',
+    name: 'Thornwick', num: '#0071', species: 'Sproutling',
+    stageNum: 5, stageLabel: 'Stage 5 · Primal',
+    price: '65.00', floor: '60', med: '72',
+    isMine: false, seller: 'naturelord7',
+    listedAgo: '1 day ago', saleId: '447003',
+    lastSold: '67 WAX (1d ago)',
+    /* template: PLACEHOLDER — Sproutling has no template on chain */
+    assetId: '1099521554102', template: '#669502', minted: '2026-03-08', mintNum: '71 / ∞',
+    rarityLabel: 'Legendary (4)', earnMult: '× 3.0', fedDuration: '12 days',
+    dailyCap: '660 EGG', burnValue: '10,000 HATCH',
+    genetics: '0xF1E2D3C4B5A69708…',
+    statStage: '5 — Primal', age: '136 days', growth: '100 / 100',
+    growthPct: 100, satiety: 55, lastFed: '8h 33m ago', fedAgo: '8h ago',
+    history: [
+      { event: 'Listed',   from: 'naturelord7',  to: '—',            price: '65 WAX', date: '1d ago',       tx: 'b2c3d4e5' },
+      { event: 'Transfer', from: 'waxwhale44x',  to: 'naturelord7',  price: '67 WAX', date: '7 days ago',   tx: 'e6f7a8b9' },
+      { event: 'Mint',     from: 'phgamecreatr', to: 'waxwhale44x',  price: '—',      date: '2026-03-08',   tx: '0002feed' },
+    ],
+  },
+  /* ③ Epic Shellby  |  card-10: Shellby · LEGEND · EPIC */
+  {
+    tier: 'epic',
+    img: '../nft-cards/card-10----shellby-epic-front.png',
+    name: 'Pearlmist', num: '#0064', species: 'Shellby',
+    stageNum: 4, stageLabel: 'Stage 4 · Legend',
+    price: '18.50', floor: '15', med: '22',
+    isMine: false, seller: 'shelltrade9',
+    listedAgo: '3 hours ago', saleId: '449102',
+    lastSold: '19 WAX (12h ago)',
+    /* template: PLACEHOLDER — Shellby has no template on chain */
+    assetId: '1099521701450', template: '#669401', minted: '2026-05-21', mintNum: '64 / ∞',
+    rarityLabel: 'Epic (3)', earnMult: '× 2.5', fedDuration: '10 days',
+    dailyCap: '480 EGG', burnValue: '6,000 HATCH',
+    genetics: '0x9A8B7C6D5E4F3021…',
+    statStage: '4 — Legend', age: '63 days', growth: '58 / 100',
+    growthPct: 58, satiety: 40, lastFed: '1d 2h ago', fedAgo: '1d ago',
+    history: [
+      { event: 'Listed',   from: 'shelltrade9',  to: '—',            price: '18.5 WAX', date: '3h ago',      tx: 'c3d4e5f6' },
+      { event: 'Transfer', from: 'epicfarm33x',  to: 'shelltrade9',  price: '19 WAX',   date: '12h ago',     tx: 'a1b2c300' },
+      { event: 'Mint',     from: 'phgamecreatr', to: 'epicfarm33x',  price: '—',        date: '2026-05-21',  tx: '0003feed' },
+    ],
+  },
+  /* ④ Legendary Fluffle  |  card-5: Fluffle · PRIMAL · LEGENDARY */
+  {
+    tier: 'legendary',
+    img: '../nft-cards/card-5----fluffle-legendary-front.png',
+    name: 'Cloudpuff', num: '#0029', species: 'Fluffle',
+    stageNum: 5, stageLabel: 'Stage 5 · Primal',
+    price: '42.00', floor: '38', med: '50',
+    isMine: false, seller: 'airtrader22x',
+    listedAgo: '2 days ago', saleId: '445500',
+    lastSold: '44 WAX (5d ago)',
+    /* template: PLACEHOLDER — Fluffle has no template on chain */
+    assetId: '1099521008855', template: '#669501', minted: '2026-01-30', mintNum: '29 / ∞',
+    rarityLabel: 'Legendary (4)', earnMult: '× 3.0', fedDuration: '12 days',
+    dailyCap: '660 EGG', burnValue: '10,000 HATCH',
+    genetics: '0x2B3C4D5E6F7A8B9C…',
+    statStage: '5 — Primal', age: '174 days', growth: '67 / 100',
+    growthPct: 67, satiety: 88, lastFed: '4h 11m ago', fedAgo: '4h ago',
+    history: [
+      { event: 'Listed',   from: 'airtrader22x', to: '—',            price: '42 WAX', date: '2d ago',       tx: 'd4e5f6a7' },
+      { event: 'Transfer', from: 'raredealer9x', to: 'airtrader22x', price: '44 WAX', date: '5 days ago',   tx: 'b8c9d0e1' },
+      { event: 'Mint',     from: 'phgamecreatr', to: 'raredealer9x', price: '—',      date: '2026-01-30',   tx: '0004feed' },
+    ],
+  },
+  /* ⑤ Epic Flicker  |  card-4: Flicker · LEGEND · EPIC */
+  {
+    tier: 'epic',
+    img: '../nft-cards/card-4----flicker-epic-front.png',
+    name: 'Blazespark', num: '#0022', species: 'Flicker',
+    stageNum: 4, stageLabel: 'Stage 4 · Legend',
+    price: '24.00', floor: '20', med: '28',
+    isMine: false, seller: 'epicfarm101',
+    listedAgo: '5 hours ago', saleId: '448900',
+    lastSold: '25 WAX (2d ago)',
+    /* template: PLACEHOLDER — Flicker has no template on chain */
+    assetId: '1099521558800', template: '#669402', minted: '2026-04-05', mintNum: '22 / ∞',
+    rarityLabel: 'Epic (3)', earnMult: '× 2.5', fedDuration: '10 days',
+    dailyCap: '480 EGG', burnValue: '6,000 HATCH',
+    genetics: '0x11A2B3C4D5E6F780…',
+    statStage: '4 — Legend', age: '109 days', growth: '91 / 100',
+    growthPct: 91, satiety: 62, lastFed: '15h ago', fedAgo: '15h ago',
+    history: [
+      { event: 'Listed',   from: 'epicfarm101',  to: '—',            price: '24 WAX', date: '5h ago',       tx: 'e5f6a7b8' },
+      { event: 'Transfer', from: 'tradeking55x', to: 'epicfarm101',  price: '25 WAX', date: '2 days ago',   tx: 'c9d0e1f2' },
+      { event: 'Mint',     from: 'phgamecreatr', to: 'tradeking55x', price: '—',      date: '2026-04-05',   tx: '0005feed' },
+    ],
+  },
+  /* ⑥ Rare Droplet  |  card-3: Droplet · RARE · RARE */
+  {
+    tier: 'rare',
+    img: '../nft-cards/card-3----droplet-rare-front.png',
+    name: 'Raindrop', num: '#0015', species: 'Droplet',
+    stageNum: 3, stageLabel: 'Stage 3 · Rare',
+    price: '8.50', floor: '7', med: '11',
+    isMine: false, seller: 'waterfarmer7',
+    listedAgo: '30 minutes ago', saleId: '449200',
+    lastSold: '9 WAX (1d ago)',
+    /* template: PLACEHOLDER — Droplet has no template on chain */
+    assetId: '1099521780234', template: '#669301', minted: '2026-06-01', mintNum: '15 / ∞',
+    rarityLabel: 'Rare (2)', earnMult: '× 2.0', fedDuration: '7 days',
+    dailyCap: '360 EGG', burnValue: '3,000 HATCH',
+    genetics: '0xE5F6A7B8C9D0E1F2…',
+    statStage: '3 — Rare', age: '52 days', growth: '29 / 100',
+    growthPct: 29, satiety: 91, lastFed: '20m ago', fedAgo: '20m ago',
+    history: [
+      { event: 'Listed',   from: 'waterfarmer7', to: '—',            price: '8.5 WAX', date: '30m ago',     tx: 'f6a7b8c9' },
+      { event: 'Transfer', from: 'raretrader8x', to: 'waterfarmer7', price: '9 WAX',   date: '1 day ago',   tx: 'd0e1f2a3' },
+      { event: 'Mint',     from: 'phgamecreatr', to: 'raretrader8x', price: '—',       date: '2026-06-01',  tx: '0006feed' },
+    ],
+  },
+  /* ⑦ Uncommon Owlet  |  card-8: Owlet · ADULT · UNCOMMON */
+  {
+    tier: 'uncommon',
+    img: '../nft-cards/card-8----owlet-uncommon-front.png',
+    name: 'Nightwing', num: '#0050', species: 'Owlet',
+    stageNum: 2, stageLabel: 'Stage 2 · Adult',
+    price: '3.80', floor: '3.2', med: '4.5',
+    isMine: false, seller: 'owlhunter88',
+    listedAgo: '4 hours ago', saleId: '449050',
+    lastSold: '4 WAX (6h ago)',
+    /* template: PLACEHOLDER — Owlet has no template on chain */
+    assetId: '1099521900118', template: '#669201', minted: '2026-06-14', mintNum: '50 / ∞',
+    rarityLabel: 'Uncommon (1)', earnMult: '× 1.5', fedDuration: '5 days',
+    dailyCap: '240 EGG', burnValue: '1,500 HATCH',
+    genetics: '0x3C4D5E6F7A8B9C0D…',
+    statStage: '2 — Adult', age: '39 days', growth: '18 / 100',
+    growthPct: 18, satiety: 78, lastFed: '6h 5m ago', fedAgo: '6h ago',
+    history: [
+      { event: 'Listed',   from: 'owlhunter88',  to: '—',            price: '3.8 WAX', date: '4h ago',      tx: 'a7b8c9d0' },
+      { event: 'Transfer', from: 'commonfarmer', to: 'owlhunter88',  price: '4 WAX',   date: '6h ago',      tx: 'e1f2a3b4' },
+      { event: 'Mint',     from: 'phgamecreatr', to: 'commonfarmer', price: '—',       date: '2026-06-14',  tx: '0007feed' },
+    ],
+  },
+  /* ⑧ Common Glimmer  |  card-7: Glimmer · BABY · COMMON */
+  {
+    tier: 'common',
+    img: '../nft-cards/card-7----glimmer-common-front.png',
+    name: 'Crystalbit', num: '#0043', species: 'Glimmer',
+    stageNum: 1, stageLabel: 'Stage 1 · Baby',
+    price: '1.80', floor: '1.2', med: '2',
+    isMine: false, seller: 'crystalfarm3',
+    listedAgo: '2 hours ago', saleId: '449155',
+    lastSold: '2 WAX (3h ago)',
+    /* template: PLACEHOLDER — Glimmer has no template on chain */
+    assetId: '1099521933445', template: '#669101', minted: '2026-06-29', mintNum: '43 / ∞',
+    rarityLabel: 'Common (0)', earnMult: '× 1.0', fedDuration: '3 days',
+    dailyCap: '120 EGG', burnValue: '500 HATCH',
+    genetics: '0xA1B2C3D4E5F6A7B8…',
+    statStage: '1 — Baby', age: '24 days', growth: '51 / 100',
+    growthPct: 51, satiety: 35, lastFed: '2d 3h ago', fedAgo: '2d ago',
+    history: [
+      { event: 'Listed',   from: 'crystalfarm3', to: '—',            price: '1.8 WAX', date: '2h ago',      tx: 'b8c9d0e1' },
+      { event: 'Transfer', from: 'hatchbot99x',  to: 'crystalfarm3', price: '2 WAX',   date: '3h ago',      tx: 'f2a3b4c5' },
+      { event: 'Mint',     from: 'phgamecreatr', to: 'hatchbot99x',  price: '—',       date: '2026-06-29',  tx: '0008feed' },
+    ],
+  },
+];
+
+/* Rarity-tinted border/shadow for detail card wrap */
+var TIER_BORDER = {
+  common:    'rgba(143,214,148,0.60)',
+  uncommon:  'rgba(91,192,190,0.60)',
+  rare:      'rgba(95,184,232,0.60)',
+  epic:      'rgba(176,123,232,0.65)',
+  legendary: 'rgba(255,216,107,0.65)',
+  mythic:    'rgba(244,114,182,0.60)',
+};
+var TIER_SHADOW = {
+  common:    '0 0 20px rgba(143,214,148,0.20)',
+  uncommon:  '0 0 22px rgba(91,192,190,0.22)',
+  rare:      '0 0 26px rgba(95,184,232,0.24)',
+  epic:      '0 0 30px rgba(176,123,232,0.26)',
+  legendary: '0 0 34px rgba(255,216,107,0.28)',
+  mythic:    '0 0 40px rgba(244,114,182,0.32), 0 0 80px rgba(161,140,209,0.18)',
+};
+
+/* ── Render browse grid from LISTINGS ── */
+function renderGrid() {
+  var html = '';
+  for (var i = 0; i < LISTINGS.length; i++) {
+    var l = LISTINGS[i];
+    var tierColor = 'var(--ph-rarity-' + l.tier + ')';
+    var btnLabel  = l.isMine ? 'Cancel Listing' : 'Buy Now';
+    html += '<div class="lcard ' + l.tier + '" onclick="showDetail(' + i + ')">'
+          + (l.isMine ? '<div class="mine-badge">My Listing</div>' : '')
+          + '<img class="card-art" src="' + l.img + '" alt="' + l.species + '">'
+          + '<div class="card-info">'
+          +   '<div class="card-hdr">'
+          +     '<span class="card-name">' + l.name + ' ' + l.num + '</span>'
+          +     '<span class="rbadge ' + l.tier + '">' + l.tier.toUpperCase() + '</span>'
+          +   '</div>'
+          +   '<div class="stage-row">'
+          +     '<span class="sdot" style="background:' + tierColor + '"></span>'
+          +     l.stageLabel
+          +   '</div>'
+          +   '<div class="price-row"><span class="p-amt">' + l.price + '</span><span class="p-sym">WAX</span></div>'
+          +   '<div class="floor-row">Floor <b>' + l.floor + ' W</b> · Med <b>' + l.med + ' W</b></div>'
+          +   '<button class="buy-btn ' + l.tier + '">' + btnLabel + '</button>'
+          + '</div>'
+          + '</div>';
+  }
+  document.getElementById('grid').innerHTML = html;
+}
+
+/* ── Populate detail view from a single LISTINGS object ── */
+function showDetail(idx) {
+  var l = LISTINGS[idx];
+
+  /* Card image */
+  document.getElementById('d-card-img').src = l.img;
+  document.getElementById('d-card-img').alt = l.species;
+
+  /* Name & ID */
+  document.getElementById('d-name').textContent = l.name;
+  document.getElementById('d-id').textContent   = l.num;
+
+  /* Rarity badge */
+  var badge = document.getElementById('d-rarity-badge');
+  badge.className    = 'rbadge badge-lg ' + l.tier;
+  badge.textContent  = '✦ ' + l.tier.toUpperCase();
+
+  /* Stage & fed */
+  document.getElementById('d-stage').textContent   = l.stageLabel;
+  document.getElementById('d-fed-ago').textContent = l.fedAgo;
+
+  /* Price, floor, median */
+  document.getElementById('d-price').textContent    = l.price;
+  document.getElementById('d-floor').textContent    = l.floor + ' WAX';
+  document.getElementById('d-med').textContent      = l.med + ' WAX';
+  document.getElementById('d-last-sold').textContent = l.lastSold;
+
+  /* Seller info */
+  document.getElementById('d-seller').textContent    = l.seller;
+  document.getElementById('d-listed-ago').textContent = l.listedAgo;
+  document.getElementById('d-sale-id').textContent   = l.saleId;
+
+  /* "Sell at Floor" button text */
+  document.getElementById('d-btn-sell-floor').textContent = 'Sell at Floor · ' + l.floor + ' WAX';
+
+  /* Buy button (buyer state) */
+  var btnBuy = document.getElementById('d-btn-buy');
+  btnBuy.className   = 'btn-buy ' + l.tier;
+  btnBuy.textContent = 'Buy Now · ' + l.price + ' WAX';
+
+  /* Card wrap — rarity border + shadow + mythic animation */
+  var wrap = document.getElementById('d-card-wrap');
+  wrap.style.borderColor = TIER_BORDER[l.tier] || TIER_BORDER.common;
+  wrap.style.boxShadow   = TIER_SHADOW[l.tier] || TIER_SHADOW.common;
+  wrap.style.animation   = l.tier === 'mythic' ? 'mythicRainbow 4s linear infinite' : 'none';
+
+  /* On-chain meta */
+  document.getElementById('d-asset-id').textContent = l.assetId;
+  document.getElementById('d-template').textContent = l.template;
+  document.getElementById('d-minted').textContent   = l.minted;
+  document.getElementById('d-mint-num').textContent = l.mintNum;
+
+  /* Mutable stats */
+  document.getElementById('d-stat-stage').textContent  = l.statStage;
+  document.getElementById('d-stat-age').textContent    = l.age;
+  document.getElementById('d-stat-growth').textContent = l.growth;
+  document.getElementById('d-stat-lastfed').textContent = l.lastFed;
+
+  document.getElementById('d-satiety-bar').style.width = l.satiety + '%';
+  document.getElementById('d-satiety-pct').textContent = l.satiety + '%';
+  document.getElementById('d-growth-bar').style.width  = l.growthPct + '%';
+  document.getElementById('d-growth-val').textContent  = l.growth;
+
+  /* Immutable data */
+  document.getElementById('d-imm-species').textContent  = l.species;
+  var immRarity = document.getElementById('d-imm-rarity');
+  immRarity.textContent  = l.rarityLabel;
+  immRarity.style.color  = 'var(--ph-rarity-' + l.tier + ')';
+  document.getElementById('d-imm-earn').textContent     = l.earnMult;
+  document.getElementById('d-imm-feddur').textContent   = l.fedDuration;
+  document.getElementById('d-imm-dailycap').textContent = l.dailyCap;
+  var immBurn = document.getElementById('d-imm-burn');
+  immBurn.textContent = l.burnValue;
+  immBurn.style.color = 'var(--ph-rarity-legendary)';
+  document.getElementById('d-imm-genetics').textContent = l.genetics;
+
+  /* Ownership history */
+  var rows = '';
+  for (var j = 0; j < l.history.length; j++) {
+    var h = l.history[j];
+    var eventColor = h.event === 'Mint' ? 'color:var(--ph-rarity-common)' : '';
+    rows += '<tr>'
+          + '<td style="' + eventColor + '">' + h.event + '</td>'
+          + '<td>' + h.from + '</td>'
+          + '<td>' + h.to + '</td>'
+          + '<td style="color:var(--ph-rarity-legendary)">' + h.price + '</td>'
+          + '<td>' + h.date + '</td>'
+          + '<td><span class="tx-hash">' + h.tx + '…</span></td>'
+          + '</tr>';
+  }
+  document.getElementById('d-history-body').innerHTML = rows;
+
+  /* Default tab: owner-listed if mine, buyer otherwise */
+  setDetailState(l.isMine ? 'owner-listed' : 'buyer');
+
+  /* Show detail, hide browse */
+  document.getElementById('view-browse').style.display = 'none';
+  document.getElementById('view-detail').style.display = 'block';
+  window.scrollTo(0, 0);
+}
+
+/* View navigation */
+function showBrowse() {
+  document.getElementById('view-detail').style.display = 'none';
+  document.getElementById('view-browse').style.display = 'block';
+}
+
+function setDetailState(state) {
+  ['buyer', 'owner-unlisted', 'owner-listed'].forEach(function(s) {
+    document.getElementById('btns-' + s).style.display =
+      (s === state) ? 'flex' : 'none';
+    document.getElementById('stab-' + s).classList.toggle('active', s === state);
+  });
+}
+
+/* Rarity filter chips (visual only) */
+function filterChip(el, rarity) {
+  document.querySelectorAll('.chip').forEach(function(c) { c.classList.remove('sel'); });
+  el.classList.add('sel');
+}
+
+/* Boot */
+renderGrid();
+</script>
+</body>
+</html>
